@@ -1,0 +1,38 @@
+{
+  "common": {
+    "welcome": "مرحباً بك في Plaza",
+    "tagline": "متجرك الإلكتروني في دقائق",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مجدداً",
+    "back": "رجوع",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "continue": "متابعة",
+    "or": "أو"
+  },
+  "auth": {
+    "signUp": "إنشاء حساب",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "noAccount": "ليس لديك حساب بعد؟",
+    "emailPlaceholder": "بريدك@الإلكتروني.com",
+    "passwordPlaceholder": "8 أحرف على الأقل",
+    "signUpSuccess": "تم إنشاء الحساب! تحقق من بريدك الإلكتروني.",
+    "signInError": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "signUpError": "تعذر إنشاء الحساب. حاول مجدداً."
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "ordersToday": "الطلبات اليوم",
+    "revenueToday": "الإيرادات اليوم",
+    "pendingDeliveries": "التسليمات المعلقة"
+  }
+}

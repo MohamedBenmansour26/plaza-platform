@@ -1,0 +1,38 @@
+{
+  "common": {
+    "welcome": "Bienvenue sur Plaza",
+    "tagline": "Votre boutique en ligne en quelques minutes",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "continue": "Continuer",
+    "or": "ou"
+  },
+  "auth": {
+    "signUp": "Créer un compte",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "noAccount": "Pas encore de compte ?",
+    "emailPlaceholder": "votre@email.com",
+    "passwordPlaceholder": "8 caractères minimum",
+    "signUpSuccess": "Compte créé ! Vérifiez votre e-mail.",
+    "signInError": "E-mail ou mot de passe incorrect.",
+    "signUpError": "Impossible de créer le compte. Réessayez."
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "ordersToday": "Commandes aujourd'hui",
+    "revenueToday": "Revenus aujourd'hui",
+    "pendingDeliveries": "Livraisons en attente"
+  }
+}
