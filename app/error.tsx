@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function Error({
   error,
@@ -9,6 +10,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('common');
+
   useEffect(() => {
     // Log to error reporting service once integrated
     console.error(error);
@@ -16,12 +19,12 @@ export default function Error({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
-      <h2 className="text-xl font-semibold">Une erreur s&apos;est produite</h2>
+      <h2 className="text-xl font-semibold">{t('error')}</h2>
       <button
         onClick={reset}
         className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
       >
-        Réessayer
+        {t('retry')}
       </button>
     </div>
   );

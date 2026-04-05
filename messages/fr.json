@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Plaza — Votre boutique en ligne",
+    "description": "Créez votre boutique, gérez vos commandes et livraisons en quelques minutes."
+  },
   "common": {
     "welcome": "Bienvenue sur Plaza",
     "tagline": "Votre boutique en ligne en quelques minutes",
