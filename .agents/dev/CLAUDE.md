@@ -254,3 +254,14 @@ A great Dev session ends with:
 - The Notion task is updated to in review
 - The memory log has a note for this task
 - No shortcuts were taken silently — any trade-offs were flagged to PM
+
+### P2 — Internal agent dashboard (build after MVP foundation is in place)
+A lightweight internal page at /dashboard/agents (not public-facing) that shows:
+- Each agent's current task and status (pulled from Notion Sprint Board)
+- Pending founder approvals (Tier 1 items waiting)
+- Sprint progress (tasks done vs total)
+- Key metrics snapshot (once Analyst has data flowing)
+
+This page is for the founder only — not merchant-facing. Use the Notion API
+with the token in .env.local to read sprint board data. Keep it simple:
+a clean read-only dashboard, no auth needed locally.

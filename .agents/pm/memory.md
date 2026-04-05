@@ -102,3 +102,29 @@ PLZ-003 must merge today. If it slips, PLZ-006 and PLZ-007 slide and the 7-day p
 
 ### Critical blocker flagged to founder
 GitHub token (GITHUB_TOKEN in .env.local) needs the `workflow` scope added to push CI workflow files. Regenerate at: https://github.com/settings/tokens
+
+---
+
+## Session — Sunday, 05 April 2026 (Day 2 — resumed with new token)
+
+### New GitHub token received
+New token with `repo` + `workflow` scope provided by founder. Updated in `.env.local`. (Token redacted from memory log — stored only in `.env.local`.)
+
+### Actions completed
+- Fixed BUG-001 (Major): `app/error.tsx` — replaced hardcoded French strings with `useTranslations('common')` calling `t('error')` and `t('retry')`
+- Fixed BUG-002 (Minor): `app/layout.tsx` — converted `export const metadata` to `generateMetadata()` with `getTranslations('meta')`. Added `meta` keys to both `fr.json` and `ar.json`.
+- Both fixes verified: `tsc --noEmit` PASS, `next lint` PASS
+- Committed both fixes + CI workflow: commits `b203e74` and `cc2be3b` pushed to `feat/PLZ-003-project-scaffold`
+- Posted QA bug report + re-sign-off on PR #1: https://github.com/MohamedBenmansour26/plaza-platform/pull/1#issuecomment-4189632383
+- Dispatched Designer agent to build `app/design-preview/page.tsx` (PLZ-002 validation deliverable)
+- Posted Day 2 daily report to Notion
+
+### Waiting on founder
+1. **MERGE PR #1** (PLZ-003) — QA approved, CI live. https://github.com/MohamedBenmansour26/plaza-platform/pull/1
+2. **DESIGN REVIEW** (PLZ-002) — design preview page being built, pending founder approval of visual direction
+3. **CONTENT REVIEW** (PLZ-005) — 3 Instagram briefs in Notion, pending feedback
+4. **PostHog project** — founder must create at app.posthog.com and add env vars
+
+### Blockers
+- PLZ-006 (Supabase schema) blocked on PLZ-003 merge
+- PLZ-007 (Auth) blocked on PLZ-006
