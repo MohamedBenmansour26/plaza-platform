@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Plaza — متجرك الإلكتروني",
+    "description": "أنشئ متجرك وأدر طلباتك وعمليات التسليم في دقائق."
+  },
+  "common": {
+    "welcome": "مرحباً بك في Plaza",
+    "tagline": "متجرك الإلكتروني في دقائق",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مجدداً",
+    "back": "رجوع",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "continue": "متابعة",
+    "or": "أو"
+  },
+  "auth": {
+    "signUp": "إنشاء حساب",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "noAccount": "ليس لديك حساب بعد؟",
+    "emailPlaceholder": "بريدك@الإلكتروني.com",
+    "passwordPlaceholder": "8 أحرف على الأقل",
+    "signUpSuccess": "تم إنشاء الحساب! تحقق من بريدك الإلكتروني.",
+    "signInError": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "signUpError": "تعذر إنشاء الحساب. حاول مجدداً."
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "ordersToday": "الطلبات اليوم",
+    "revenueToday": "الإيرادات اليوم",
+    "pendingDeliveries": "التسليمات المعلقة"
+  },
+  "designPreview": {
+    "title": "معاينة نظام التصميم",
+    "subtitle": "مراجعة داخلية لرموز التصميم البصري لـ Plaza — للموافقة من المؤسس",
+    "colorsSection": "لوحة الألوان",
+    "typographySection": "الطباعة",
+    "spacingSection": "مقياس التباعد (شبكة 8px)",
+    "componentsSection": "مكونات shadcn/ui",
+    "heading1": "العنوان الرئيسي (H1)",
+    "heading2": "العنوان الثانوي (H2)",
+    "heading3": "العنوان الثالثي (H3)",
+    "heading4": "العنوان الرابعي (H4)",
+    "bodyText": "النص الأساسي — تُبسّط Plaza إنشاء المتاجر الإلكترونية للتجار الجزائريين.",
+    "smallText": "نص صغير — المعلومات الثانوية والإشعارات القانونية.",
+    "mutedText": "نص خافت — البيانات الوصفية والطوابع الزمنية والمحتوى المنزوي.",
+    "buttonDefault": "الزر الرئيسي",
+    "buttonSecondary": "ثانوي",
+    "buttonOutline": "محدد",
+    "buttonGhost": "شبح",
+    "buttonDestructive": "حذف",
+    "inputPlaceholder": "بريدك الإلكتروني",
+    "cardTitle": "بطاقة نموذجية",
+    "cardDescription": "عرض بطاقة بعنوان ووصف وتذييل.",
+    "cardContent": "يمكن أن يتضمن محتوى البطاقة أي عنصر — إحصائيات أو نماذج أو قوائم.",
+    "cardFooter": "تذييل البطاقة",
+    "badgeDefault": "افتراضي",
+    "badgeSecondary": "ثانوي",
+    "badgeOutline": "محدد",
+    "badgeDestructive": "خطأ",
+    "spacingUnit": "وحدة",
+    "spacingPx": "px"
+  }
+}
