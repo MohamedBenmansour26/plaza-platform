@@ -16,14 +16,13 @@ export default async function OnboardingPage() {
     redirect('/auth/login');
   }
 
-  // Note: explicit cast needed — Supabase JS 2.x inferred result types break
-  // under TypeScript 5.9's stricter conditional type evaluation.
-  const { data: rawMerchant } = await supabase
+  // Explicit Pick generic bypasses Supabase JS 2.x / TS 5.9 inferred-type
+  // regression where column-select results resolve to `never`.
+  const { data: merchant } = await supabase
     .from('merchants')
-    .select('*')
+    .select('id,store_slug')
     .eq('user_id', user.id)
-    .maybeSingle();
-  const merchant = rawMerchant as Merchant | null;
+    .maybeSingle<Pick<Merchant, 'id' | 'store_slug'>>();
 
   // If the merchant row already has a store_slug, onboarding is done.
   if (merchant?.store_slug) {
