@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const NOTION_VERSION = '2022-06-28';
-const SPRINT_BOARD_DB_ID = '339a9773-b9dc-81de-bf57-c8436f26f7c2';
+const SPRINT_BOARD_DB_ID = '339a9773-b9dc-8161-9eab-c2e80f9ebeb6';
 
 export type TaskStatus =
   | 'In Progress'
