@@ -4,9 +4,15 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Images: allow Supabase Storage domain once configured
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        // Supabase Storage — product images, merchant logos
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
 };
 
