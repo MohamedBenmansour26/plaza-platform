@@ -9,14 +9,17 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'as-needed',
 });
 
-const PROTECTED_PREFIXES = ['/dashboard'];
+const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
+// Internal pages that are exempt from auth (no merchant data exposed).
+const PUBLIC_OVERRIDES = ['/dashboard/agents'];
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
+  const isPublicOverride = PUBLIC_OVERRIDES.some((p) => pathname.startsWith(p));
+  const isProtected =
+    !isPublicOverride &&
+    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isProtected) {
     // Create a temporary Supabase client to read the session from cookies.
