@@ -65,6 +65,40 @@ Updated after every session._
 
 ---
 
+## PLZ-008 — Merchant onboarding flow — 06 April 2026
+
+**What I built:** 2-step onboarding wizard at `/onboarding`: step 1 (store name, auto-slug with debounced uniqueness check, description, optional logo upload), step 2 (bilingual product name FR+AR, price in MAD stored as centimes, stock, required photo upload). Server actions for slug check + submit. Upload API at `/api/upload`. `Textarea` UI primitive. `onboarding` i18n namespace in both languages. Playwright E2E test.
+
+**Decisions made:**
+- Split client form into `OnboardingForm` (orchestrator) + `StepStoreDetails` + `StepFirstProduct` — keeps each file under 150 lines, clean props interface
+- Upload happens immediately on file selection (not on submit) — better UX; URL stored in state and included in final submit payload
+- `submitOnboardingAction` uses service client for upsert — RLS only allows `user_id = auth.uid()` reads/writes on the merchant row; server actions need elevated access
+- Price input: user types whole MAD (e.g. 150), stored as centimes (15000) via `Math.round(parseFloat(price) * 100)`
+- Slug debounce: 500ms via `useRef + setTimeout` (no lodash); slug status shown inline below the input
+- `maybeSingle<Pick<Merchant, 'id' | 'store_slug'>>()` — explicit generic bypasses Supabase JS 2.x / TS 5.9 inferred-result regression where column-select results resolve to `never`
+- Middleware updated to add `/onboarding` to `PROTECTED_PREFIXES` — unauthenticated redirect handled at edge level
+
+**Shortcuts taken:**
+- No Supabase Storage buckets created — `merchant-logos` and `product-images` buckets must be created in the Supabase dashboard before testing uploads. Flagged in PR notes.
+- Upload API returns 500 if bucket doesn't exist — no auto-create logic; would be a privilege escalation risk
+- E2E test uses in-memory pixel PNG buffer for file upload — avoids fixture file; `setInputFiles()` with buffer works in Playwright
+
+**Friction encountered:**
+- Accidentally landed on `feat/PLZ-009-public-storefront` branch (another agent's in-progress branch) instead of PLZ-008 — happened because of stash state confusion after `git pull --merge` on main. Had to cherry-pick my files across to correct branch.
+- Message files (`fr.json`, `ar.json`) were reverted when switching from PLZ-009 to PLZ-008 branch — had to re-add the `onboarding` namespace after the switch.
+- Supabase JS 2.x `maybeSingle()` return type resolves to `never` under TypeScript 5.9 — initial fix used `as Merchant | null` cast; Hamza flagged it, replaced with explicit Pick generic which is cleaner and type-safe.
+
+**What I would do differently:**
+- Always verify current branch before writing files (`git branch` early); don't assume the branch from `git checkout -b` is the active one
+- Implement Supabase Storage bucket creation in a separate migration (using Supabase `storage.buckets` table) so it's tracked in version control
+- For the slug hint prefix (`plaza.ma/store/`), the padding-start calculation (`ps-[7.5rem]`) is brittle — move this to a design token or measure the prefix text width dynamically
+
+**PR:** https://github.com/MohamedBenmansour26/plaza-platform/pull/5
+
+---
+
 ## Feedback received
 
-_None yet — awaiting QA review of PLZ-003 and PLZ-006._
+- **Hamza (PLZ-008 review):** TypeScript errors from Supabase query result types — replace `as T | null` casts with explicit generic on `.maybeSingle<Pick<T, ...>>()`. More idiomatic, no assertion needed. Applied immediately; will use this pattern consistently going forward.
+
+_PLZ-003 and PLZ-006 — awaiting QA review._
