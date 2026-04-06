@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Plaza — Votre boutique en ligne",
+    "description": "Créez votre boutique, gérez vos commandes et livraisons en quelques minutes."
+  },
+  "common": {
+    "welcome": "Bienvenue sur Plaza",
+    "tagline": "Votre boutique en ligne en quelques minutes",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "continue": "Continuer",
+    "or": "ou"
+  },
+  "auth": {
+    "signUp": "Créer un compte",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "noAccount": "Pas encore de compte ?",
+    "emailPlaceholder": "votre@email.com",
+    "passwordPlaceholder": "8 caractères minimum",
+    "signUpSuccess": "Compte créé ! Vérifiez votre e-mail.",
+    "signInError": "E-mail ou mot de passe incorrect.",
+    "signUpError": "Impossible de créer le compte. Réessayez."
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "ordersToday": "Commandes aujourd'hui",
+    "revenueToday": "Revenus aujourd'hui",
+    "pendingDeliveries": "Livraisons en attente"
+  },
+  "designPreview": {
+    "title": "Aperçu du système de design",
+    "subtitle": "Revue interne des tokens visuels Plaza — pour validation par le fondateur",
+    "colorsSection": "Palette de couleurs",
+    "typographySection": "Typographie",
+    "spacingSection": "Échelle d'espacement (grille 8px)",
+    "componentsSection": "Composants shadcn/ui",
+    "heading1": "Titre principal (H1)",
+    "heading2": "Titre secondaire (H2)",
+    "heading3": "Titre tertiaire (H3)",
+    "heading4": "Titre quaternaire (H4)",
+    "bodyText": "Texte courant — Plaza simplifie la création de boutiques en ligne pour les commerçants algériens.",
+    "smallText": "Petit texte — Informations secondaires et mentions légales.",
+    "mutedText": "Texte atténué — Métadonnées, horodatages et contenu discret.",
+    "buttonDefault": "Bouton principal",
+    "buttonSecondary": "Secondaire",
+    "buttonOutline": "Contour",
+    "buttonGhost": "Fantôme",
+    "buttonDestructive": "Supprimer",
+    "inputPlaceholder": "Votre adresse e-mail",
+    "cardTitle": "Carte exemple",
+    "cardDescription": "Affichage d'une carte avec titre, description et pied de page.",
+    "cardContent": "Le contenu de la carte peut inclure n'importe quel élément — statistiques, formulaires, listes.",
+    "cardFooter": "Pied de carte",
+    "badgeDefault": "Par défaut",
+    "badgeSecondary": "Secondaire",
+    "badgeOutline": "Contour",
+    "badgeDestructive": "Erreur",
+    "spacingUnit": "unité",
+    "spacingPx": "px"
+  }
+}
