@@ -4,24 +4,82 @@
 
 @layer base {
   :root {
+    /* ─── shadcn/ui base tokens ─────────────────────────────────────── */
     --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 20 14.3% 4.1%;
-    --primary: 24.6 95% 53.1%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
-    --ring: 24.6 95% 53.1%;
+    --card-foreground: 222 47% 11%;
+
+    /* Primary: #2563EB — warm blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    /* shadcn accent — light surface for hover states */
+    --accent: 214 32% 91%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+
+    /* Ring: matches primary */
+    --ring: 221 83% 53%;
     --radius: 0.75rem;
+
+    /* ─── Plaza brand color tokens ──────────────────────────────────── */
+
+    /* Primary scale — blue (#2563EB = 600) */
+    --plaza-color-primary-50: 214 100% 97%;
+    --plaza-color-primary-100: 214 95% 93%;
+    --plaza-color-primary-200: 213 97% 87%;
+    --plaza-color-primary-300: 212 96% 78%;
+    --plaza-color-primary-400: 217 91% 70%;
+    --plaza-color-primary-500: 217 91% 60%;
+    --plaza-color-primary-600: 221 83% 53%;   /* #2563EB */
+    --plaza-color-primary-700: 224 76% 44%;
+    --plaza-color-primary-800: 226 71% 37%;
+    --plaza-color-primary-900: 224 64% 33%;
+
+    /* Accent scale — orange (#E8632A = 600) */
+    --plaza-color-accent-50: 34 100% 96%;
+    --plaza-color-accent-100: 34 100% 91%;
+    --plaza-color-accent-200: 32 98% 83%;
+    --plaza-color-accent-300: 27 96% 73%;
+    --plaza-color-accent-400: 24 90% 64%;
+    --plaza-color-accent-500: 21 86% 59%;
+    --plaza-color-accent-600: 18 81% 54%;     /* #E8632A */
+    --plaza-color-accent-700: 18 77% 45%;
+    --plaza-color-accent-800: 18 72% 38%;
+    --plaza-color-accent-900: 19 66% 31%;
+
+    /* Neutral scale */
+    --plaza-color-neutral-50: 210 40% 98%;
+    --plaza-color-neutral-100: 210 40% 96%;
+    --plaza-color-neutral-200: 214 32% 91%;
+    --plaza-color-neutral-300: 213 27% 84%;
+    --plaza-color-neutral-400: 215 20% 65%;
+    --plaza-color-neutral-500: 215 16% 47%;
+    --plaza-color-neutral-600: 215 19% 35%;
+    --plaza-color-neutral-700: 215 25% 27%;
+    --plaza-color-neutral-800: 217 33% 17%;
+    --plaza-color-neutral-900: 222 47% 11%;
+
+    /* Semantic tokens */
+    --plaza-color-success-500: 142 71% 45%;
+    --plaza-color-warning-500: 38 92% 50%;
+    --plaza-color-error-500: 0 84% 60%;
+
+    /* Surface layers */
+    --plaza-color-surface-1: 0 0% 100%;
+    --plaza-color-surface-2: 210 40% 98%;
+    --plaza-color-surface-3: 214 32% 91%;
+    --plaza-color-surface-4: 213 27% 84%;
   }
 }
 
