@@ -11,16 +11,18 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "next": "14.2.29",
-    "react": "^18",
-    "react-dom": "^18",
-    "@supabase/supabase-js": "^2",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.5",
-    "next-intl": "^3",
+    "@supabase/supabase-js": "^2",
     "class-variance-authority": "^0.7",
     "clsx": "^2",
-    "tailwind-merge": "^2",
-    "lucide-react": "^0.400.0"
+    "lucide-react": "^0.400.0",
+    "next": "14.2.29",
+    "next-intl": "^3",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwind-merge": "^2"
   },
   "devDependencies": {
     "@playwright/test": "^1.44.0",
