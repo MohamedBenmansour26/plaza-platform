@@ -3,6 +3,12 @@
  * Reads the Plaza Sprint Board database to power the agent activity dashboard.
  */
 
+// SSL proxy in dev environment rejects the Notion certificate.
+// Disabling verification locally only — never set in production.
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 const NOTION_VERSION = '2022-06-28';
 const SPRINT_BOARD_DB_ID = '339a9773-b9dc-81de-bf57-c8436f26f7c2';
 
