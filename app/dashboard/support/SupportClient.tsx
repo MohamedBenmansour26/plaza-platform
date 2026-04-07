@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { MessageCircle, Send, Paperclip, Loader2, Plus } from 'lucide-react';
 import { sendMessageAction, fetchTicketMessagesAction } from './actions';
@@ -9,28 +10,20 @@ import type { SupportTicket, SupportMessage, TicketStatus } from '@/lib/db/suppo
 
 // ─── Ticket status badge ──────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
-  open:        { label: 'Ouvert',      bg: '#F3F4F6', text: '#6B7280' },
-  in_progress: { label: 'En cours',   bg: '#EFF6FF', text: '#2563EB' },
-  resolved:    { label: 'Résolu',     bg: '#F0FDF4', text: '#16A34A' },
-  closed:      { label: 'Fermé',      bg: '#F3F4F6', text: '#6B7280' },
-};
-
-function TicketStatusPill({ status }: { status: TicketStatus }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.open;
+function TicketStatusPill({ label, bg, text }: { label: string; bg: string; text: string }) {
   return (
     <span
       className="text-[12px] px-2 py-0.5 rounded-full whitespace-nowrap"
-      style={{ backgroundColor: cfg.bg, color: cfg.text }}
+      style={{ backgroundColor: bg, color: text }}
     >
-      {cfg.label}
+      {label}
     </span>
   );
 }
 
 // ─── Chat message bubble ──────────────────────────────────────────────────────
 
-function MessageBubble({ msg }: { msg: SupportMessage }) {
+function MessageBubble({ msg, plazaLabel }: { msg: SupportMessage; plazaLabel: string }) {
   const isMe = msg.sender === 'merchant';
   const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -56,7 +49,7 @@ function MessageBubble({ msg }: { msg: SupportMessage }) {
         P
       </div>
       <div>
-        <div className="text-[12px] text-[#78716C] mb-1">Plaza Support</div>
+        <div className="text-[12px] text-[#78716C] mb-1">{plazaLabel}</div>
         <div className="bg-[#F5F5F4] text-[#1C1917] px-4 py-2.5 rounded-xl rounded-tl-none text-sm">
           {msg.content}
         </div>
@@ -73,12 +66,15 @@ function ChatPanel({
   messages,
   onSend,
   isSending,
+  plazaLabel,
 }: {
   ticket: SupportTicket;
   messages: SupportMessage[];
   onSend: (content: string) => void;
   isSending: boolean;
+  plazaLabel: string;
 }) {
+  const t = useTranslations('support');
   const [content, setContent] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +88,13 @@ function ChatPanel({
     setContent('');
   };
 
+  const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
+    open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
+    closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
+  };
+
   return (
     <>
       {/* Header */}
@@ -100,7 +103,7 @@ function ChatPanel({
           <span className="text-base font-semibold text-[#1C1917] truncate">
             {ticket.ticket_number} — {ticket.subject}
           </span>
-          <TicketStatusPill status={ticket.status} />
+          <TicketStatusPill {...STATUS_CONFIG[ticket.status]} />
         </div>
       </div>
 
@@ -108,13 +111,13 @@ function ChatPanel({
       {ticket.order_id && (
         <div className="mx-4 mt-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 text-sm flex items-center gap-4">
           <span className="text-[#78716C]">
-            Commande liée:{' '}
+            {t('linked_order')}:{' '}
             <Link href={`/dashboard/commandes/${ticket.order_id}`} className="text-[#2563EB] hover:underline">
-              voir commande
+              {t('view_order')}
             </Link>
           </span>
           <span className="text-[#78716C]">
-            Ouvert le{' '}
+            {t('opened_on')}{' '}
             {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
               day: 'numeric',
               month: 'long',
@@ -137,11 +140,11 @@ function ChatPanel({
         </div>
         {messages.length === 0 && (
           <div className="text-center text-sm text-[#A8A29E] py-8">
-            Aucun message pour l&apos;instant
+            {t('no_messages')}
           </div>
         )}
         {messages.map((msg) => (
-          <MessageBubble key={msg.id} msg={msg} />
+          <MessageBubble key={msg.id} msg={msg} plazaLabel={plazaLabel} />
         ))}
         <div ref={bottomRef} />
       </div>
@@ -153,7 +156,7 @@ function ChatPanel({
         </button>
         <input
           type="text"
-          placeholder="Écrivez un message..."
+          placeholder={t('reply_placeholder')}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
@@ -185,6 +188,13 @@ type Props = {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function SupportClient({ tickets }: Props) {
+  const t = useTranslations('support');
+  const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
+    open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
+    closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
+  };
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(
     tickets[0] ?? null,
   );
@@ -246,12 +256,12 @@ export function SupportClient({ tickets }: Props) {
           {/* Left panel: ticket list */}
           <div className="w-[320px] bg-white rounded-xl shadow-sm overflow-hidden flex flex-col flex-shrink-0">
             <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
-              <h2 className="text-lg font-semibold text-[#1C1917]">Support Plaza</h2>
+              <h2 className="text-lg font-semibold text-[#1C1917]">{t('title')}</h2>
               <button
                 onClick={() => setShowNewTicket(true)}
                 className="h-9 px-3 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
               >
-                Nouveau ticket
+                {t('new_ticket')}
               </button>
             </div>
 
@@ -259,7 +269,7 @@ export function SupportClient({ tickets }: Props) {
               {tickets.length === 0 ? (
                 <div className="p-6 text-center">
                   <MessageCircle className="w-10 h-10 text-[#E2E8F0] mx-auto mb-3" />
-                  <p className="text-sm text-[#78716C]">Aucun ticket pour l&apos;instant</p>
+                  <p className="text-sm text-[#78716C]">{t('no_tickets')}</p>
                 </div>
               ) : (
                 tickets.map((ticket) => (
@@ -276,7 +286,7 @@ export function SupportClient({ tickets }: Props) {
                       <span className="text-[13px] font-bold text-[#1C1917]">
                         {ticket.ticket_number}
                       </span>
-                      <TicketStatusPill status={ticket.status} />
+                      <TicketStatusPill {...STATUS_CONFIG[ticket.status]} />
                     </div>
                     <div className="text-[13px] text-[#1C1917] truncate mb-1">
                       {ticket.subject}
@@ -306,6 +316,7 @@ export function SupportClient({ tickets }: Props) {
                 messages={messages}
                 onSend={handleSend}
                 isSending={isSending}
+                plazaLabel={t('plaza_support')}
               />
             ) : loadingMessages ? (
               <div className="flex-1 flex items-center justify-center">
@@ -316,7 +327,7 @@ export function SupportClient({ tickets }: Props) {
                 <div className="text-center">
                   <MessageCircle className="w-20 h-20 text-[#E2E8F0] mx-auto mb-4" />
                   <p className="text-base text-[#78716C]">
-                    Sélectionnez un ticket ou créez-en un nouveau
+                    {t('select_ticket')}
                   </p>
                 </div>
               </div>
@@ -329,13 +340,13 @@ export function SupportClient({ tickets }: Props) {
       {/* ── Mobile ticket list ─────────────────────────────────────────── */}
       <div className="md:hidden p-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold text-[#1C1917]">Support Plaza</h1>
+          <h1 className="text-xl font-semibold text-[#1C1917]">{t('title')}</h1>
           <button
             onClick={() => setShowNewTicket(true)}
             className="h-9 px-3 bg-[#2563EB] text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-[#1d4ed8] transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Nouveau
+            {t('new_ticket_mobile')}
           </button>
         </div>
 
@@ -343,10 +354,10 @@ export function SupportClient({ tickets }: Props) {
           <div className="bg-white rounded-xl shadow-sm py-16 text-center">
             <MessageCircle className="w-10 h-10 text-[#E2E8F0] mx-auto mb-3" />
             <h3 className="text-base font-semibold text-[#1C1917] mb-1">
-              Aucun ticket
+              {t('no_tickets')}
             </h3>
             <p className="text-sm text-[#78716C]">
-              Créez un ticket si vous avez besoin d&apos;aide.
+              {t('no_tickets_cta')}
             </p>
           </div>
         ) : (
@@ -361,7 +372,7 @@ export function SupportClient({ tickets }: Props) {
                   <div className="text-[14px] font-semibold text-[#1C1917]">
                     {ticket.ticket_number}
                   </div>
-                  <TicketStatusPill status={ticket.status} />
+                  <TicketStatusPill {...STATUS_CONFIG[ticket.status]} />
                 </div>
                 <div className="text-[14px] text-[#1C1917] mb-1 truncate">
                   {ticket.subject}

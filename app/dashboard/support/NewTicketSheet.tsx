@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useTransition, useState } from 'react';
 import { X, Loader2, Paperclip } from 'lucide-react';
 import { createTicketAction } from './actions';
@@ -10,16 +11,16 @@ type Props = {
   onCreated: (ticketId: string, ticketNumber: string) => void;
 };
 
-const CATEGORIES: { value: TicketCategory; label: string }[] = [
-  { value: 'order_issue',    label: 'Problème de commande' },
-  { value: 'payment_issue',  label: 'Problème de paiement' },
-  { value: 'technical',      label: 'Bug / problème technique' },
-  { value: 'other',          label: 'Autre' },
-];
-
 const MAX_DESC = 1000;
 
 export function NewTicketSheet({ onClose, onCreated }: Props) {
+  const t = useTranslations('support');
+  const CATEGORIES: { value: TicketCategory; label: string }[] = [
+    { value: 'order_issue',   label: t('category_order_issue') },
+    { value: 'payment_issue', label: t('category_payment_issue') },
+    { value: 'technical',     label: t('category_technical') },
+    { value: 'other',         label: t('category_other') },
+  ];
   const [isPending, startTransition] = useTransition();
   const [category, setCategory] = useState<TicketCategory>('order_issue');
   const [subject, setSubject] = useState('');
@@ -56,7 +57,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-base font-semibold text-[#1C1917]">Nouveau ticket</h2>
+          <h2 className="text-base font-semibold text-[#1C1917]">{t('sheet_title')}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#F8FAFC] rounded-lg transition-colors"
@@ -73,15 +74,15 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               <div className="w-16 h-16 rounded-full bg-[#F0FDF4] flex items-center justify-center mb-4">
                 <span className="text-3xl">✅</span>
               </div>
-              <h3 className="text-lg font-semibold text-[#1C1917] mb-2">Ticket créé !</h3>
-              <p className="text-sm text-[#78716C]">Notre équipe vous répond sous 24h.</p>
+              <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('sheet_success_title')}</h3>
+              <p className="text-sm text-[#78716C]">{t('sheet_success_body')}</p>
             </div>
           ) : (
             <>
               {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                  Catégorie
+                  {t('sheet_category')}
                 </label>
                 <select
                   value={category}
@@ -97,13 +98,13 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               {/* Subject */}
               <div>
                 <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                  Sujet
+                  {t('sheet_subject')}
                 </label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Ex: Commande #PLZ-042 non livrée"
+                  placeholder={t('sheet_subject_placeholder')}
                   className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
               </div>
@@ -112,7 +113,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               {category === 'order_issue' && (
                 <div>
                   <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                    N° commande concernée <span className="text-[#A8A29E] font-normal">(optionnel)</span>
+                    {t('sheet_order_number')} <span className="text-[#A8A29E] font-normal">({t('sheet_optional')})</span>
                   </label>
                   <input
                     type="text"
@@ -127,12 +128,12 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                  Description
+                  {t('sheet_description')}
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC))}
-                  placeholder="Décrivez votre problème en détail..."
+                  placeholder={t('sheet_description_placeholder')}
                   rows={5}
                   className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
@@ -144,15 +145,15 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               {/* File upload zone (UI only — storage not yet configured) */}
               <div>
                 <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                  Pièce jointe <span className="text-[#A8A29E] font-normal">(optionnel)</span>
+                  {t('sheet_attachment')} <span className="text-[#A8A29E] font-normal">({t('sheet_optional')})</span>
                 </label>
                 <div className="border-2 border-dashed border-[#E2E8F0] rounded-lg p-5 flex flex-col items-center gap-2 text-center">
                   <Paperclip className="w-6 h-6 text-[#A8A29E]" />
                   <p className="text-sm text-[#78716C]">
-                    Glissez un fichier ou{' '}
-                    <span className="text-[#2563EB] cursor-pointer hover:underline">parcourez</span>
+                    {t('sheet_attachment_hint')}{' '}
+                    <span className="text-[#2563EB] cursor-pointer hover:underline">{t('sheet_attachment_browse')}</span>
                   </p>
-                  <p className="text-xs text-[#A8A29E]">PNG, JPG, PDF — max 10 Mo</p>
+                  <p className="text-xs text-[#A8A29E]">{t('sheet_attachment_types')}</p>
                 </div>
               </div>
             </>
@@ -168,7 +169,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               className="w-full h-11 bg-[#2563EB] text-white text-sm font-semibold rounded-lg hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              Envoyer le ticket
+              {t('sheet_submit')}
             </button>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
   LineChart,
@@ -38,19 +39,6 @@ const PAYMENT_COLORS: Record<string, string> = {
   terminal: '#2563EB',
   card:     '#7C3AED',
 };
-const PAYMENT_LABELS: Record<string, string> = {
-  cod:      'COD',
-  terminal: 'Terminal',
-  card:     'Carte',
-};
-
-// ─── Period config ────────────────────────────────────────────────────────────
-
-const PERIODS: { id: Period; label: string }[] = [
-  { id: 'week',  label: 'Cette semaine' },
-  { id: 'month', label: 'Ce mois' },
-  { id: 'all',   label: 'Tout' },
-];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -63,9 +51,23 @@ type Props = {
 
 export function FinancesClient({ metrics, period }: Props) {
   const router = useRouter();
+  const t = useTranslations('finances');
   // Guard recharts against SSR hydration
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Arrays with user-facing strings MUST be inside component, after t()
+  const PERIODS: { id: Period; label: string }[] = [
+    { id: 'week',  label: t('period_week') },
+    { id: 'month', label: t('period_month') },
+    { id: 'all',   label: t('period_all') },
+  ];
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    cod:      t('payment_cod'),
+    terminal: t('payment_terminal'),
+    card:     t('payment_card'),
+  };
 
   const chartData = metrics.revenueByDay.map((p) => ({
     label: formatChartDate(p.date, period),
@@ -83,7 +85,7 @@ export function FinancesClient({ metrics, period }: Props) {
 
   const ChartPlaceholder = ({ h }: { h: string }) => (
     <div className={`${h} bg-[#F8FAFC] rounded-lg flex items-center justify-center`}>
-      <span className="text-sm text-[#A8A29E]">Aucune donnée</span>
+      <span className="text-sm text-[#A8A29E]">{t('no_data')}</span>
     </div>
   );
 
@@ -92,7 +94,7 @@ export function FinancesClient({ metrics, period }: Props) {
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-[#1C1917]">Finances</h1>
+        <h1 className="text-2xl font-semibold text-[#1C1917]">{t('title')}</h1>
 
         {/* Period selector */}
         <div className="flex gap-2">
@@ -115,21 +117,21 @@ export function FinancesClient({ metrics, period }: Props) {
       {/* ── Stats row ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 col-span-2 md:col-span-1">
-          <div className="text-[13px] text-[#78716C] mb-2">Revenus totaux</div>
+          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_revenue')}</div>
           <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
             {isEmpty ? '—' : formatMAD(metrics.totalRevenue)}
           </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
-          <div className="text-[13px] text-[#78716C] mb-2">Commandes</div>
+          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_orders')}</div>
           <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
             {isEmpty ? '—' : metrics.totalOrders}
           </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
-          <div className="text-[13px] text-[#78716C] mb-2">Panier moyen</div>
+          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_avg_basket')}</div>
           <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
             {isEmpty ? '—' : formatMAD(metrics.avgBasket)}
           </div>
@@ -141,10 +143,10 @@ export function FinancesClient({ metrics, period }: Props) {
         <div className="bg-white rounded-xl shadow-sm py-20 text-center">
           <div className="text-4xl mb-4">📊</div>
           <h3 className="text-base font-semibold text-[#1C1917] mb-2">
-            Aucune commande pour le moment
+            {t('empty_title')}
           </h3>
           <p className="text-sm text-[#78716C]">
-            Les statistiques apparaîtront dès votre première commande.
+            {t('empty_body')}
           </p>
         </div>
       ) : (
@@ -155,7 +157,7 @@ export function FinancesClient({ metrics, period }: Props) {
             {/* Revenue line chart */}
             <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-base font-semibold text-[#1C1917] mb-4">
-                Évolution des revenus
+                {t('chart_title')}
               </h2>
               <div className="h-[220px]">
                 {mounted ? (
@@ -189,7 +191,7 @@ export function FinancesClient({ metrics, period }: Props) {
                           borderRadius: '8px',
                           fontSize: '12px',
                         }}
-                        formatter={(value) => [`${value ?? 0} MAD`, 'Revenus']}
+                        formatter={(value) => [`${value ?? 0} MAD`, t('stat_revenue')]}
                       />
                       <Line
                         type="monotone"
@@ -213,7 +215,7 @@ export function FinancesClient({ metrics, period }: Props) {
               {/* Payment breakdown */}
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-base font-semibold text-[#1C1917] mb-4">
-                  Répartition des paiements
+                  {t('payment_title')}
                 </h2>
                 {mounted && pieData.length > 0 ? (
                   <>
@@ -240,7 +242,7 @@ export function FinancesClient({ metrics, period }: Props) {
                           <div className="text-xl font-bold text-[#1C1917]">
                             {metrics.totalOrders}
                           </div>
-                          <div className="text-xs text-[#78716C]">commandes</div>
+                          <div className="text-xs text-[#78716C]">{t('orders_label')}</div>
                         </div>
                       </div>
                     </div>
@@ -266,10 +268,10 @@ export function FinancesClient({ metrics, period }: Props) {
               {/* Top products */}
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-base font-semibold text-[#1C1917] mb-3">
-                  Meilleures ventes
+                  {t('top_products_title')}
                 </h2>
                 {metrics.topProducts.length === 0 ? (
-                  <p className="text-sm text-[#78716C] text-center py-4">Aucun produit</p>
+                  <p className="text-sm text-[#78716C] text-center py-4">{t('no_products')}</p>
                 ) : (
                   <div>
                     {metrics.topProducts.map((p, i) => (
@@ -299,7 +301,7 @@ export function FinancesClient({ metrics, period }: Props) {
                           ) : (
                             <div className="text-sm font-medium text-[#1C1917] truncate">{p.name_fr}</div>
                           )}
-                          <div className="text-xs text-[#78716C]">{p.sold} vendus</div>
+                          <div className="text-xs text-[#78716C]">{t('sold_count', { count: p.sold })}</div>
                         </div>
                         <div className="text-sm font-semibold text-[#1C1917] flex-shrink-0">
                           {formatMAD(p.revenue)}
@@ -318,7 +320,7 @@ export function FinancesClient({ metrics, period }: Props) {
 
             {/* Revenue card + chart */}
             <div className="bg-white rounded-xl shadow-sm p-5">
-              <div className="text-[12px] text-[#78716C] uppercase mb-1">Revenus totaux</div>
+              <div className="text-[12px] text-[#78716C] uppercase mb-1">{t('stat_revenue')}</div>
               <div className="text-[28px] font-semibold text-[#1C1917] mb-4">
                 {formatMAD(metrics.totalRevenue)}
               </div>
@@ -357,11 +359,11 @@ export function FinancesClient({ metrics, period }: Props) {
             {/* Payment breakdown — mobile uses custom SVG donut */}
             <div className="bg-white rounded-xl shadow-sm p-5">
               <h3 className="text-[16px] font-semibold text-[#1C1917] mb-4">
-                Répartition des paiements
+                {t('payment_title')}
               </h3>
               {pieData.length > 0 ? (
                 <>
-                  <DonutChartSVG data={pieData} total={metrics.totalOrders} />
+                  <DonutChartSVG data={pieData} total={metrics.totalOrders} ordersLabel={t('orders_label')} />
                   <div className="mt-4 space-y-2">
                     {pieData.map((item) => (
                       <div key={item.name} className="flex items-center justify-between">
@@ -377,15 +379,15 @@ export function FinancesClient({ metrics, period }: Props) {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-center text-[#78716C] py-8">Aucune donnée</p>
+                <p className="text-sm text-center text-[#78716C] py-8">{t('no_data')}</p>
               )}
             </div>
 
             {/* Top products */}
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-3">Meilleures ventes</h3>
+              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-3">{t('top_products_title')}</h3>
               {metrics.topProducts.length === 0 ? (
-                <p className="text-sm text-center text-[#78716C] py-4">Aucun produit</p>
+                <p className="text-sm text-center text-[#78716C] py-4">{t('no_products')}</p>
               ) : (
                 <div className="space-y-3">
                   {metrics.topProducts.map((p, i) => (
@@ -401,7 +403,7 @@ export function FinancesClient({ metrics, period }: Props) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[14px] font-medium text-[#1C1917] truncate">{p.name_fr}</div>
-                        <div className="text-[12px] text-[#78716C]">{p.sold} vendus</div>
+                        <div className="text-[12px] text-[#78716C]">{t('sold_count', { count: p.sold })}</div>
                       </div>
                       <div className="text-[14px] font-semibold text-[#1C1917]">
                         {formatMAD(p.revenue)}
@@ -423,7 +425,7 @@ export function FinancesClient({ metrics, period }: Props) {
 
 type DonutSegment = { name: string; value: number; color: string };
 
-function DonutChartSVG({ data, total }: { data: DonutSegment[]; total: number }) {
+function DonutChartSVG({ data, total, ordersLabel }: { data: DonutSegment[]; total: number; ordersLabel: string }) {
   const size = 160;
   const cx = size / 2;
   const cy = size / 2;
@@ -462,7 +464,7 @@ function DonutChartSVG({ data, total }: { data: DonutSegment[]; total: number })
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="text-xl font-bold text-[#1C1917]">{total}</div>
-          <div className="text-xs text-[#78716C]">commandes</div>
+          <div className="text-xs text-[#78716C]">{ordersLabel}</div>
         </div>
       </div>
     </div>

@@ -1,20 +1,12 @@
 'use client';
 
 import { useTransition, useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Send, Paperclip, Loader2 } from 'lucide-react';
 import { sendMessageAction } from '../actions';
 import type { SupportTicket, SupportMessage, TicketStatus } from '@/lib/db/support';
 import Link from 'next/link';
-
-// ─── Status badge ─────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
-  open:        { label: 'Ouvert',    bg: '#F3F4F6', text: '#6B7280' },
-  in_progress: { label: 'En cours', bg: '#EFF6FF', text: '#2563EB' },
-  resolved:    { label: 'Résolu',   bg: '#F0FDF4', text: '#16A34A' },
-  closed:      { label: 'Fermé',    bg: '#F3F4F6', text: '#6B7280' },
-};
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -25,6 +17,13 @@ type Props = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function TicketDetailClient({ ticket }: Props) {
+  const t = useTranslations('support');
+  const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
+    open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
+    closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
+  };
   const router = useRouter();
   const [isSending, startSending] = useTransition();
   const [content, setContent] = useState('');
@@ -87,16 +86,16 @@ export function TicketDetailClient({ ticket }: Props) {
           <div className="p-4 pb-0">
             <div className="bg-white rounded-xl shadow-sm p-3">
               <div className="text-[13px]">
-                <span className="text-[#78716C]">Commande liée: </span>
+                <span className="text-[#78716C]">{t('linked_order')}: </span>
                 <Link
                   href={`/dashboard/commandes/${ticket.order_id}`}
                   className="text-[#2563EB] hover:underline"
                 >
-                  voir commande
+                  {t('view_order')}
                 </Link>
               </div>
               <div className="text-[13px] text-[#78716C] mt-1">
-                Ouvert le{' '}
+                {t('opened_on')}{' '}
                 {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'long',
@@ -122,7 +121,7 @@ export function TicketDetailClient({ ticket }: Props) {
 
           {messages.length === 0 && (
             <div className="text-center text-sm text-[#A8A29E] py-8">
-              Aucun message pour l&apos;instant
+              {t('no_messages')}
             </div>
           )}
 
@@ -152,7 +151,7 @@ export function TicketDetailClient({ ticket }: Props) {
                   P
                 </div>
                 <div className="flex-1">
-                  <div className="text-[12px] text-[#78716C] mb-1">Plaza Support</div>
+                  <div className="text-[12px] text-[#78716C] mb-1">{t('plaza_support')}</div>
                   <div className="bg-[#F5F5F4] rounded-xl rounded-tl-none p-3 max-w-[85%]">
                     <p className="text-[14px] text-[#1C1917]">{msg.content}</p>
                   </div>
@@ -173,7 +172,7 @@ export function TicketDetailClient({ ticket }: Props) {
             </button>
             <input
               type="text"
-              placeholder="Écrivez un message..."
+              placeholder={t('reply_placeholder')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
