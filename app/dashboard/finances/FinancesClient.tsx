@@ -1,0 +1,470 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import type { MerchantMetrics, Period } from '@/lib/db/metrics';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatMAD(centimes: number): string {
+  return `${Math.round(centimes / 100).toLocaleString('fr-MA')} MAD`;
+}
+
+function formatChartDate(iso: string, period: Period): string {
+  const d = new Date(iso);
+  if (period === 'week') {
+    return d.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3);
+  }
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
+// ─── Payment colours ──────────────────────────────────────────────────────────
+
+const PAYMENT_COLORS: Record<string, string> = {
+  cod:      '#6B7280',
+  terminal: '#2563EB',
+  card:     '#7C3AED',
+};
+const PAYMENT_LABELS: Record<string, string> = {
+  cod:      'COD',
+  terminal: 'Terminal',
+  card:     'Carte',
+};
+
+// ─── Period config ────────────────────────────────────────────────────────────
+
+const PERIODS: { id: Period; label: string }[] = [
+  { id: 'week',  label: 'Cette semaine' },
+  { id: 'month', label: 'Ce mois' },
+  { id: 'all',   label: 'Tout' },
+];
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+
+type Props = {
+  metrics: MerchantMetrics;
+  period: Period;
+};
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function FinancesClient({ metrics, period }: Props) {
+  const router = useRouter();
+  // Guard recharts against SSR hydration
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const chartData = metrics.revenueByDay.map((p) => ({
+    label: formatChartDate(p.date, period),
+    revenue: Math.round(p.revenue / 100),
+  }));
+
+  const pieData = metrics.paymentBreakdown.map((p) => ({
+    name: PAYMENT_LABELS[p.method] ?? p.method,
+    value: p.percentage,
+    color: PAYMENT_COLORS[p.method] ?? '#A8A29E',
+    count: p.count,
+  }));
+
+  const isEmpty = metrics.totalOrders === 0;
+
+  const ChartPlaceholder = ({ h }: { h: string }) => (
+    <div className={`${h} bg-[#F8FAFC] rounded-lg flex items-center justify-center`}>
+      <span className="text-sm text-[#A8A29E]">Aucune donnée</span>
+    </div>
+  );
+
+  return (
+    <div className="p-4 md:p-8 max-w-[1040px] mx-auto">
+
+      {/* ── Page header ──────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h1 className="text-2xl font-semibold text-[#1C1917]">Finances</h1>
+
+        {/* Period selector */}
+        <div className="flex gap-2">
+          {PERIODS.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => router.push(`?period=${p.id}`)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                period === p.id
+                  ? 'bg-[#2563EB] text-white'
+                  : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Stats row ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 col-span-2 md:col-span-1">
+          <div className="text-[13px] text-[#78716C] mb-2">Revenus totaux</div>
+          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+            {isEmpty ? '—' : formatMAD(metrics.totalRevenue)}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
+          <div className="text-[13px] text-[#78716C] mb-2">Commandes</div>
+          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+            {isEmpty ? '—' : metrics.totalOrders}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
+          <div className="text-[13px] text-[#78716C] mb-2">Panier moyen</div>
+          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+            {isEmpty ? '—' : formatMAD(metrics.avgBasket)}
+          </div>
+        </div>
+      </div>
+
+      {isEmpty ? (
+        /* ── Empty state ─────────────────────────────────────────────────── */
+        <div className="bg-white rounded-xl shadow-sm py-20 text-center">
+          <div className="text-4xl mb-4">📊</div>
+          <h3 className="text-base font-semibold text-[#1C1917] mb-2">
+            Aucune commande pour le moment
+          </h3>
+          <p className="text-sm text-[#78716C]">
+            Les statistiques apparaîtront dès votre première commande.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* ── Desktop layout: chart + right column ─────────────────────── */}
+          <div className="hidden md:flex gap-6">
+
+            {/* Revenue line chart */}
+            <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-base font-semibold text-[#1C1917] mb-4">
+                Évolution des revenus
+              </h2>
+              <div className="h-[220px]">
+                {mounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor="#E8632A" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#E8632A" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                      <XAxis
+                        dataKey="label"
+                        stroke="#78716C"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#78716C"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                        }}
+                        formatter={(value) => [`${value ?? 0} MAD`, 'Revenus']}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#E8632A"
+                        strokeWidth={2}
+                        dot={{ fill: '#E8632A', r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <ChartPlaceholder h="h-[220px]" />
+                )}
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div className="w-[340px] space-y-4 flex-shrink-0">
+
+              {/* Payment breakdown */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-base font-semibold text-[#1C1917] mb-4">
+                  Répartition des paiements
+                </h2>
+                {mounted && pieData.length > 0 ? (
+                  <>
+                    <div className="flex justify-center mb-4">
+                      <div className="relative w-[180px] h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={pieData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={55}
+                              outerRadius={75}
+                              paddingAngle={2}
+                              dataKey="value"
+                            >
+                              {pieData.map((entry, i) => (
+                                <Cell key={i} fill={entry.color} />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                          <div className="text-xl font-bold text-[#1C1917]">
+                            {metrics.totalOrders}
+                          </div>
+                          <div className="text-xs text-[#78716C]">commandes</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2.5">
+                      {pieData.map((item) => (
+                        <div key={item.name} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                            <span className="text-sm text-[#1C1917]">{item.name}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-[#1C1917]">
+                            {item.value}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <ChartPlaceholder h="h-[200px]" />
+                )}
+              </div>
+
+              {/* Top products */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-base font-semibold text-[#1C1917] mb-3">
+                  Meilleures ventes
+                </h2>
+                {metrics.topProducts.length === 0 ? (
+                  <p className="text-sm text-[#78716C] text-center py-4">Aucun produit</p>
+                ) : (
+                  <div>
+                    {metrics.topProducts.map((p, i) => (
+                      <div
+                        key={p.product_id ?? p.name_fr}
+                        className={`flex items-center gap-3 py-3 -mx-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors ${
+                          i < metrics.topProducts.length - 1 ? 'border-b border-[#F3F4F6]' : ''
+                        } ${p.product_id ? 'cursor-pointer' : ''}`}
+                      >
+                        <div className="w-6 text-center text-sm font-semibold text-[#A8A29E]">
+                          {i + 1}
+                        </div>
+                        <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                          {p.image_url && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.image_url} alt={p.name_fr} className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {p.product_id ? (
+                            <Link
+                              href={`/dashboard/produits/${p.product_id}`}
+                              className="text-sm font-medium text-[#1C1917] truncate hover:text-[#2563EB] block"
+                            >
+                              {p.name_fr}
+                            </Link>
+                          ) : (
+                            <div className="text-sm font-medium text-[#1C1917] truncate">{p.name_fr}</div>
+                          )}
+                          <div className="text-xs text-[#78716C]">{p.sold} vendus</div>
+                        </div>
+                        <div className="text-sm font-semibold text-[#1C1917] flex-shrink-0">
+                          {formatMAD(p.revenue)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          {/* ── Mobile layout ──────────────────────────────────────────────── */}
+          <div className="md:hidden space-y-3">
+
+            {/* Revenue card + chart */}
+            <div className="bg-white rounded-xl shadow-sm p-5">
+              <div className="text-[12px] text-[#78716C] uppercase mb-1">Revenus totaux</div>
+              <div className="text-[28px] font-semibold text-[#1C1917] mb-4">
+                {formatMAD(metrics.totalRevenue)}
+              </div>
+              <div className="bg-[#FAFAF9] rounded-lg p-2 h-[160px]">
+                {mounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11, fill: '#78716C' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: '#78716C' }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={30}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#E8632A"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full bg-[#F0F0EF] rounded animate-pulse" />
+                )}
+              </div>
+            </div>
+
+            {/* Payment breakdown — mobile uses custom SVG donut */}
+            <div className="bg-white rounded-xl shadow-sm p-5">
+              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-4">
+                Répartition des paiements
+              </h3>
+              {pieData.length > 0 ? (
+                <>
+                  <DonutChartSVG data={pieData} total={metrics.totalOrders} />
+                  <div className="mt-4 space-y-2">
+                    {pieData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span className="text-[14px] text-[#1C1917]">{item.name}</span>
+                        </div>
+                        <span className="text-[14px] font-semibold text-[#1C1917]">
+                          {item.value}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-center text-[#78716C] py-8">Aucune donnée</p>
+              )}
+            </div>
+
+            {/* Top products */}
+            <div className="bg-white rounded-xl shadow-sm p-4">
+              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-3">Meilleures ventes</h3>
+              {metrics.topProducts.length === 0 ? (
+                <p className="text-sm text-center text-[#78716C] py-4">Aucun produit</p>
+              ) : (
+                <div className="space-y-3">
+                  {metrics.topProducts.map((p, i) => (
+                    <div key={p.product_id ?? p.name_fr} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
+                        {i + 1}
+                      </div>
+                      <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                        {p.image_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.image_url} alt={p.name_fr} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[14px] font-medium text-[#1C1917] truncate">{p.name_fr}</div>
+                        <div className="text-[12px] text-[#78716C]">{p.sold} vendus</div>
+                      </div>
+                      <div className="text-[14px] font-semibold text-[#1C1917]">
+                        {formatMAD(p.revenue)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── SVG donut chart (mobile only, no recharts needed) ────────────────────────
+
+type DonutSegment = { name: string; value: number; color: string };
+
+function DonutChartSVG({ data, total }: { data: DonutSegment[]; total: number }) {
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 50;
+  const strokeWidth = 24;
+  const circumference = 2 * Math.PI * r;
+
+  let cumulative = 0;
+  const segments = data.map((d) => {
+    const offset = circumference * (1 - cumulative / 100);
+    const dashArray = `${(d.value / 100) * circumference} ${circumference}`;
+    cumulative += d.value;
+    return { ...d, dashArray, offset };
+  });
+
+  return (
+    <div className="flex justify-center">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          {segments.map((seg, i) => (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={seg.dashArray}
+              strokeDashoffset={`-${(circumference * (segments.slice(0, i).reduce((s, x) => s + parseFloat(x.dashArray), 0) - (i > 0 ? circumference * i : 0))) / circumference}`}
+              style={{
+                strokeDashoffset: -(circumference * segments.slice(0, i).reduce((s, x) => s + x.value, 0) / 100),
+              }}
+            />
+          ))}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-xl font-bold text-[#1C1917]">{total}</div>
+          <div className="text-xs text-[#78716C]">commandes</div>
+        </div>
+      </div>
+    </div>
+  );
+}
