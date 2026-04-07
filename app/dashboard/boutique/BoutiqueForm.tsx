@@ -24,15 +24,15 @@ const COLOR_OPTIONS = [
   { value: '#EC4899', name: 'Rose' },
 ];
 
-const CATEGORIES = [
-  'Mode & Vêtements',
-  'Accessoires',
-  'Maison & Décoration',
-  'Beauté & Cosmétiques',
-  'Électronique',
-  'Alimentation',
-  'Autre',
-];
+const CATEGORY_KEYS = [
+  'fashion',
+  'food',
+  'beauty',
+  'electronics',
+  'home',
+  'sport',
+  'other',
+] as const;
 
 type Props = { merchant: Merchant };
 
@@ -44,7 +44,7 @@ export function BoutiqueForm({ merchant }: Props) {
   const [storeName, setStoreName] = useState(merchant.store_name);
   const [storeSlug, setStoreSlug] = useState(merchant.store_slug);
   const [description, setDescription] = useState(merchant.description ?? '');
-  const [category, setCategory] = useState(merchant.category ?? CATEGORIES[0]);
+  const [category, setCategory] = useState(merchant.category ?? 'fashion');
 
   // Appearance
   const [logoUrl, setLogoUrl] = useState(merchant.logo_url ?? '');
@@ -185,8 +185,10 @@ export function BoutiqueForm({ merchant }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
           >
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
+            {CATEGORY_KEYS.map((key) => (
+              <option key={key} value={key}>
+                {t(`categories.${key}`)}
+              </option>
             ))}
           </select>
         </div>

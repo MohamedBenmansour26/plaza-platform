@@ -228,7 +228,16 @@
     "offline": "Hors ligne",
     "offlineNote": "Votre boutique sera invisible aux clients",
     "save": "Enregistrer",
-    "saving": "Enregistrement…"
+    "saving": "Enregistrement…",
+    "categories": {
+      "fashion": "Mode & Vêtements",
+      "food": "Alimentation",
+      "beauty": "Beauté & Bien-être",
+      "electronics": "Électronique",
+      "home": "Maison & Déco",
+      "sport": "Sport & Loisirs",
+      "other": "Autre"
+    }
   },
   "account": {
     "pageTitle": "Mon compte",
