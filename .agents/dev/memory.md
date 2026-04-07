@@ -97,8 +97,38 @@ Updated after every session._
 
 ---
 
+## PLZ-021 — Dashboard foundation, layout, product list — 07 April 2026
+
+**What I built:** Design token file, StatusBadge, PaymentBadge, DashboardLayout (sidebar 240px desktop + bottom nav mobile), SidebarNav, MobileNav, PageHeader. Rebuilt `/dashboard` (4 real Supabase stat cards, recent orders table/cards, store link + clipboard copy). `/dashboard/produits` (product list with search + filter chips, desktop table, mobile cards). Shell pages for PLZ-022. New i18n namespaces: `dashboard.*`, `products.*`, `nav.*`.
+
+**Key decisions:**
+- DashboardLayout = server wrapper; SidebarNav + MobileNav + ProductsClient = client (need hooks)
+- Products page: server fetches data, `ProductsClient` handles search/filter state — clean split
+- `CopyButton.tsx` separate client island — keeps dashboard page server-rendered
+- `todayOrders` query needs `.returns<{ total_amount: number }[]>()` — same TS 5.9 regression
+- Excluded `design-exports/` from tsconfig — Vite/react-router, generates ~50 spurious errors
+- `lib/db/orders.ts`: `as any` → `as never` for Supabase `.update()` (TS 5.x: any not assignable to never)
+
+**Bug fixes applied post-review (BUG-006 + BUG-007):**
+- All client components now call `useTranslations` — wiring JSON keys is NOT enough
+- `EmptyState` (sub-component inside ProductsClient file) calls `useTranslations` itself — functions that return JSX can call hooks
+- Added `nav.*` namespace — nav labels in SidebarNav + MobileNav were hardcoded
+- Added `col*`, `empty*`, `editButton`, `addButton` keys to messages (12 keys missed from initial PR)
+
+**PR:** https://github.com/MohamedBenmansour26/plaza-platform/pull/7
+
+---
+
 ## Feedback received
 
-- **Hamza (PLZ-008 review):** TypeScript errors from Supabase query result types — replace `as T | null` casts with explicit generic on `.maybeSingle<Pick<T, ...>>()`. More idiomatic, no assertion needed. Applied immediately; will use this pattern consistently going forward.
+- **Hamza (PLZ-008 review):** Replace `as T | null` casts with `.maybeSingle<Pick<T, ...>>()`. Applied immediately.
+- **Anas (PLZ-021 review / BUG-006 + BUG-007):** Adding keys to JSON is not enough — every client component that renders user-facing strings MUST call `useTranslations`. Spot-check ALL client components before opening a PR.
 
-_PLZ-003 and PLZ-006 — awaiting QA review._
+---
+
+## Standing rules
+
+- **i18n wiring:** Always call `useTranslations` in the consuming component. Adding keys to `fr.json`/`ar.json` does nothing if the component never calls `t()`. Before opening any PR, verify every client component with user-facing strings has `const t = useTranslations(...)` and uses it.
+- **i18n ownership:** Coordinate with Hamza before touching `messages/fr.json` or `messages/ar.json`. One person owns i18n per sprint.
+- **Supabase `.maybeSingle()` / `.single()`:** Always use explicit generic: `.maybeSingle<Pick<T, 'col1' | 'col2'>>()`. Never rely on inference.
+- **Supabase `.update()`:** Cast argument `as never` when TS2345 fires — `any` is no longer assignable to `never` in TS 5.x strict mode.
