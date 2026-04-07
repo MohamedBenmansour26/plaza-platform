@@ -2,17 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Search, Edit2, Eye, EyeOff, Plus } from 'lucide-react';
 import type { Product } from '@/types/supabase';
 
 type FilterStatus = 'tous' | 'en-stock' | 'rupture' | 'masques';
-
-const filters: { id: FilterStatus; label: string }[] = [
-  { id: 'tous',     label: 'Tous' },
-  { id: 'en-stock', label: 'En stock' },
-  { id: 'rupture',  label: 'Rupture' },
-  { id: 'masques',  label: 'Masqués' },
-];
 
 function formatPrice(centimes: number) {
   return `${(centimes / 100).toLocaleString('fr-MA')} MAD`;
@@ -21,8 +15,16 @@ function formatPrice(centimes: number) {
 type Props = { products: Product[] };
 
 export function ProductsClient({ products }: Props) {
+  const t = useTranslations('products');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('tous');
+
+  const filters: { id: FilterStatus; label: string }[] = [
+    { id: 'tous',     label: t('filterAll') },
+    { id: 'en-stock', label: t('filterInStock') },
+    { id: 'rupture',  label: t('filterOutOfStock') },
+    { id: 'masques',  label: t('filterHidden') },
+  ];
 
   const filtered = products.filter((p) => {
     const matchesSearch =
@@ -38,12 +40,12 @@ export function ProductsClient({ products }: Props) {
     <>
       {/* Mobile top bar */}
       <div className="md:hidden bg-white h-14 px-4 flex items-center justify-between shadow-sm border-b border-[#E2E8F0]">
-        <h1 className="text-[18px] font-semibold text-[#1C1917]">Mes produits</h1>
+        <h1 className="text-[18px] font-semibold text-[#1C1917]">{t('title')}</h1>
         <Link
           href="/dashboard/produits/nouveau"
           className="h-9 px-4 bg-[#2563EB] text-white text-sm rounded-lg hover:bg-[#1d4ed8] transition-colors flex items-center"
         >
-          Ajouter
+          {t('add')}
         </Link>
       </div>
 
@@ -53,7 +55,7 @@ export function ProductsClient({ products }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
           <input
             type="text"
-            placeholder="Rechercher un produit..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full h-10 pl-10 pr-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
@@ -103,10 +105,12 @@ export function ProductsClient({ products }: Props) {
                   </div>
                   {product.stock === 0 ? (
                     <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-[#FEF2F2] text-[#DC2626] mt-1">
-                      Rupture
+                      {t('outOfStock')}
                     </span>
                   ) : (
-                    <div className="text-xs text-[#78716C] mt-1">{product.stock} en stock</div>
+                    <div className="text-xs text-[#78716C] mt-1">
+                      {t('inStock', { count: product.stock })}
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-col items-end justify-start pt-1">
@@ -125,12 +129,12 @@ export function ProductsClient({ products }: Props) {
       {/* Desktop table */}
       <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="h-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 flex items-center">
-          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">Image</div>
-          <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase">Produit</div>
-          <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">Prix</div>
-          <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">Stock</div>
-          <div className="w-[100px] text-[13px] font-medium text-[#78716C] uppercase">Statut</div>
-          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">Actions</div>
+          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">{t('colImage')}</div>
+          <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase">{t('colName')}</div>
+          <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">{t('colPrice')}</div>
+          <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStock')}</div>
+          <div className="w-[100px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStatus')}</div>
+          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">{t('colActions')}</div>
         </div>
 
         {filtered.length === 0 ? (
@@ -160,10 +164,12 @@ export function ProductsClient({ products }: Props) {
               <div className="w-[140px]">
                 {product.stock === 0 ? (
                   <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-[#FEF2F2] text-[#DC2626]">
-                    Rupture
+                    {t('outOfStock')}
                   </span>
                 ) : (
-                  <span className="text-[13px] text-[#78716C]">{product.stock} en stock</span>
+                  <span className="text-[13px] text-[#78716C]">
+                    {t('inStock', { count: product.stock })}
+                  </span>
                 )}
               </div>
               <div className="w-[100px]">
@@ -174,14 +180,14 @@ export function ProductsClient({ products }: Props) {
                       : 'bg-[#F5F5F4] text-[#78716C]'
                   }`}
                 >
-                  {product.is_active ? 'Visible' : 'Masqué'}
+                  {product.is_active ? t('visible') : t('hidden')}
                 </span>
               </div>
               <div className="w-16 flex items-center gap-1">
                 <Link
                   href={`/dashboard/produits/${product.id}`}
                   className="p-1 text-[#78716C] hover:text-[#2563EB] transition-colors"
-                  title="Modifier"
+                  title={t('editButton')}
                 >
                   <Edit2 className="w-5 h-5" />
                 </Link>
@@ -195,12 +201,14 @@ export function ProductsClient({ products }: Props) {
 }
 
 function EmptyState({ hasProducts }: { hasProducts: boolean }) {
+  const t = useTranslations('products');
+
   if (hasProducts) {
     return (
       <div className="py-16 text-center">
         <Search className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
-        <h3 className="text-base font-semibold text-[#1C1917] mb-1">Aucun produit trouvé</h3>
-        <p className="text-sm text-[#78716C]">Essayez de modifier vos filtres</p>
+        <h3 className="text-base font-semibold text-[#1C1917] mb-1">{t('emptySearchTitle')}</h3>
+        <p className="text-sm text-[#78716C]">{t('emptySearchSub')}</p>
       </div>
     );
   }
@@ -209,14 +217,14 @@ function EmptyState({ hasProducts }: { hasProducts: boolean }) {
       <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center mx-auto mb-4">
         <Plus className="w-8 h-8 text-[#2563EB]" />
       </div>
-      <h3 className="text-base font-semibold text-[#1C1917] mb-2">Aucun produit pour l&apos;instant</h3>
-      <p className="text-sm text-[#78716C] mb-4">Ajoutez votre premier produit pour commencer.</p>
+      <h3 className="text-base font-semibold text-[#1C1917] mb-2">{t('emptyTitle')}</h3>
+      <p className="text-sm text-[#78716C] mb-4">{t('emptyCta')}</p>
       <Link
         href="/dashboard/produits/nouveau"
         className="inline-flex items-center gap-2 h-9 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
       >
         <Plus className="w-4 h-4" />
-        Ajouter un produit
+        {t('addButton')}
       </Link>
     </div>
   );

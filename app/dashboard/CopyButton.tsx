@@ -2,10 +2,12 @@
 
 import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 type Props = { url: string };
 
 export function CopyButton({ url }: Props) {
+  const t = useTranslations('dashboard');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -27,12 +29,12 @@ export function CopyButton({ url }: Props) {
       {copied ? (
         <>
           <Check className="w-4 h-4 text-[#16A34A]" />
-          <span className="text-[#16A34A]">Copié !</span>
+          <span className="text-[#16A34A]">{t('linkCopied')}</span>
         </>
       ) : (
         <>
           <Copy className="w-4 h-4" />
-          Copier le lien
+          {t('copyLink')}
         </>
       )}
     </button>

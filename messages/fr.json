@@ -110,7 +110,30 @@
     "statusHeader": "Statut",
     "actionsHeader": "Actions",
     "newProduct": "Nouveau produit",
-    "editProduct": "Modifier le produit"
+    "editProduct": "Modifier le produit",
+    "colImage": "Image",
+    "colName": "Produit",
+    "colPrice": "Prix",
+    "colStock": "Stock",
+    "colStatus": "Statut",
+    "colActions": "Actions",
+    "emptyTitle": "Aucun produit pour l'instant",
+    "emptyCta": "Ajouter votre premier produit",
+    "emptySearchTitle": "Aucun produit trouvé",
+    "emptySearchSub": "Essayez de modifier vos filtres",
+    "editButton": "Modifier",
+    "addButton": "Ajouter un produit"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "orders": "Commandes",
+    "finances": "Finances",
+    "store": "Ma Boutique",
+    "support": "Support",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "more": "Plus"
   },
   "store": {
     "noProducts": "Cette boutique n'a pas encore de produits.",

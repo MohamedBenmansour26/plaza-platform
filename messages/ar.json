@@ -110,7 +110,30 @@
     "statusHeader": "الحالة",
     "actionsHeader": "إجراءات",
     "newProduct": "منتج جديد",
-    "editProduct": "تعديل المنتج"
+    "editProduct": "تعديل المنتج",
+    "colImage": "صورة",
+    "colName": "المنتج",
+    "colPrice": "السعر",
+    "colStock": "المخزون",
+    "colStatus": "الحالة",
+    "colActions": "إجراءات",
+    "emptyTitle": "لا توجد منتجات حتى الآن",
+    "emptyCta": "أضف أول منتج للبدء",
+    "emptySearchTitle": "لم يُعثر على منتج",
+    "emptySearchSub": "حاول تعديل الفلاتر",
+    "editButton": "تعديل",
+    "addButton": "إضافة منتج"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "finances": "المالية",
+    "store": "متجري",
+    "support": "الدعم",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "more": "المزيد"
   },
   "store": {
     "noProducts": "لا توجد منتجات في هذا المتجر بعد.",

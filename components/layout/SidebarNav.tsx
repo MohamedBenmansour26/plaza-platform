@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Home,
   Grid3x3,
@@ -12,22 +13,23 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-const navItems = [
-  { href: '/dashboard',           label: 'Accueil',     icon: Home,          exact: true },
-  { href: '/dashboard/produits',  label: 'Produits',    icon: Grid3x3,       exact: false },
-  { href: '/dashboard/commandes', label: 'Commandes',   icon: ListOrdered,   exact: false },
-  { href: '/dashboard/finances',  label: 'Finances',    icon: BarChart3,     exact: false },
-  { href: '/dashboard/boutique',  label: 'Ma Boutique', icon: Store,         exact: false },
-  { href: '/dashboard/support',   label: 'Support',     icon: MessageCircle, exact: false },
-];
-
 type Props = {
   merchantName: string | null;
 };
 
 export function SidebarNav({ merchantName }: Props) {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const router = useRouter();
+
+  const navItems = [
+    { href: '/dashboard',           label: t('home'),     icon: Home,          exact: true },
+    { href: '/dashboard/produits',  label: t('products'), icon: Grid3x3,       exact: false },
+    { href: '/dashboard/commandes', label: t('orders'),   icon: ListOrdered,   exact: false },
+    { href: '/dashboard/finances',  label: t('finances'), icon: BarChart3,     exact: false },
+    { href: '/dashboard/boutique',  label: t('store'),    icon: Store,         exact: false },
+    { href: '/dashboard/support',   label: t('support'),  icon: MessageCircle, exact: false },
+  ];
 
   const isActive = (href: string, exact: boolean) =>
     exact
@@ -90,12 +92,12 @@ export function SidebarNav({ merchantName }: Props) {
             onClick={() => router.push('/dashboard/parametres')}
             className="text-[#78716C] hover:underline"
           >
-            Paramètres
+            {t('settings')}
           </button>
           <span className="text-[#78716C]">/</span>
           <form action="/auth/logout" method="POST" className="inline">
             <button type="submit" className="text-[#DC2626] hover:underline">
-              Déconnexion
+              {t('logout')}
             </button>
           </form>
         </div>

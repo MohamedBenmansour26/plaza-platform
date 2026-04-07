@@ -2,18 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Home, Grid3x3, List, TrendingUp, MoreHorizontal } from 'lucide-react';
 
-const tabs = [
-  { href: '/dashboard',           label: 'Accueil',   icon: Home,          exact: true },
-  { href: '/dashboard/produits',  label: 'Produits',  icon: Grid3x3,       exact: false },
-  { href: '/dashboard/commandes', label: 'Commandes', icon: List,          exact: false },
-  { href: '/dashboard/finances',  label: 'Finances',  icon: TrendingUp,    exact: false },
-  { href: '/dashboard/boutique',  label: 'Plus',      icon: MoreHorizontal, exact: false },
-];
-
 export function MobileNav() {
+  const t = useTranslations('nav');
   const pathname = usePathname();
+
+  const tabs = [
+    { href: '/dashboard',           label: t('home'),     icon: Home,          exact: true },
+    { href: '/dashboard/produits',  label: t('products'), icon: Grid3x3,       exact: false },
+    { href: '/dashboard/commandes', label: t('orders'),   icon: List,          exact: false },
+    { href: '/dashboard/finances',  label: t('finances'), icon: TrendingUp,    exact: false },
+    { href: '/dashboard/boutique',  label: t('more'),     icon: MoreHorizontal, exact: false },
+  ];
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href || pathname === `${href}/` : pathname.startsWith(href);
