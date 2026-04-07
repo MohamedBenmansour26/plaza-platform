@@ -3,6 +3,10 @@
  *
  * Uses the server Supabase client. Aggregation is done in JS
  * (no RPC needed for MVP scale). Period filtering uses ISO date strings.
+ *
+ * Live schema (07 Apr 2026):
+ *   orders.total       (was total_amount in PLZ-006)
+ *   order_items.name_fr is a snapshot column (no products join needed for name)
  */
 
 import { createClient } from '@/lib/supabase/server';
@@ -19,9 +23,9 @@ export type RevenuePoint = {
 };
 
 export type TopProduct = {
-  product_id: string;
+  /** null when the product was deleted after the order was placed */
+  product_id: string | null;
   name_fr: string;
-  name_ar: string;
   image_url: string | null;
   sold: number;
   revenue: number;
@@ -66,17 +70,16 @@ function toDateString(isoString: string): string {
 
 type RawOrder = {
   id: string;
-  total_amount: number;
+  total: number;
   payment_method: PaymentMethod;
   status: OrderStatus;
   created_at: string;
   order_items: {
     quantity: number;
     unit_price: number;
+    name_fr: string;
+    product_id: string | null;
     products: {
-      id: string;
-      name_fr: string;
-      name_ar: string;
       image_url: string | null;
     } | null;
   }[];
@@ -91,14 +94,14 @@ export async function getMerchantMetrics(
   const supabase = await createClient();
   const periodStart = getPeriodStart(period);
 
-  // Single query: orders + items + products for the period
+  // Single query: orders + items + product images for the period
   let query = supabase
     .from('orders')
     .select(`
-      id, total_amount, payment_method, status, created_at,
+      id, total, payment_method, status, created_at,
       order_items (
-        quantity, unit_price,
-        products ( id, name_fr, name_ar, image_url )
+        quantity, unit_price, name_fr, product_id,
+        products ( image_url )
       )
     `)
     .eq('merchant_id', merchantId)
@@ -109,7 +112,6 @@ export async function getMerchantMetrics(
   }
 
   const { data: orders, error } = await query.returns<RawOrder[]>();
-
   if (error) throw new Error(`getMerchantMetrics: ${error.message}`);
 
   const rows = orders ?? [];
@@ -117,7 +119,7 @@ export async function getMerchantMetrics(
   // ── Totals ──────────────────────────────────────────────────────────────
 
   const totalOrders = rows.length;
-  const totalRevenue = rows.reduce((sum, o) => sum + o.total_amount, 0);
+  const totalRevenue = rows.reduce((sum, o) => sum + o.total, 0);
   const avgBasket = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
   // ── Revenue by day ──────────────────────────────────────────────────────
@@ -125,39 +127,37 @@ export async function getMerchantMetrics(
   const revenueMap = new Map<string, number>();
   for (const order of rows) {
     const day = toDateString(order.created_at);
-    revenueMap.set(day, (revenueMap.get(day) ?? 0) + order.total_amount);
+    revenueMap.set(day, (revenueMap.get(day) ?? 0) + order.total);
   }
   const revenueByDay: RevenuePoint[] = Array.from(revenueMap.entries())
     .map(([date, revenue]) => ({ date, revenue }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   // ── Top products ────────────────────────────────────────────────────────
+  // name_fr is snapshotted on order_items — no products join needed for name.
+  // Group by product_id (fall back to name for orders without product link).
 
-  const productMap = new Map<
-    string,
-    {
-      name_fr: string;
-      name_ar: string;
-      image_url: string | null;
-      sold: number;
-      revenue: number;
-    }
-  >();
+  type ProductAgg = {
+    name_fr: string;
+    image_url: string | null;
+    sold: number;
+    revenue: number;
+  };
+
+  const productMap = new Map<string, ProductAgg>();
 
   for (const order of rows) {
     for (const item of order.order_items ?? []) {
-      if (!item.products) continue;
-      const pid = item.products.id;
-      const existing = productMap.get(pid);
+      const key = item.product_id ?? `name:${item.name_fr}`;
+      const existing = productMap.get(key);
       const itemRevenue = item.quantity * item.unit_price;
       if (existing) {
         existing.sold += item.quantity;
         existing.revenue += itemRevenue;
       } else {
-        productMap.set(pid, {
-          name_fr: item.products.name_fr,
-          name_ar: item.products.name_ar,
-          image_url: item.products.image_url,
+        productMap.set(key, {
+          name_fr: item.name_fr,
+          image_url: item.products?.image_url ?? null,
           sold: item.quantity,
           revenue: itemRevenue,
         });
@@ -166,7 +166,10 @@ export async function getMerchantMetrics(
   }
 
   const topProducts: TopProduct[] = Array.from(productMap.entries())
-    .map(([product_id, v]) => ({ product_id, ...v }))
+    .map(([key, v]) => ({
+      product_id: key.startsWith('name:') ? null : key,
+      ...v,
+    }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
@@ -178,9 +181,9 @@ export async function getMerchantMetrics(
     const existing = paymentMap.get(m);
     if (existing) {
       existing.count += 1;
-      existing.amount += order.total_amount;
+      existing.amount += order.total;
     } else {
-      paymentMap.set(m, { count: 1, amount: order.total_amount });
+      paymentMap.set(m, { count: 1, amount: order.total });
     }
   }
 
