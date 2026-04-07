@@ -2,7 +2,7 @@ import type { PaymentMethod } from '@/types/supabase';
 
 const config: Record<PaymentMethod, { bg: string; text: string; label: string }> = {
   cod:           { bg: '#F5F5F4', text: '#78716C', label: 'COD' },
-  card_terminal: { bg: '#EFF6FF', text: '#2563EB', label: 'Terminal' },
+  terminal:      { bg: '#EFF6FF', text: '#2563EB', label: 'Terminal' },
   card:          { bg: '#F5F3FF', text: '#7C3AED', label: 'Carte' },
 };
 
