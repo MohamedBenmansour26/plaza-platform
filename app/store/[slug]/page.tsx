@@ -49,7 +49,7 @@ export default async function StorefrontPage({ params }: Props) {
     .from('products')
     .select('*')
     .eq('merchant_id', merchant.id)
-    .eq('is_active', true)
+    .eq('is_visible', true)
     .order('created_at', { ascending: false })
     .returns<Product[]>();
 

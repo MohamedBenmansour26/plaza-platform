@@ -22,7 +22,7 @@ function getStockLevel(stock: number): 'in_stock' | 'low_stock' | 'out_of_stock'
 export function ProductCard({ product, locale, onAddToCart }: Props) {
   const t = useTranslations('store');
 
-  const name = locale === 'ar' ? product.name_ar : product.name_fr;
+  const name = (locale === 'ar' ? product.name_ar : null) ?? product.name_fr;
   const stockLevel = getStockLevel(product.stock);
   const isOutOfStock = stockLevel === 'out_of_stock';
 
