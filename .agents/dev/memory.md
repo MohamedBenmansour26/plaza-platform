@@ -119,6 +119,31 @@ Updated after every session._
 
 ---
 
+## PLZ-022 — Product add/edit form — 07 April 2026
+
+**What I built:** Full product create/edit UI at `/dashboard/produits/nouveau` and `/dashboard/produits/[id]`. `ProductForm` client component (bilingual name FR/AR, stock stepper, photo upload, visibility toggle, inline price calculator with 5% commission breakdown). Server actions in `actions.ts`: `createProduct`, `updateProduct`, `deleteProduct`. Delete confirmation modal. Responsive: sticky CTA mobile, two-column desktop.
+
+**Key decisions:**
+- Single `ProductForm` component with optional `product` prop (create vs edit via `isEdit = !!product`)
+- `useTransition` + direct server action calls — no native `<form action>` because controlled state (image_url, is_visible, stock) needs to be collected manually into FormData before submitting
+- Photo upload: fires POST to existing `/api/upload` with bucket=product-images immediately on file select; URL stored in component state, included in FormData on submit
+- Price stored as centimes in DB: form displays MAD (price/100), action converts back (`Math.round(priceMAD * 100)`)
+- Revenue calculator: pure derived state — no effect or memo needed
+- Inline switch component (no @radix-ui/react-switch — not installed); ARIA role=switch with keyboard focus ring
+- Schema fixes applied: `total_amount→total`, `customer_name` removed from display, `is_active→is_visible`, `name_ar?.includes()` null-safe
+
+**Shortcuts taken:**
+- No E2E test — form interaction requires auth + Supabase; will add in QA phase
+- On update: redirects to /dashboard/produits (no "saved successfully" toast) — simpler without a toast library
+
+**Friction encountered:**
+- Was on `main` branch instead of feature branch when writing files — used `git stash` + `git checkout` to move changes to correct branch; caused a merge conflict in `app/dashboard/page.tsx` that needed manual resolution
+- Branch was already ahead of origin/main with Hamza's schema patches (`customer_id`, `order_number` on the Pick type)
+
+**PR:** https://github.com/MohamedBenmansour26/plaza-platform/pull/10
+
+---
+
 ## Feedback received
 
 - **Hamza (PLZ-008 review):** Replace `as T | null` casts with `.maybeSingle<Pick<T, ...>>()`. Applied immediately.
