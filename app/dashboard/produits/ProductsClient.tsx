@@ -29,10 +29,10 @@ export function ProductsClient({ products }: Props) {
   const filtered = products.filter((p) => {
     const matchesSearch =
       p.name_fr.toLowerCase().includes(search.toLowerCase()) ||
-      p.name_ar.includes(search);
+      (p.name_ar?.includes(search) ?? false);
     if (filter === 'en-stock') return matchesSearch && p.stock > 0;
     if (filter === 'rupture')  return matchesSearch && p.stock === 0;
-    if (filter === 'masques')  return matchesSearch && !p.is_active;
+    if (filter === 'masques')  return matchesSearch && !p.is_visible;
     return matchesSearch;
   });
 
@@ -114,7 +114,7 @@ export function ProductsClient({ products }: Props) {
                   )}
                 </div>
                 <div className="flex flex-col items-end justify-start pt-1">
-                  {product.is_active ? (
+                  {product.is_visible ? (
                     <Eye size={18} className="text-[#2563EB]" />
                   ) : (
                     <EyeOff size={18} className="text-[#78716C]" />
@@ -175,12 +175,12 @@ export function ProductsClient({ products }: Props) {
               <div className="w-[100px]">
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    product.is_active
+                    product.is_visible
                       ? 'bg-[#F0FDF4] text-[#16A34A]'
                       : 'bg-[#F5F5F4] text-[#78716C]'
                   }`}
                 >
-                  {product.is_active ? t('visible') : t('hidden')}
+                  {product.is_visible ? t('visible') : t('hidden')}
                 </span>
               </div>
               <div className="w-16 flex items-center gap-1">

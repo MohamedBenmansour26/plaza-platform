@@ -31,7 +31,7 @@ function formatDate(): string {
 
 type RecentOrder = Pick<
   Order,
-  'id' | 'customer_name' | 'total_amount' | 'status' | 'payment_method' | 'created_at'
+  'id' | 'order_number' | 'customer_id' | 'total' | 'status' | 'payment_method' | 'created_at'
 >;
 
 export default async function DashboardPage() {
@@ -70,10 +70,10 @@ export default async function DashboardPage() {
 
     supabase
       .from('orders')
-      .select('total_amount')
+      .select('total')
       .eq('merchant_id', merchant.id)
       .gte('created_at', todayIso)
-      .returns<{ total_amount: number }[]>(),
+      .returns<{ total: number }[]>(),
 
     supabase
       .from('orders')
@@ -90,14 +90,14 @@ export default async function DashboardPage() {
 
     supabase
       .from('orders')
-      .select('id, customer_name, total_amount, status, payment_method, created_at')
+      .select('id, order_number, customer_id, total, status, payment_method, created_at')
       .eq('merchant_id', merchant.id)
       .order('created_at', { ascending: false })
       .limit(5)
       .returns<RecentOrder[]>(),
   ]);
 
-  const revenueToday = (todayOrders ?? []).reduce((sum, o) => sum + o.total_amount, 0);
+  const revenueToday = (todayOrders ?? []).reduce((sum, o) => sum + o.total, 0);
 
   const firstName = merchant.store_name.split(/\s+/)[0];
   const storeUrl = `plaza.ma/store/${merchant.store_slug}`;
@@ -204,12 +204,11 @@ export default async function DashboardPage() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <span className="font-bold text-sm text-[#1C1917]">
-                          #{order.id.slice(-6).toUpperCase()}
+                          {order.order_number}
                         </span>
-                        <span className="text-sm text-[#78716C] ml-2">{order.customer_name}</span>
                       </div>
                       <div className="text-sm font-semibold text-[#1C1917]">
-                        {formatPrice(order.total_amount)}
+                        {formatPrice(order.total)}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -246,11 +245,11 @@ export default async function DashboardPage() {
                     className="h-12 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] cursor-pointer transition-colors"
                   >
                     <div className="w-[130px] text-sm font-medium text-[#1C1917]">
-                      #{order.id.slice(-6).toUpperCase()}
+                      {order.order_number}
                     </div>
-                    <div className="w-[160px] text-sm text-[#1C1917]">{order.customer_name}</div>
+                    <div className="w-[160px] text-sm text-[#1C1917]">—</div>
                     <div className="w-[130px] text-sm text-[#1C1917]">
-                      {formatPrice(order.total_amount)}
+                      {formatPrice(order.total)}
                     </div>
                     <div className="w-[140px]">
                       <StatusBadge status={order.status as OrderStatus} />
