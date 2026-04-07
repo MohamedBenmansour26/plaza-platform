@@ -63,13 +63,30 @@ export function OrdersClient({ orders }: Props) {
           <h1 className="text-2xl font-semibold text-[#1C1917]">Commandes</h1>
         </div>
 
-        {/* Filter tabs — horizontal scroll on mobile */}
-        <div className="flex gap-2 overflow-x-auto pb-1 mb-4 md:flex-wrap">
+        {/* Filter tabs — underline style on mobile */}
+        <div className="md:hidden bg-white border-b border-[#E2E8F0] flex overflow-x-auto mb-4 -mx-4 px-4">
           {FILTERS.map((f) => (
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 px-3.5 h-11 text-[14px] whitespace-nowrap border-b-2 transition-colors ${
+                activeFilter === f.id
+                  ? 'text-[#2563EB] border-[#2563EB] font-medium'
+                  : 'text-[#78716C] border-transparent'
+              }`}
+            >
+              {f.label} ({countFor(f.id)})
+            </button>
+          ))}
+        </div>
+
+        {/* Filter tabs — pill style on desktop */}
+        <div className="hidden md:flex gap-2 flex-wrap mb-4">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeFilter === f.id
                   ? 'bg-[#2563EB] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
@@ -90,7 +107,8 @@ export function OrdersClient({ orders }: Props) {
             <div className="w-[130px] text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Montant</div>
             <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Statut</div>
             <div className="w-[130px] text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Paiement</div>
-            <div className="flex-1   text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Date</div>
+            <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Date</div>
+            <div className="w-16   text-[13px] font-medium text-[#78716C] uppercase tracking-wide">Actions</div>
           </div>
 
           {/* Data rows */}
@@ -118,8 +136,11 @@ export function OrdersClient({ orders }: Props) {
               <div className="w-[130px]">
                 <PaymentBadge method={order.payment_method as import('@/types/supabase').PaymentMethod} />
               </div>
-              <div className="flex-1 text-sm text-[#78716C]">
+              <div className="w-[120px] text-sm text-[#78716C]">
                 {formatDate(order.created_at)}
+              </div>
+              <div className="w-16">
+                <span className="text-sm text-[#2563EB] hover:underline">Voir</span>
               </div>
             </div>
           ))}
