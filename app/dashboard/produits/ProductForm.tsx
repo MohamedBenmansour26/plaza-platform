@@ -1,0 +1,523 @@
+'use client';
+
+import { useState, useTransition, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import { Camera, Info, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import type { Product } from '@/types/supabase';
+import { createProduct, updateProduct, deleteProduct } from './actions';
+
+type Props = {
+  product?: Product;
+};
+
+export function ProductForm({ product }: Props) {
+  const t = useTranslations('products');
+  const isEdit = !!product;
+  const [isPending, startTransition] = useTransition();
+
+  // Form state
+  const [nameFr, setNameFr] = useState(product?.name_fr ?? '');
+  const [nameAr, setNameAr] = useState(product?.name_ar ?? '');
+  const [description, setDescription] = useState(product?.description ?? '');
+  const [price, setPrice] = useState(
+    product ? String(product.price / 100) : ''
+  );
+  const [stock, setStock] = useState(product?.stock ?? 0);
+  const [isVisible, setIsVisible] = useState(product?.is_visible ?? true);
+  const [imageUrl, setImageUrl] = useState(product?.image_url ?? '');
+  const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Price calculator
+  const priceNum = parseFloat(price) || 0;
+  const commission = priceNum * 0.05;
+  const revenue = priceNum - commission;
+  const showCalc = priceNum >= 1;
+  const priceError = price !== '' && priceNum > 0 && priceNum < 1;
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('bucket', 'product-images');
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await res.json() as { url?: string; error?: string };
+      if (json.url) setImageUrl(json.url);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function validate(): boolean {
+    const newErrors: Record<string, string> = {};
+    if (!nameFr.trim()) newErrors.nameFr = t('formNameRequired');
+    if (!price || priceNum <= 0) newErrors.price = t('formPriceRequired');
+    if (priceNum > 0 && priceNum < 1) newErrors.price = t('formPriceMin');
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  function handleSubmit() {
+    if (!validate()) return;
+    const fd = new FormData();
+    fd.set('name_fr', nameFr);
+    fd.set('name_ar', nameAr);
+    fd.set('description', description);
+    fd.set('price', price);
+    fd.set('stock', String(stock));
+    fd.set('image_url', imageUrl);
+    fd.set('is_visible', String(isVisible));
+    startTransition(async () => {
+      if (isEdit && product) {
+        await updateProduct(product.id, fd);
+      } else {
+        await createProduct(fd);
+      }
+    });
+  }
+
+  function handleDelete() {
+    if (!product) return;
+    startDeleteTransition(async () => {
+      await deleteProduct(product.id);
+    });
+  }
+
+  // ─── Shared sub-components ────────────────────────────────────────────────
+
+  const priceCalculator = (
+    <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#2563EB]">
+      <h2 className="text-base font-semibold text-[#1C1917] mb-1">{t('formPriceTitle')}</h2>
+      <p className="text-[13px] text-[#78716C] mb-4">{t('formPriceSubtitle')}</p>
+
+      <div className="mb-3">
+        <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+          {t('formPriceLabel')}
+        </label>
+        <div className="relative">
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => {
+              setPrice(e.target.value);
+              setErrors((prev) => ({ ...prev, price: '' }));
+            }}
+            className={`w-full h-14 px-4 pr-16 border rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none transition-all ${
+              errors.price || priceError
+                ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20'
+                : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
+            }`}
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
+        </div>
+        {(errors.price || priceError) && (
+          <p className="text-xs text-[#DC2626] mt-1.5">{errors.price || t('formPriceMin')}</p>
+        )}
+      </div>
+
+      <div className="bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg p-3">
+        <p className="text-xs font-semibold text-[#78716C] uppercase tracking-wide mb-2.5">
+          {t('formRevenueTitle')}
+        </p>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-[#1C1917]">{t('formPriceClient')}</span>
+            <span className="text-[#1C1917]">{showCalc ? `${priceNum.toFixed(2)} MAD` : '—'}</span>
+          </div>
+          <div className="flex justify-between text-sm text-[#DC2626]">
+            <span>{t('formPriceCommission')}</span>
+            <span>{showCalc ? `- ${commission.toFixed(2)} MAD` : '—'}</span>
+          </div>
+          <div className="border-t border-[#E2E8F0]" />
+          <div className="flex justify-between text-sm font-semibold">
+            <span className="text-[#1C1917]">{t('formPriceRevenue')}</span>
+            <span className="text-[#16A34A]">{showCalc ? `${revenue.toFixed(2)} MAD` : '—'}</span>
+          </div>
+        </div>
+        <div className="my-2.5 border-t border-dashed border-[#E2E8F0]" />
+        <div className="flex gap-1.5 items-start">
+          <Info className="w-4 h-4 text-[#78716C] flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-[#78716C] leading-relaxed">{t('formPriceNote')}</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const photoCard = (
+    <div className="bg-white rounded-xl shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-[#1C1917] mb-3">{t('formPhoto')}</h3>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+      <div
+        onClick={() => !uploading && fileInputRef.current?.click()}
+        className="w-full h-[200px] rounded-lg flex flex-col items-center justify-center gap-2 mb-2 cursor-pointer transition-colors overflow-hidden"
+        style={{ background: imageUrl ? 'transparent' : undefined }}
+      >
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+        ) : (
+          <div className="w-full h-full bg-[#F5F5F4] hover:bg-[#EEEEEE] transition-colors flex flex-col items-center justify-center gap-2">
+            <Camera className="w-8 h-8 text-[#A8A29E]" />
+            <span className="text-[13px] text-[#2563EB]">
+              {uploading ? t('uploading') : (imageUrl ? t('formPhotoChange') : t('formPhotoAdd'))}
+            </span>
+          </div>
+        )}
+      </div>
+      {imageUrl && (
+        <button
+          type="button"
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          className="text-[13px] text-[#2563EB] hover:underline"
+        >
+          {uploading ? t('uploading') : t('formPhotoChange')}
+        </button>
+      )}
+      <p className="text-xs text-[#A8A29E] mt-1">{t('formPhotoFormats')}</p>
+    </div>
+  );
+
+  const visibilityCard = (
+    <div className="bg-white rounded-xl shadow-sm p-5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-[#1C1917]">{t('formVisible')}</span>
+        <button
+          type="button"
+          onClick={() => setIsVisible((v) => !v)}
+          role="switch"
+          aria-checked={isVisible}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
+            isVisible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+              isVisible ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+      </div>
+      <p className="text-xs text-[#78716C] mt-1">
+        {isVisible ? t('formVisibleDesc') : t('formHiddenDesc')}
+      </p>
+    </div>
+  );
+
+  const dangerCard = isEdit ? (
+    <div className="bg-white rounded-xl border border-[#FEE2E2] shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-[#DC2626] mb-2">{t('formDangerZone')}</h3>
+      <button
+        type="button"
+        onClick={() => setShowDeleteModal(true)}
+        className="w-full h-10 bg-white border-[1.5px] border-[#DC2626] text-[#DC2626] rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
+      >
+        {t('formDelete')}
+      </button>
+      <p className="text-xs text-[#78716C] mt-1.5">{t('formDangerDesc')}</p>
+    </div>
+  ) : null;
+
+  // ─── Mobile layout ─────────────────────────────────────────────────────────
+
+  const mobileLayout = (
+    <div className="md:hidden bg-[#FAFAF9] min-h-screen pb-24">
+      {/* Top bar */}
+      <div className="bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
+        <Link
+          href="/dashboard/produits"
+          className="absolute left-4 p-2 -ml-2 text-[#1C1917]"
+        >
+          <ArrowLeft size={20} />
+        </Link>
+        <h1 className="text-base font-semibold text-[#1C1917]">
+          {isEdit ? t('editProduct') : t('newProduct')}
+        </h1>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {/* Photo */}
+        {photoCard}
+
+        {/* Info form */}
+        <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+          {/* Name FR */}
+          <div>
+            <label className="block text-sm font-medium text-[#1C1917] mb-2">
+              {t('formNameFr')}
+            </label>
+            <input
+              type="text"
+              value={nameFr}
+              onChange={(e) => {
+                setNameFr(e.target.value);
+                setErrors((prev) => ({ ...prev, nameFr: '' }));
+              }}
+              className={`w-full h-11 px-3 border rounded-lg text-sm focus:outline-none ${
+                errors.nameFr
+                  ? 'border-[#DC2626] focus:border-[#DC2626]'
+                  : 'border-[#E2E8F0] focus:border-[#2563EB]'
+              }`}
+            />
+            {errors.nameFr && (
+              <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
+            )}
+          </div>
+
+          {/* Name AR */}
+          <div>
+            <label className="block text-sm font-medium text-[#1C1917] mb-2">
+              {t('formNameAr')}
+            </label>
+            <input
+              type="text"
+              dir="rtl"
+              placeholder="اسم المنتج"
+              value={nameAr}
+              onChange={(e) => setNameAr(e.target.value)}
+              className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-[#1C1917] mb-2">
+              {t('formDescription')}
+            </label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] resize-none"
+            />
+          </div>
+
+          {/* Stock */}
+          <div>
+            <label className="block text-sm font-medium text-[#1C1917] mb-2">
+              {t('formStock')}
+            </label>
+            <input
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
+              className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
+            />
+          </div>
+
+          {/* Visibility */}
+          <div className="flex items-center justify-between py-2">
+            <label className="text-sm font-medium text-[#1C1917]">{t('formVisible')}</label>
+            <button
+              type="button"
+              onClick={() => setIsVisible((v) => !v)}
+              role="switch"
+              aria-checked={isVisible}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isVisible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  isVisible ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Price calculator */}
+        {priceCalculator}
+
+        {/* Danger zone (edit only) */}
+        {dangerCard}
+      </div>
+
+      {/* Sticky CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isPending || uploading}
+          className="w-full h-12 bg-[#2563EB] text-white text-base font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+        >
+          {isPending
+            ? isEdit ? t('formSaving') : t('formPublishing')
+            : isEdit ? t('formSave') : t('formPublish')}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ─── Desktop layout ────────────────────────────────────────────────────────
+
+  const desktopLayout = (
+    <div className="hidden md:block bg-[#FAFAF9] min-h-screen">
+      <div className="max-w-[1040px] mx-auto p-8">
+        {/* Breadcrumb */}
+        <div className="text-xs text-[#78716C] mb-6">
+          <Link href="/dashboard/produits" className="hover:underline">
+            {t('title')}
+          </Link>
+          {' > '}
+          <span>{isEdit ? (product?.name_fr ?? t('editProduct')) : t('newProduct')}</span>
+        </div>
+
+        {/* Action bar */}
+        <div className="flex justify-end mb-6">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending || uploading}
+            className="h-10 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+          >
+            {isPending
+              ? isEdit ? t('formSaving') : t('formPublishing')
+              : isEdit ? t('formSave') : t('formPublish')}
+          </button>
+        </div>
+
+        <div className="flex gap-6">
+          {/* Left: info card */}
+          <div className="flex-1">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-base font-semibold text-[#1C1917] mb-4">{t('formInfoTitle')}</h2>
+              <div className="space-y-4">
+                {/* Name FR */}
+                <div>
+                  <label className="block text-[13px] text-[#78716C] mb-1.5">{t('formNameFr')}</label>
+                  <input
+                    type="text"
+                    value={nameFr}
+                    onChange={(e) => {
+                      setNameFr(e.target.value);
+                      setErrors((prev) => ({ ...prev, nameFr: '' }));
+                    }}
+                    className={`w-full h-10 px-3 border rounded-lg text-sm focus:outline-none focus:ring-1 ${
+                      errors.nameFr
+                        ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]'
+                        : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-[#2563EB]'
+                    }`}
+                  />
+                  {errors.nameFr && (
+                    <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
+                  )}
+                </div>
+
+                {/* Name AR */}
+                <div>
+                  <label className="block text-[13px] text-[#78716C] mb-1.5">{t('formNameAr')}</label>
+                  <input
+                    type="text"
+                    dir="rtl"
+                    placeholder="اسم المنتج"
+                    value={nameAr}
+                    onChange={(e) => setNameAr(e.target.value)}
+                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                  />
+                  <p className="text-xs text-[#78716C] mt-1">{t('formNameArHint')}</p>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-[13px] text-[#78716C] mb-1.5">{t('formDescription')}</label>
+                  <textarea
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] resize-none"
+                  />
+                </div>
+
+                {/* Stock with stepper */}
+                <div>
+                  <label className="block text-[13px] text-[#78716C] mb-1.5">{t('formStock')}</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setStock((s) => Math.max(0, s - 1))}
+                      className="w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      value={stock}
+                      onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-24 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm text-center focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setStock((s) => s + 1)}
+                      className="w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: price + photo + visibility + danger */}
+          <div className="w-[320px] space-y-4">
+            {priceCalculator}
+            {photoCard}
+            {visibilityCard}
+            {dangerCard}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ─── Delete modal ──────────────────────────────────────────────────────────
+
+  const deleteModal = showDeleteModal ? (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
+        <p className="text-sm text-[#78716C] mb-6">{t('formDeleteBody')}</p>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowDeleteModal(false)}
+            disabled={isDeleting}
+            className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+          >
+            {t('formDeleteCancel')}
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? t('loading') : t('formDeleteConfirm')}
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      {mobileLayout}
+      {desktopLayout}
+      {deleteModal}
+    </>
+  );
+}
