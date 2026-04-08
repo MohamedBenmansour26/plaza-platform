@@ -35,6 +35,13 @@ export async function signupAction(formData: FormData): Promise<SignupResult> {
     return { error: 'no_user' };
   }
 
+  // If session is null, email confirmation is required — the user cannot log in yet.
+  // This should not happen in normal operation (auto-confirm must be enabled in Supabase Auth
+  // settings for local dev). Surface a clear error rather than silently redirecting.
+  if (!data.session) {
+    return { error: 'email_confirmation_required' };
+  }
+
   // Insert merchant row using the service role client to bypass RLS.
   try {
     const service = createServiceClient();

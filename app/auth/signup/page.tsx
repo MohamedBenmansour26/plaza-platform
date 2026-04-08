@@ -27,10 +27,16 @@ export default function SignupPage() {
     const result = await signupAction(formData);
 
     if (result.error) {
-      setError(result.error === 'validation' ? t('validationError') : t('signUpError'));
+      setError(
+        result.error === 'validation'
+          ? t('validationError')
+          : result.error === 'email_confirmation_required'
+            ? t('signUpEmailConfirmation')
+            : t('signUpError'),
+      );
       setLoading(false);
     } else {
-      router.push('/dashboard');
+      router.push('/onboarding');
     }
   }
 
