@@ -32,7 +32,9 @@ function formatDate(): string {
 type RecentOrder = Pick<
   Order,
   'id' | 'order_number' | 'customer_id' | 'total' | 'status' | 'payment_method' | 'created_at'
->;
+> & {
+  customers: { full_name: string | null } | null;
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -90,7 +92,7 @@ export default async function DashboardPage() {
 
     supabase
       .from('orders')
-      .select('id, order_number, customer_id, total, status, payment_method, created_at')
+      .select('id, order_number, customer_id, total, status, payment_method, created_at, customers ( full_name )')
       .eq('merchant_id', merchant.id)
       .order('created_at', { ascending: false })
       .limit(5)
@@ -145,7 +147,7 @@ export default async function DashboardPage() {
                 <Banknote className="w-5 h-5 text-[#E8632A]" />
               </div>
             </div>
-            <div className="text-xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
+            <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
               {formatPrice(revenueToday)}
             </div>
             <div className="text-[12px] md:text-[13px] text-[#78716C] mt-1">
@@ -247,7 +249,9 @@ export default async function DashboardPage() {
                     <div className="w-[130px] text-sm font-medium text-[#1C1917]">
                       {order.order_number}
                     </div>
-                    <div className="w-[160px] text-sm text-[#1C1917]">—</div>
+                    <div className="w-[160px] text-sm text-[#1C1917]">
+                      {order.customers?.full_name ?? '—'}
+                    </div>
                     <div className="w-[130px] text-sm text-[#1C1917]">
                       {formatPrice(order.total)}
                     </div>
@@ -265,7 +269,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Store link card */}
-          <div className="md:w-[300px]">
+          <div className="md:w-[320px]">
             {/* Mobile banner */}
             <div className="md:hidden bg-[#FFF7ED] rounded-xl p-4 border-l-4 border-[#E8632A]">
               <div className="text-sm font-semibold text-[#1C1917] mb-1">

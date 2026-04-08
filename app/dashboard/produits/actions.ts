@@ -80,6 +80,19 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   redirect('/dashboard/produits');
 }
 
+export async function toggleProductVisibility(productId: string, isVisible: boolean): Promise<void> {
+  const merchantId = await getMerchantId();
+  const supabase = await createClient();
+
+  await supabase
+    .from('products')
+    .update({ is_visible: isVisible } as never)
+    .eq('id', productId)
+    .eq('merchant_id', merchantId);
+
+  revalidatePath('/dashboard/produits');
+}
+
 export async function deleteProduct(productId: string): Promise<void> {
   const merchantId = await getMerchantId();
   const supabase = await createClient();
