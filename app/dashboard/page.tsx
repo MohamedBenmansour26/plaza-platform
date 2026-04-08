@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Banknote, Clock, CheckCircle, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import { CopyButton } from './CopyButton';
+import { getOnboardingData } from '@/lib/db/onboarding';
+import { OnboardingChecklist, OnboardingChecklistSkeleton } from '@/components/onboarding/OnboardingChecklist';
 import type { Merchant, Order, OrderStatus, PaymentMethod } from '@/types/supabase';
 
 function formatPrice(centimes: number): string {
@@ -52,6 +55,8 @@ export default async function DashboardPage() {
     .maybeSingle<Pick<Merchant, 'id' | 'store_name' | 'store_slug'>>();
 
   if (!merchant) redirect('/onboarding');
+
+  const onboardingData = await getOnboardingData(user.id);
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -124,6 +129,13 @@ export default async function DashboardPage() {
           </h1>
           <p className="text-sm text-[#78716C] mt-1 capitalize">{formatDate()}</p>
         </div>
+
+        {/* Onboarding checklist — only shown when store is not yet live */}
+        {onboardingData !== null && !onboardingData.isOnline && (
+          <Suspense fallback={<OnboardingChecklistSkeleton />}>
+            <OnboardingChecklist data={onboardingData} />
+          </Suspense>
+        )}
 
         {/* Stats grid — 2 cols mobile, 4 cols desktop */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
