@@ -116,7 +116,7 @@ export function ProductForm({ product }: Props) {
                 : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
             }`}
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
+          <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
         </div>
         {(errors.price || priceError) && (
           <p className="text-xs text-[#DC2626] mt-1.5">{errors.price || t('formPriceMin')}</p>
@@ -239,7 +239,7 @@ export function ProductForm({ product }: Props) {
       <div className="bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
         <Link
           href="/dashboard/produits"
-          className="absolute left-4 p-2 -ml-2 text-[#1C1917]"
+          className="absolute start-4 p-2 -ms-2 text-[#1C1917]"
         >
           <ArrowLeft size={20} />
         </Link>
@@ -347,7 +347,7 @@ export function ProductForm({ product }: Props) {
       </div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
+      <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
         <button
           type="button"
           onClick={handleSubmit}

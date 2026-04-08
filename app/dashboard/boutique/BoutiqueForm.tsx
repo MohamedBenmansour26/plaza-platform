@@ -133,7 +133,7 @@ export function BoutiqueForm({ merchant }: Props) {
       }`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+        className={`absolute top-0.5 start-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
           checked ? 'translate-x-5' : 'translate-x-0'
         }`}
       />
@@ -553,7 +553,7 @@ export function BoutiqueForm({ merchant }: Props) {
         {statusSection}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
+      <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
         <button
           type="button"
           onClick={handleSave}

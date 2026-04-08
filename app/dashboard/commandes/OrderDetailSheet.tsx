@@ -218,7 +218,7 @@ export function OrderDetailSheet({ order, onClose }: Props) {
       />
 
       {/* Drawer panel */}
-      <div className="fixed right-0 top-0 h-screen w-full max-w-[560px] bg-white shadow-xl z-50 flex flex-col">
+      <div className="fixed end-0 top-0 h-screen w-full max-w-[560px] bg-white shadow-xl z-50 flex flex-col">
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
