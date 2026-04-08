@@ -38,7 +38,8 @@
     "validationError": "Veuillez remplir tous les champs.",
     "signUpSuccess": "Compte créé ! Vérifiez votre e-mail.",
     "signInError": "E-mail ou mot de passe incorrect.",
-    "signUpError": "Impossible de créer le compte. Réessayez."
+    "signUpError": "Impossible de créer le compte. Réessayez.",
+    "signUpEmailConfirmation": "Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter."
   },
   "onboarding": {
     "step1Title": "Votre boutique",
