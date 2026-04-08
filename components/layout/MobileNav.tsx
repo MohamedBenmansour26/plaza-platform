@@ -21,7 +21,7 @@ export function MobileNav() {
     exact ? pathname === href || pathname === `${href}/` : pathname.startsWith(href);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] h-16 flex items-center justify-around z-50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] h-16 flex items-center justify-around z-50 lg:hidden">
       {tabs.map((tab) => {
         const active = isActive(tab.href, tab.exact);
         const Icon = tab.icon;
