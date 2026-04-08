@@ -325,7 +325,17 @@
       "dispatched": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée"
-    }
+    },
+    "banner_pending": "Commande en attente de confirmation",
+    "banner_confirmed": "Commande confirmée — en préparation",
+    "banner_dispatched": "Commande expédiée — en route",
+    "banner_delivered": "Commande livrée",
+    "banner_cancelled": "Commande annulée",
+    "step_received": "Commande reçue",
+    "step_confirmed": "Confirmée",
+    "step_dispatched": "Expédiée",
+    "step_delivered": "Livrée",
+    "step_pending_confirmation": "En attente de confirmation"
   },
   "finances": {
     "title": "Finances",
