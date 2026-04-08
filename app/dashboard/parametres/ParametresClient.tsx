@@ -19,7 +19,7 @@ export function ParametresClient() {
   });
 
   const [selectedLanguage, setSelectedLanguage] = useState('fr');
-  const [twoFactor, setTwoFactor] = useState(false);
+  const [twoFactor, _setTwoFactor] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const notifItems: { id: NotifKey; label: string }[] = [
