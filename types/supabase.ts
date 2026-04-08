@@ -1,6 +1,6 @@
 // ============================================================
 // Plaza Platform — Supabase Database Types
-// Updated: 07 April 2026 — aligned to live schema (9-table migration)
+// Updated: 08 April 2026 — OTP auth columns + delivery_zones table (approved migrations)
 //
 // ⚠️  BREAKING CHANGES vs old PLZ-006 migration:
 //   - orders: removed customer_name/phone/address/total_amount/payment_status
@@ -57,6 +57,14 @@ export type Database = {
           is_online:                boolean
           delivery_free_threshold:  number | null
           created_at:               string
+          // OTP auth columns (migration 2026-04-08)
+          pin_hash:                 string | null
+          recovery_email:           string | null
+          otp_attempts:             number
+          locked_until:             string | null
+          phone:                    string | null
+          // Onboarding checklist columns (migration 2026-04-08)
+          city:                     string | null
         }
         Insert: {
           id?:                      string
@@ -71,6 +79,12 @@ export type Database = {
           is_online?:               boolean
           delivery_free_threshold?: number | null
           created_at?:              string
+          pin_hash?:                string | null
+          recovery_email?:          string | null
+          otp_attempts?:            number
+          locked_until?:            string | null
+          phone?:                   string | null
+          city?:                    string | null
         }
         Update: {
           id?:                      string
@@ -85,6 +99,12 @@ export type Database = {
           is_online?:               boolean
           delivery_free_threshold?: number | null
           created_at?:              string
+          pin_hash?:                string | null
+          recovery_email?:          string | null
+          otp_attempts?:            number
+          locked_until?:            string | null
+          phone?:                   string | null
+          city?:                    string | null
         }
         Relationships: [
           {
@@ -450,6 +470,40 @@ export type Database = {
         ]
       }
 
+      // ── Delivery Zones ─────────────────────────────────────────
+      delivery_zones: {
+        Row: {
+          id:           string
+          merchant_id:  string
+          zone_name:    string
+          delivery_fee: number
+          created_at:   string
+        }
+        Insert: {
+          id?:           string
+          merchant_id:   string
+          zone_name:     string
+          delivery_fee?: number
+          created_at?:   string
+        }
+        Update: {
+          id?:           string
+          merchant_id?:  string
+          zone_name?:    string
+          delivery_fee?: number
+          created_at?:   string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'delivery_zones_merchant_id_fkey'
+            columns: ['merchant_id']
+            isOneToOne: false
+            referencedRelation: 'merchants'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -477,6 +531,7 @@ export type Driver         = Database['public']['Tables']['drivers']['Row']
 export type Delivery       = Database['public']['Tables']['deliveries']['Row']
 export type SupportTicket  = Database['public']['Tables']['support_tickets']['Row']
 export type SupportMessage = Database['public']['Tables']['support_messages']['Row']
+export type DeliveryZone   = Database['public']['Tables']['delivery_zones']['Row']
 
 export type MerchantInsert      = Database['public']['Tables']['merchants']['Insert']
 export type ProductInsert       = Database['public']['Tables']['products']['Insert']
@@ -486,9 +541,11 @@ export type OrderItemInsert     = Database['public']['Tables']['order_items']['I
 export type DeliveryInsert      = Database['public']['Tables']['deliveries']['Insert']
 export type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert']
 export type SupportMessageInsert = Database['public']['Tables']['support_messages']['Insert']
+export type DeliveryZoneInsert   = Database['public']['Tables']['delivery_zones']['Insert']
 
 export type MerchantUpdate      = Database['public']['Tables']['merchants']['Update']
 export type ProductUpdate       = Database['public']['Tables']['products']['Update']
 export type OrderUpdate         = Database['public']['Tables']['orders']['Update']
 export type DeliveryUpdate      = Database['public']['Tables']['deliveries']['Update']
 export type SupportTicketUpdate = Database['public']['Tables']['support_tickets']['Update']
+export type DeliveryZoneUpdate  = Database['public']['Tables']['delivery_zones']['Update']
