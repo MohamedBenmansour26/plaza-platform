@@ -151,7 +151,11 @@ function ChatPanel({
 
       {/* Reply bar */}
       <div className="h-16 border-t border-[#E2E8F0] px-4 flex items-center gap-3 flex-shrink-0">
-        <button className="p-2 text-[#78716C] hover:text-[#2563EB] transition-colors">
+        <button
+          disabled
+          title={t('paperclip_tooltip')}
+          className="p-2 text-[#E2E8F0] opacity-50 cursor-not-allowed"
+        >
           <Paperclip className="w-5 h-5" />
         </button>
         <input
