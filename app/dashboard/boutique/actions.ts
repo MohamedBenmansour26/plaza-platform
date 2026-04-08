@@ -5,6 +5,63 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Merchant } from '@/types/supabase';
 
+// ─── Delivery Zone Actions ─────────────────────────────────────────────────────
+
+export async function addDeliveryZone(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
+
+  const { data: merchant } = await supabase
+    .from('merchants')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle<Pick<Merchant, 'id'>>();
+
+  if (!merchant) redirect('/onboarding');
+
+  const zoneName = (formData.get('zone_name') as string).trim();
+  const feeRaw = parseFloat(formData.get('delivery_fee') as string);
+  const deliveryFee = isNaN(feeRaw) ? 0 : Math.round(feeRaw * 100);
+
+  await supabase.from('delivery_zones').insert({
+    merchant_id: merchant.id,
+    zone_name: zoneName,
+    delivery_fee: deliveryFee,
+  } as never);
+
+  revalidatePath('/dashboard/boutique');
+  revalidatePath('/dashboard');
+}
+
+export async function deleteDeliveryZone(zoneId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
+
+  const { data: merchant } = await supabase
+    .from('merchants')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle<Pick<Merchant, 'id'>>();
+
+  if (!merchant) redirect('/onboarding');
+
+  // Only delete zones belonging to this merchant
+  await supabase
+    .from('delivery_zones')
+    .delete()
+    .eq('id', zoneId)
+    .eq('merchant_id', merchant.id);
+
+  revalidatePath('/dashboard/boutique');
+  revalidatePath('/dashboard');
+}
+
 export async function updateBoutique(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const {
@@ -27,6 +84,7 @@ export async function updateBoutique(formData: FormData): Promise<void> {
     .replace(/[^a-z0-9-]/g, '-');
   const description = (formData.get('description') as string | null)?.trim() || null;
   const category = (formData.get('category') as string | null) || null;
+  const city = (formData.get('city') as string | null)?.trim() || null;
   const logoUrl = (formData.get('logo_url') as string | null) || null;
   const bannerUrl = (formData.get('banner_url') as string | null) || null;
   const primaryColor = (formData.get('primary_color') as string) || '#2563EB';
@@ -43,6 +101,7 @@ export async function updateBoutique(formData: FormData): Promise<void> {
       store_slug: storeSlug,
       description,
       category,
+      city,
       logo_url: logoUrl,
       banner_url: bannerUrl,
       primary_color: primaryColor,
