@@ -144,6 +144,27 @@ Updated after every session._
 
 ---
 
+## UI Fix Batch — Part 1 — 08 April 2026
+
+**Source:** Antonio (Designer) — audit approved by Anas (Founder)
+**Notion page:** "Mehdi — UI Fixes — Part 1" (child of "UI Fix Prompts — Part 1")
+
+**9 fixes assigned:**
+- [M1] `components/layout/MobileNav.tsx` — Finances icon: TrendingUp → BarChart3
+- [M2] `components/layout/MobileNav.tsx` — Tab label: text-[10px] → text-xs
+- [M3] `app/dashboard/page.tsx` — Revenue stat card: text-xl → text-2xl on mobile
+- [M4] `app/dashboard/page.tsx` — Store card: md:w-[300px] → md:w-[320px]
+- [M5] `app/dashboard/page.tsx` — Activity table: add `customers(full_name)` to SELECT, update RecentOrder type, replace hardcoded "—" with `order.customers?.full_name ?? '—'`
+- [M6] `app/dashboard/produits/ProductsClient.tsx` — Filter chips: h-8 → h-10
+- [M7] `app/dashboard/produits/actions.ts` + `ProductsClient.tsx` — Add `toggleProductVisibility` server action; replace static visibility badge with inline toggle switch
+- [M8] `app/dashboard/produits/ProductsClient.tsx` — Wire existing `deleteProduct` action: add Trash2 icon + confirmation modal (action already in actions.ts)
+- [M9] `app/dashboard/parametres/ParametresClient.tsx` — 2FA toggle: add disabled state + "Bientôt disponible" label
+
+**Key note for M5:** Supabase returns the join as `customers` (table name), not `customer`. Type field is `customers: { full_name: string | null } | null`.
+**Key note for M7:** Use `useTransition` for toggle + delete. Pattern is identical to `dispatchOrderAction` in OrderDetailSheet.
+
+---
+
 ## Feedback received
 
 - **Hamza (PLZ-008 review):** Replace `as T | null` casts with `.maybeSingle<Pick<T, ...>>()`. Applied immediately.

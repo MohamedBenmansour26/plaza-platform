@@ -48,13 +48,14 @@ export function ParametresClient() {
     });
   }
 
-  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
+  const Toggle = ({ checked, onChange, disabled = false }: { checked: boolean; onChange: () => void; disabled?: boolean }) => (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
+      disabled={disabled}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
         checked ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
       }`}
     >
@@ -142,10 +143,16 @@ export function ParametresClient() {
               <ChevronRight className="w-4 h-4 text-[#78716C]" />
             </a>
             <div className="h-12 flex items-center justify-between px-1">
-              <span className="text-sm text-[#1C1917]">{t('twoFactor')}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#1C1917]">{t('twoFactor')}</span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FFF7ED] text-[#E8632A]">
+                  {t('twoFactorSoon')}
+                </span>
+              </div>
               <Toggle
                 checked={twoFactor}
-                onChange={() => setTwoFactor((v) => !v)}
+                onChange={() => {/* disabled — 2FA not yet available */}}
+                disabled
               />
             </div>
           </div>
