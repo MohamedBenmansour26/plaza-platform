@@ -309,7 +309,6 @@
     "securityTitle": "Sécurité",
     "changePassword": "Changer le mot de passe",
     "twoFactor": "Authentification à 2 facteurs",
-    "twoFactorSoon": "Bientôt disponible",
     "dangerZone": "Zone de danger",
     "deleteAccount": "Supprimer mon compte",
     "deleteAccountNote": "Cette action supprimera toutes vos données de façon définitive.",
@@ -325,7 +324,17 @@
       "dispatched": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée"
-    }
+    },
+    "banner_pending": "Commande en attente de confirmation",
+    "banner_confirmed": "Commande confirmée — en préparation",
+    "banner_dispatched": "Commande expédiée — en route",
+    "banner_delivered": "Commande livrée",
+    "banner_cancelled": "Commande annulée",
+    "step_received": "Commande reçue",
+    "step_confirmed": "Confirmée",
+    "step_dispatched": "Expédiée",
+    "step_delivered": "Livrée",
+    "step_pending_confirmation": "En attente de confirmation"
   },
   "finances": {
     "title": "Finances",
@@ -384,6 +393,7 @@
     "category_order_issue": "Problème de commande",
     "category_payment_issue": "Problème de paiement",
     "category_technical": "Bug / problème technique",
-    "category_other": "Autre"
+    "category_other": "Autre",
+    "paperclip_tooltip": "Pièces jointes — bientôt disponible"
   }
 }
