@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { BarChart3 as BarChart3Icon } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -141,7 +142,7 @@ export function FinancesClient({ metrics, period }: Props) {
       {isEmpty ? (
         /* ── Empty state ─────────────────────────────────────────────────── */
         <div className="bg-white rounded-xl shadow-sm py-20 text-center">
-          <div className="text-4xl mb-4">📊</div>
+          <BarChart3Icon className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
           <h3 className="text-base font-semibold text-[#1C1917] mb-2">
             {t('empty_title')}
           </h3>
