@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { checkPhoneAction } from './actions';
 
 function formatPhoneDisplay(value: string): string {
   if (!value) return '';
@@ -30,7 +31,7 @@ export default function PhoneEntryPage() {
     }
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!validatePhone(phone)) {
       setError(true);
       return;
@@ -41,24 +42,36 @@ export default function PhoneEntryPage() {
     const fullPhone = `+212${phone}`;
     // TODO: [SMS stub — implement real OTP send via SMS provider]
 
-    // Navigate to OTP page with phone in search params
-    const params = new URLSearchParams({ phone: fullPhone });
-    router.push(`/auth/otp?${params.toString()}`);
+    // Check if phone is already registered → returning user goes to PIN login,
+    // new user goes through OTP → PIN setup flow.
+    try {
+      const { exists, merchantName } = await checkPhoneAction(fullPhone);
+      const params = new URLSearchParams({ phone: fullPhone });
+      if (exists) {
+        if (merchantName) params.set('name', merchantName);
+        router.push(`/auth/pin-login?${params.toString()}`);
+      } else {
+        router.push(`/auth/otp?${params.toString()}`);
+      }
+    } catch {
+      setLoading(false);
+      setError(true);
+    }
   }
 
   const isValid = validatePhone(phone);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
-      <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+    <main className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
+      <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-lg p-8">
         {/* Logo area */}
-        <div className="flex-[0.3] flex flex-col items-center justify-center pt-12 md:pt-0">
+        <div className="flex flex-col items-center justify-center pb-8">
           <div className="text-[28px] font-bold text-[#2563EB]">{t('logo')}</div>
           <div className="text-sm text-[#78716C] text-center mt-2">{t('tagline')}</div>
         </div>
 
         {/* Phone input */}
-        <div className="flex-[0.4] px-4 mt-8">
+        <div className="mt-2">
           <label className="block text-[13px] font-medium text-[#78716C] mb-2">
             {t('phoneLabel')}
           </label>
@@ -87,7 +100,7 @@ export default function PhoneEntryPage() {
         </div>
 
         {/* CTA */}
-        <div className="flex-[0.3] px-4 pb-8 flex flex-col justify-end">
+        <div className="mt-8">
           <button
             onClick={handleSubmit}
             disabled={!isValid || loading}
@@ -104,6 +117,6 @@ export default function PhoneEntryPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
