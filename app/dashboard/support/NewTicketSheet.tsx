@@ -53,7 +53,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed right-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-50 flex flex-col">
+      <div className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-50 flex flex-col">
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
@@ -137,7 +137,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   rows={5}
                   className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                 />
-                <div className="text-xs text-[#A8A29E] text-right mt-1">
+                <div className="text-xs text-[#A8A29E] text-end mt-1">
                   {description.length}/{MAX_DESC}
                 </div>
               </div>
