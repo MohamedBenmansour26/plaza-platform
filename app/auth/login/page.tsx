@@ -39,8 +39,7 @@ export default function PhoneEntryPage() {
     // Strip leading 0, prepend country code: e.g. 0612345678 → +212612345678
     // phone already starts with 6 (9 digits), so full number is +212 + phone
     const fullPhone = `+212${phone}`;
-    // DEV stub — real SMS integration pending
-    console.log('[DEV] Sending OTP to', fullPhone);
+    // TODO: [SMS stub — implement real OTP send via SMS provider]
 
     // Navigate to OTP page with phone in search params
     const params = new URLSearchParams({ phone: fullPhone });

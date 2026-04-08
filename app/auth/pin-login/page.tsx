@@ -21,7 +21,7 @@ function PINLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const merchantName = searchParams.get('name') ?? 'Marchand';
+  const merchantName = searchParams.get('name') ?? t('defaultStoreName');
   const phoneNumber = searchParams.get('phone') ?? '';
 
   const [pin, setPin] = useState('');
@@ -32,8 +32,7 @@ function PINLoginContent() {
   useEffect(() => {
     if (pin.length === 4) {
       const timer = setTimeout(() => {
-        // DEV stub — PIN verification is server-side
-        console.log('[DEV] Verifying PIN for', phoneNumber);
+        // TODO: [PIN stub — implement real PIN verification server-side]
         // Hardcoded PIN for dev: 1234
         const isCorrect = pin === '1234';
         if (isCorrect) {
@@ -134,6 +133,7 @@ function PINLoginContent() {
             >
               0
             </button>
+            {/* TODO PLZ-033: migrate to i18n */}
             <button
               onClick={handleBackspace}
               disabled={isLocked}

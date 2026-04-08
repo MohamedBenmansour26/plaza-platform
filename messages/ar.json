@@ -72,6 +72,7 @@
     },
     "login": {
       "logo": "Plaza",
+      "defaultStoreName": "متجري",
       "pinLabel": "أدخل رمز PIN",
       "pinError": "رمز PIN غير صحيح. {attempts} محاولة(ات) متبقية.",
       "locked": "الحساب مقفل. استخدم خيار نسيت PIN.",

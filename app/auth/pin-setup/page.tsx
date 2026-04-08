@@ -31,8 +31,7 @@ export default function PINSetupPage() {
   useEffect(() => {
     if (confirmPin.length === 4) {
       if (pin === confirmPin) {
-        // PIN hashing is server-side — stub here
-        console.log('[DEV] PIN setup complete — pin hash should be sent to server');
+        // TODO: [PIN stub — send bcrypt PIN hash to server for storage]
         setTimeout(() => router.push('/dashboard'), 500);
       } else {
         setError(true);
@@ -75,6 +74,7 @@ export default function PINSetupPage() {
       <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 md:pt-0">
+          {/* TODO PLZ-033: migrate to i18n */}
           <button
             onClick={handleBack}
             className={`w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors ${
@@ -136,6 +136,7 @@ export default function PINSetupPage() {
             >
               0
             </button>
+            {/* TODO PLZ-033: migrate to i18n */}
             <button
               onClick={handleBackspace}
               className="h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all"

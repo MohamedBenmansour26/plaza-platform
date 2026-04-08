@@ -72,6 +72,7 @@
     },
     "login": {
       "logo": "Plaza",
+      "defaultStoreName": "Ma boutique",
       "pinLabel": "ENTREZ VOTRE CODE PIN",
       "pinError": "PIN incorrect. {attempts} tentative(s) restante(s).",
       "locked": "Compte verrouillé. Utilisez PIN oublié.",

@@ -12,8 +12,7 @@ function ForgotPINContent() {
   const phone = searchParams.get('phone') ?? '';
 
   function handleSendOTP() {
-    // DEV stub — real OTP sending pending
-    console.log('[DEV] Sending recovery OTP to', phone);
+    // TODO: [SMS stub — implement real recovery OTP send via SMS provider]
     const params = new URLSearchParams({ phone, mode: 'reset' });
     router.push(`/auth/otp?${params.toString()}`);
   }
@@ -21,6 +20,7 @@ function ForgotPINContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
       <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+        {/* TODO PLZ-033: migrate to i18n */}
         <button
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"

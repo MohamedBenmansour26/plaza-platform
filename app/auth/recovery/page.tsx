@@ -22,8 +22,7 @@ export default function PhoneRecoveryPage() {
       setTimeout(() => setError(false), 3000);
       return;
     }
-    // DEV stub — real recovery email lookup pending
-    console.log('[DEV] Recovery email requested for', email);
+    // TODO: [Recovery stub — implement real recovery email lookup]
     setIsSuccess(true);
   }
 
@@ -31,6 +30,7 @@ export default function PhoneRecoveryPage() {
     return (
       <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
         <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+          {/* TODO PLZ-033: migrate to i18n */}
           <button
             onClick={() => router.back()}
             className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"
@@ -71,6 +71,7 @@ export default function PhoneRecoveryPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
       <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+        {/* TODO PLZ-033: migrate to i18n */}
         <button
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"

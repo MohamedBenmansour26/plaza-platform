@@ -30,8 +30,7 @@ function OTPContent() {
   useEffect(() => {
     if (otp.every((digit) => digit !== '') && !isChecking) {
       setIsChecking(true);
-      // DEV stub — OTP hardcoded to 123456 for testing
-      console.log('[DEV] Verifying OTP for', phone, ':', otp.join(''));
+      // TODO: [OTP stub — implement real verification via SMS provider]
       setTimeout(() => {
         const isCorrect = otp.join('') === '123456';
         if (isCorrect) {
@@ -88,8 +87,7 @@ function OTPContent() {
       setCountdown(60);
       setOtp(['', '', '', '', '', '']);
       setError(false);
-      // DEV stub
-      console.log('[DEV] Resending OTP to', phone);
+      // TODO: [SMS stub — implement real OTP resend via SMS provider]
       inputRefs.current[0]?.focus();
     }
   }
@@ -103,6 +101,7 @@ function OTPContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
       <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+        {/* TODO PLZ-033: migrate to i18n */}
         <button
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"

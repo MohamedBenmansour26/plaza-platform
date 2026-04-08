@@ -17,15 +17,13 @@
 -- ============================================================
 
 -- Add OTP/PIN auth columns to merchants table
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS phone text UNIQUE;
+
 ALTER TABLE merchants
   ADD COLUMN IF NOT EXISTS pin_hash          text,
   ADD COLUMN IF NOT EXISTS recovery_email    text,
   ADD COLUMN IF NOT EXISTS otp_attempts      integer DEFAULT 0 NOT NULL,
   ADD COLUMN IF NOT EXISTS locked_until      timestamptz;
-
--- Index for fast lookup by phone (for OTP flow)
--- Note: phone column must exist on merchants. If not yet added, add it:
--- ALTER TABLE merchants ADD COLUMN IF NOT EXISTS phone text UNIQUE;
 
 -- Column comments
 COMMENT ON COLUMN merchants.pin_hash IS
