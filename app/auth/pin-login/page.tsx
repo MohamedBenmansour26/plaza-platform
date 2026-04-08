@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Delete } from 'lucide-react';
+import { verifyPinLoginAction } from './actions';
 
 const NUMPAD = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
@@ -28,23 +29,23 @@ function PINLoginContent() {
   const [attempts, setAttempts] = useState(3);
   const [error, setError] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (pin.length === 4) {
-      const timer = setTimeout(() => {
-        // TODO: [PIN stub — implement real PIN verification server-side]
-        // Hardcoded PIN for dev: 1234
-        const isCorrect = pin === '1234';
-        if (isCorrect) {
-          router.push('/dashboard');
-        } else {
+    if (pin.length === 4 && !isSubmitting) {
+      setIsSubmitting(true);
+      const timer = setTimeout(async () => {
+        const result = await verifyPinLoginAction({ phone: phoneNumber, pin });
+        if (result?.error) {
           const newAttempts = attempts - 1;
           setAttempts(newAttempts);
           setError(true);
           setPin('');
+          setIsSubmitting(false);
           if (newAttempts === 0) setIsLocked(true);
           setTimeout(() => setError(false), 3000);
         }
+        // On success verifyPinLoginAction redirects to /dashboard — no client code needed.
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -52,34 +53,32 @@ function PINLoginContent() {
   }, [pin]);
 
   function handleNumberPress(num: string) {
-    if (!isLocked && pin.length < 4) setPin(pin + num);
+    if (!isLocked && !isSubmitting && pin.length < 4) setPin(pin + num);
   }
 
   function handleBackspace() {
-    if (!isLocked) setPin(pin.slice(0, -1));
+    if (!isLocked && !isSubmitting) setPin(pin.slice(0, -1));
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col md:items-center md:justify-center md:bg-[#FAFAF9]">
-      <div className="flex-1 flex flex-col md:flex-none md:w-full md:max-w-[420px] md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
+    <main className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
+      <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-lg p-8">
         {/* Logo */}
-        <div className="pt-16 px-4">
+        <div className="pb-6">
           <div className="text-[28px] font-bold text-[#2563EB] text-center">{t('logo')}</div>
         </div>
 
         {/* Merchant card */}
-        <div className="px-4 mt-8">
-          <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col items-center">
-            <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center">
-              <span className="text-xl font-semibold text-[#2563EB]">{getInitials(merchantName)}</span>
-            </div>
-            <div className="text-lg font-semibold text-[#1C1917] mt-2">{merchantName}</div>
-            <div className="text-[13px] text-[#78716C]">{phoneNumber}</div>
+        <div className="bg-[#FAFAF9] rounded-2xl p-4 flex flex-col items-center">
+          <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center">
+            <span className="text-xl font-semibold text-[#2563EB]">{getInitials(merchantName)}</span>
           </div>
+          <div className="text-lg font-semibold text-[#1C1917] mt-2">{merchantName}</div>
+          <div className="text-[13px] text-[#78716C]">{phoneNumber}</div>
         </div>
 
         {/* PIN input */}
-        <div className="flex-1 px-4 mt-8">
+        <div className="mt-8">
           <div className="text-xs text-[#78716C] uppercase tracking-wide text-center">{t('pinLabel')}</div>
 
           <div className="flex justify-center gap-4 mt-6">
@@ -115,9 +114,9 @@ function PINLoginContent() {
               <button
                 key={num}
                 onClick={() => handleNumberPress(num.toString())}
-                disabled={isLocked}
+                disabled={isLocked || isSubmitting}
                 className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
-                  isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                  isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 {num}
@@ -126,9 +125,9 @@ function PINLoginContent() {
             <div />
             <button
               onClick={() => handleNumberPress('0')}
-              disabled={isLocked}
+              disabled={isLocked || isSubmitting}
               className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
-                isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               0
@@ -136,9 +135,9 @@ function PINLoginContent() {
             {/* TODO PLZ-033: migrate to i18n */}
             <button
               onClick={handleBackspace}
-              disabled={isLocked}
+              disabled={isLocked || isSubmitting}
               className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all ${
-                isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               aria-label="Effacer"
             >
@@ -154,7 +153,7 @@ function PINLoginContent() {
           </button>
         </div>
 
-        <div className="pb-8 text-center">
+        <div className="pt-8 text-center">
           <button
             onClick={() => router.push('/auth/login')}
             className="text-xs text-[#A8A29E]"
@@ -163,7 +162,7 @@ function PINLoginContent() {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
