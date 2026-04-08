@@ -133,7 +133,37 @@
     "uploadError": "Erreur lors de l'envoi",
     "next": "Suivant",
     "finish": "Lancer ma boutique",
-    "error": "Une erreur est survenue. Veuillez réessayer."
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "checklist_title": "Lancez votre boutique",
+    "checklist_subtitle": "Complétez ces étapes pour mettre votre boutique en ligne",
+    "checklist_progress": "{done}/{total} étapes complétées",
+    "checklist_progress_done": "Félicitations !",
+    "step_identity": "Identité vérifiée",
+    "step_identity_desc": "Compte vérifié par OTP",
+    "step_store_name": "Nom de la boutique",
+    "step_store_name_desc": "Nom de votre boutique défini",
+    "step_address": "Adresse et ville",
+    "step_address_desc": "Ville de livraison configurée",
+    "step_address_cta": "Configurer",
+    "step_delivery_zone": "Zone de livraison",
+    "step_delivery_desc": "Zone de livraison configurée",
+    "step_delivery_cta": "Configurer",
+    "step_product": "Au moins 1 produit publié",
+    "step_product_desc": "Au moins un produit visible",
+    "step_product_cta": "Ajouter",
+    "step_logo": "Logo de la boutique",
+    "step_logo_desc": "Logo ajouté à votre boutique",
+    "step_logo_cta": "Ajouter",
+    "step_share": "Partager votre lien",
+    "step_share_desc": "Lien partagé avec vos clients",
+    "step_share_cta": "Copier le lien",
+    "publish_cta": "Publier ma boutique",
+    "publishing": "Publication…",
+    "published_title": "Votre boutique est en ligne !",
+    "published_subtitle": "Partagez votre lien avec vos premiers clients.",
+    "published_share_cta": "Partager le lien",
+    "live_banner": "Votre boutique est en ligne",
+    "live_banner_sub": "Continuez à ajouter des produits pour attirer plus de clients."
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -389,7 +419,17 @@
       "dispatched": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée"
-    }
+    },
+    "banner_pending": "Commande en attente de confirmation",
+    "banner_confirmed": "Commande confirmée — en préparation",
+    "banner_dispatched": "Commande expédiée — en route",
+    "banner_delivered": "Commande livrée",
+    "banner_cancelled": "Commande annulée",
+    "step_received": "Commande reçue",
+    "step_confirmed": "Confirmée",
+    "step_dispatched": "Expédiée",
+    "step_delivered": "Livrée",
+    "step_pending_confirmation": "En attente de confirmation"
   },
   "finances": {
     "title": "Finances",
@@ -448,6 +488,7 @@
     "category_order_issue": "Problème de commande",
     "category_payment_issue": "Problème de paiement",
     "category_technical": "Bug / problème technique",
-    "category_other": "Autre"
+    "category_other": "Autre",
+    "paperclip_tooltip": "Pièces jointes — bientôt disponible"
   }
 }
