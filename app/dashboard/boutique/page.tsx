@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Merchant } from '@/types/supabase';
+import type { Merchant, DeliveryZone } from '@/types/supabase';
 import { BoutiqueForm } from './BoutiqueForm';
 
 export default async function BoutiquePage() {
@@ -18,5 +18,12 @@ export default async function BoutiquePage() {
 
   if (!merchant) redirect('/onboarding');
 
-  return <BoutiqueForm merchant={merchant} />;
+  const { data: deliveryZones } = await supabase
+    .from('delivery_zones')
+    .select('*')
+    .eq('merchant_id', merchant.id)
+    .order('created_at', { ascending: true })
+    .returns<DeliveryZone[]>();
+
+  return <BoutiqueForm merchant={merchant} deliveryZones={deliveryZones ?? []} />;
 }
