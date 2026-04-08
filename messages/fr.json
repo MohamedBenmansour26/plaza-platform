@@ -39,7 +39,66 @@
     "signUpSuccess": "Compte créé ! Vérifiez votre e-mail.",
     "signInError": "E-mail ou mot de passe incorrect.",
     "signUpError": "Impossible de créer le compte. Réessayez.",
-    "signUpEmailConfirmation": "Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter."
+    "signUpEmailConfirmation": "Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter.",
+    "welcome": {
+      "logo": "Plaza",
+      "tagline": "Votre boutique en ligne, en 5 minutes.",
+      "phoneLabel": "Votre numéro de téléphone",
+      "phonePlaceholder": "6 XX XX XX XX",
+      "phoneHint": "Nous enverrons un code de vérification par SMS",
+      "phoneError": "Numéro invalide. Format: 6XX XX XX XX",
+      "continue": "Continuer",
+      "terms": "En continuant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité."
+    },
+    "otp": {
+      "title": "Vérifiez votre numéro",
+      "subtitle": "Code envoyé par SMS au",
+      "checking": "Vérification...",
+      "success": "Code vérifié !",
+      "error": "Code incorrect. {attempts} tentative(s) restante(s).",
+      "locked": "Trop de tentatives. Réessayez dans 24h.",
+      "resendCountdown": "Renvoyer le code dans {time}",
+      "resend": "Renvoyer le code",
+      "wrongNumber": "Mauvais numéro ?"
+    },
+    "pin": {
+      "secureLabel": "SÉCURISEZ VOTRE COMPTE",
+      "createTitle": "Créez votre code PIN",
+      "confirmTitle": "Confirmez votre code PIN",
+      "subtitle": "Vous l'utiliserez pour vous connecter chaque jour",
+      "mismatch": "Les codes ne correspondent pas. Réessayez.",
+      "biometricLabel": "Activer Face ID / empreinte digitale",
+      "biometricSoon": "Bientôt disponible"
+    },
+    "login": {
+      "logo": "Plaza",
+      "pinLabel": "ENTREZ VOTRE CODE PIN",
+      "pinError": "PIN incorrect. {attempts} tentative(s) restante(s).",
+      "locked": "Compte verrouillé. Utilisez PIN oublié.",
+      "forgotPin": "PIN oublié ?",
+      "switchAccount": "Changer de compte"
+    },
+    "forgotPin": {
+      "title": "PIN oublié ?",
+      "subtitle": "Nous allons vérifier votre identité via SMS avant de réinitialiser votre PIN.",
+      "phoneNote": "Un code vous sera envoyé à ce numéro.",
+      "sendSms": "Envoyer un code SMS",
+      "wrongNumber": "Ce n'est pas votre numéro ?"
+    },
+    "recovery": {
+      "title": "Récupérez votre accès",
+      "subtitle": "Entrez l'email de récupération que vous avez fourni à l'inscription.",
+      "emailLabel": "Email de récupération",
+      "emailPlaceholder": "votre@email.com",
+      "emailError": "Email non reconnu. Vérifiez l'adresse ou contactez le support.",
+      "submit": "Recevoir le lien de récupération",
+      "noEmailNote": "Vous n'avez pas configuré d'email de récupération ?",
+      "contactSupport": "Contacter le support",
+      "successTitle": "Email envoyé !",
+      "successSubtitle": "Vérifiez votre boîte mail. Le lien vous permettra de changer votre numéro de téléphone.",
+      "successExpiry": "Le lien expire dans 15 minutes.",
+      "resend": "Renvoyer l'email"
+    }
   },
   "onboarding": {
     "step1Title": "Votre boutique",

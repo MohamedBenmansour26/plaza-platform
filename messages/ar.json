@@ -39,7 +39,66 @@
     "signUpSuccess": "تم إنشاء الحساب! تحقق من بريدك الإلكتروني.",
     "signInError": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "signUpError": "تعذر إنشاء الحساب. حاول مجدداً.",
-    "signUpEmailConfirmation": "تحقق من بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول."
+    "signUpEmailConfirmation": "تحقق من بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.",
+    "welcome": {
+      "logo": "Plaza",
+      "tagline": "متجرك الإلكتروني في 5 دقائق.",
+      "phoneLabel": "رقم هاتفك",
+      "phonePlaceholder": "6 XX XX XX XX",
+      "phoneHint": "سنرسل لك رمز التحقق عبر SMS",
+      "phoneError": "رقم غير صالح. الصيغة: 6XX XX XX XX",
+      "continue": "متابعة",
+      "terms": "بالمتابعة، أنت توافق على شروط الاستخدام وسياسة الخصوصية."
+    },
+    "otp": {
+      "title": "تحقق من رقمك",
+      "subtitle": "تم إرسال الرمز عبر SMS إلى",
+      "checking": "جارٍ التحقق...",
+      "success": "تم التحقق من الرمز!",
+      "error": "رمز غير صحيح. {attempts} محاولة(ات) متبقية.",
+      "locked": "محاولات كثيرة جداً. أعد المحاولة خلال 24 ساعة.",
+      "resendCountdown": "إعادة إرسال الرمز خلال {time}",
+      "resend": "إعادة إرسال الرمز",
+      "wrongNumber": "رقم خاطئ؟"
+    },
+    "pin": {
+      "secureLabel": "أمّن حسابك",
+      "createTitle": "أنشئ رمز PIN",
+      "confirmTitle": "أكّد رمز PIN",
+      "subtitle": "ستستخدمه لتسجيل الدخول يومياً",
+      "mismatch": "الرمزان لا يتطابقان. حاول مجدداً.",
+      "biometricLabel": "تفعيل Face ID / بصمة الإصبع",
+      "biometricSoon": "قريباً"
+    },
+    "login": {
+      "logo": "Plaza",
+      "pinLabel": "أدخل رمز PIN",
+      "pinError": "رمز PIN غير صحيح. {attempts} محاولة(ات) متبقية.",
+      "locked": "الحساب مقفل. استخدم خيار نسيت PIN.",
+      "forgotPin": "نسيت PIN؟",
+      "switchAccount": "تغيير الحساب"
+    },
+    "forgotPin": {
+      "title": "نسيت PIN؟",
+      "subtitle": "سنتحقق من هويتك عبر SMS قبل إعادة تعيين رمز PIN.",
+      "phoneNote": "سيُرسَل رمز إلى هذا الرقم.",
+      "sendSms": "إرسال رمز SMS",
+      "wrongNumber": "ليس رقمك؟"
+    },
+    "recovery": {
+      "title": "استعادة وصولك",
+      "subtitle": "أدخل بريد الاسترداد الذي قدمته عند التسجيل.",
+      "emailLabel": "بريد الاسترداد",
+      "emailPlaceholder": "بريدك@الإلكتروني.com",
+      "emailError": "البريد غير معروف. تحقق من العنوان أو تواصل مع الدعم.",
+      "submit": "استلام رابط الاسترداد",
+      "noEmailNote": "لم تُعدّ بريد استرداد؟",
+      "contactSupport": "تواصل مع الدعم",
+      "successTitle": "تم إرسال البريد!",
+      "successSubtitle": "تحقق من صندوق البريد. سيتيح الرابط تغيير رقم هاتفك.",
+      "successExpiry": "الرابط صالح لمدة 15 دقيقة.",
+      "resend": "إعادة إرسال البريد"
+    }
   },
   "onboarding": {
     "step1Title": "متجرك",
