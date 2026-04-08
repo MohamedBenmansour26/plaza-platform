@@ -12,8 +12,9 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import type { Merchant } from '@/types/supabase';
+import type { Merchant, DeliveryZone } from '@/types/supabase';
 import { updateBoutique } from './actions';
+import { DeliveryZones } from './DeliveryZones';
 
 const COLOR_OPTIONS = [
   { value: '#2563EB', name: 'Bleu' },
@@ -34,9 +35,9 @@ const CATEGORY_KEYS = [
   'other',
 ] as const;
 
-type Props = { merchant: Merchant };
+type Props = { merchant: Merchant; deliveryZones: DeliveryZone[] };
 
-export function BoutiqueForm({ merchant }: Props) {
+export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   const t = useTranslations('boutique');
   const [isPending, startTransition] = useTransition();
 
@@ -45,6 +46,7 @@ export function BoutiqueForm({ merchant }: Props) {
   const [storeSlug, setStoreSlug] = useState(merchant.store_slug);
   const [description, setDescription] = useState(merchant.description ?? '');
   const [category, setCategory] = useState(merchant.category ?? 'fashion');
+  const [city, setCity] = useState(merchant.city ?? '');
 
   // Appearance
   const [logoUrl, setLogoUrl] = useState(merchant.logo_url ?? '');
@@ -96,6 +98,7 @@ export function BoutiqueForm({ merchant }: Props) {
     fd.set('store_slug', storeSlug);
     fd.set('description', description);
     fd.set('category', category);
+    fd.set('city', city);
     fd.set('logo_url', logoUrl);
     fd.set('banner_url', bannerUrl);
     fd.set('primary_color', primaryColor);
@@ -191,6 +194,16 @@ export function BoutiqueForm({ merchant }: Props) {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">{t('city')}</label>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder={t('cityPlaceholder')}
+            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+          />
         </div>
       </div>
     </div>
@@ -550,6 +563,7 @@ export function BoutiqueForm({ merchant }: Props) {
         {identitySection}
         {appearanceSection}
         {deliverySection}
+        <DeliveryZones initialZones={deliveryZones} />
         {statusSection}
       </div>
 
@@ -589,6 +603,7 @@ export function BoutiqueForm({ merchant }: Props) {
             {identitySection}
             {appearanceSection}
             {deliverySection}
+            <DeliveryZones initialZones={deliveryZones} />
             {statusSection}
 
             <div className="pt-2">
