@@ -100,19 +100,7 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-      /* 8px base grid */
-      spacing: {
-        '1': '8px',
-        '2': '16px',
-        '3': '24px',
-        '4': '32px',
-        '5': '40px',
-        '6': '48px',
-        '8': '64px',
-        '10': '80px',
-        '12': '96px',
-        '16': '128px',
-      },
+
     },
   },
   plugins: [],
