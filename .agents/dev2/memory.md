@@ -22,3 +22,29 @@ values, CSS class strings) may stay at module level.
 **Root cause bug (BUG-013/014/015/016):** FinancesClient, NewTicketSheet,
 SupportClient, TicketDetailClient were all shipped with module-level arrays.
 Fixed 2026-04-08 by moving all arrays inside components after `t = useTranslations()`.
+
+---
+
+### RTL: NEVER use directional Tailwind classes — always use logical properties
+
+NEVER use physical/directional positioning or spacing utilities. Arabic (RTL) layout
+breaks whenever left/right is hardcoded.
+
+| ❌ Directional (broken in RTL) | ✅ Logical (works in both LTR + RTL) |
+|-------------------------------|--------------------------------------|
+| `left-*`                      | `start-*`                            |
+| `right-*`                     | `end-*`                              |
+| `pl-*`                        | `ps-*`                               |
+| `pr-*`                        | `pe-*`                               |
+| `ml-*`                        | `ms-*`                               |
+| `mr-*`                        | `me-*`                               |
+| `text-left`                   | `text-start`                         |
+| `text-right`                  | `text-end`                           |
+| `border-l-*`                  | `border-s-*`                         |
+| `border-r-*`                  | `border-e-*`                         |
+| `rounded-l-*`                 | `rounded-s-*`                        |
+| `rounded-r-*`                 | `rounded-e-*`                        |
+
+**Root cause bug (BUG-018):** ProductsClient (`absolute left-3`, `pl-10 pr-4`),
+OrderDetailSheet (`fixed right-0`), NewTicketSheet (`fixed right-0`, `text-right`)
+shipped with directional classes. Fixed 2026-04-08.
