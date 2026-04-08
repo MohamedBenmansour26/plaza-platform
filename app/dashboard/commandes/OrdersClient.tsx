@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { PackageOpen } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import { OrderDetailSheet } from './OrderDetailSheet';
@@ -69,7 +70,7 @@ export function OrdersClient({ orders }: Props) {
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeFilter === f.id
                   ? 'bg-[#2563EB] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
@@ -127,7 +128,7 @@ export function OrdersClient({ orders }: Props) {
           {/* Empty state */}
           {filtered.length === 0 && (
             <div className="py-16 text-center">
-              <div className="text-4xl mb-4">📦</div>
+              <PackageOpen className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
               <h3 className="text-base font-semibold text-[#1C1917] mb-2">Aucune commande</h3>
               <p className="text-sm text-[#78716C]">Il n&apos;y a pas de commandes dans cette catégorie.</p>
             </div>
@@ -147,11 +148,11 @@ export function OrdersClient({ orders }: Props) {
                   <span className="font-bold text-[#1C1917] text-sm">
                     {order.order_number}
                   </span>
-                  <span className="text-sm text-[#78716C] ml-2">
+                  <span className="text-sm text-[#78716C] ms-2">
                     {order.customer?.full_name ?? '—'}
                   </span>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <div className="text-sm font-semibold text-[#1C1917]">
                     {formatMAD(order.total)}
                   </div>
@@ -169,7 +170,7 @@ export function OrdersClient({ orders }: Props) {
 
           {filtered.length === 0 && (
             <div className="py-16 text-center">
-              <div className="text-4xl mb-4">📦</div>
+              <PackageOpen className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
               <h3 className="text-base font-semibold text-[#1C1917] mb-2">Aucune commande</h3>
               <p className="text-sm text-[#78716C]">Il n&apos;y a pas de commandes dans cette catégorie.</p>
             </div>

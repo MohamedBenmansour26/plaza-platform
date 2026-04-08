@@ -1,0 +1,414 @@
+Create a fully clickable mobile prototype (375px) for Plaza — 
+the delivery driver app. Drivers are Moroccan delivery agents 
+who receive orders, pick them up from merchants, and deliver 
+to customers. All text in French. Use Inter font.
+
+This is a mobile-only app (375px). No desktop version needed.
+Drivers use their phone exclusively.
+
+Design system:
+  Primary: #2563EB | Accent: #E8632A | Success: #16A34A
+  Error: #DC2626 | Warning: #D97706 | Dark: #1C1917
+  Mid: #78716C | Surface: #FAFAF9 | Card: #FFFFFF
+  Radius: 8px standard, 12px cards, 9999px badges
+  Spacing: 8px grid | Font: Inter
+
+Navigation: bottom tab bar (3 tabs, always visible):
+  Livraisons (truck icon) | Historique (clock icon) | Profil (user icon)
+  Active: #2563EB icon + label. Inactive: #78716C.
+
+---
+
+SCREEN 1 — Connexion (Login)
+Route: /driver/login
+
+Full screen, #FAFAF9 bg.
+Top: Plaza logo (centered, 40px, margin-top 64px)
+Below logo: "Espace Livreur" (20px semibold #1C1917, centered, mt 8px)
+Subtext: "Connectez-vous pour voir vos livraisons" (14px #78716C, centered)
+
+Form card (white, 12px radius, shadow, 24px padding, mx 24px, mt 40px):
+  "Numero de telephone" label (13px medium)
+  Phone input (48px, prefix "+212" in gray left inside input, 
+    placeholder "06 XX XX XX XX", number keyboard)
+  "Mot de passe" label (13px medium, mt 16px)
+  Password input (48px, eye toggle right)
+  "Mot de passe oublie ?" link (13px #2563EB, right-aligned, mt 8px)
+
+"Se connecter" CTA (full width, 48px, #2563EB, radius 8px, mt 24px)
+Loading state: spinner inside button
+
+Error state (below button):
+  Red banner (radius 8px, #FEF2F2 bg, #DC2626 text):
+  "Identifiants incorrects. Veuillez reessayer."
+
+---
+
+SCREEN 2 — Livraisons (Active Deliveries)
+Route: /driver/livraisons
+
+Top bar (white, 56px, shadow):
+  Left: "Bonjour, Youssef" (16px semibold #1C1917)
+  Right: availability toggle — pill shape (9999px):
+    ON state: #16A34A bg "Disponible" white text
+    OFF state: #78716C bg "Indisponible" white text
+  Toggle tap → Screen 2b (availability change confirmation)
+
+Status summary row (mx 16px, mt 12px, flex gap 8px):
+  2 pills (white, border 1px #E2E8F0, 9999px radius, px 12px py 6px):
+    "3 en cours" (13px, #E8632A semibold)
+    "12 aujourd'hui" (13px, #78716C)
+
+Section "A collecter" (mx 16px, mt 16px):
+  Label "A collecter" (14px semibold #1C1917) + count badge (#FFF7ED #E8632A)
+  
+  2 delivery cards (white, 12px radius, shadow, 16px padding, 8px gap):
+    Card top row:
+      Left: order number "#PLZ-042" (14px semibold) + 
+        "En attente de collecte" orange badge
+      Right: distance "2.3 km" (13px #78716C)
+    Merchant row (mt 8px):
+      Store icon + "Boutique Fatima" (14px #1C1917)
+      Address: "12 Rue Hassan II, Casablanca" (12px #78716C)
+    Divider (1px #F1F5F9, my 8px)
+    Customer row:
+      User icon + "Fatima Zahra Benali" (14px #1C1917)
+      Phone: "06 12 34 56 78" (12px #2563EB, tappable tel: link)
+      Address: "45 Bd Mohammed V, Casablanca" (12px #78716C)
+    Card bottom row (mt 8px, flex space-between):
+      Amount: "579 MAD" (14px semibold #1C1917)
+      Payment badge: "COD" (gray pill) or "Terminal" (blue pill)
+      "Collecter" CTA button (primary blue, 80px, 36px, radius 8px)
+    
+    Full card tappable → Screen 3 (delivery detail)
+    "Collecter" button → Screen 4 (collection confirmation)
+
+Section "En cours de livraison" (mx 16px, mt 24px):
+  Label "En livraison" (14px semibold) + count badge (#EFF6FF #2563EB)
+  
+  1 delivery card (same structure as above but):
+    Status badge: "En route" (blue, #EFF6FF #2563EB)
+    CTA button: "Livrer" (#16A34A, green)
+    "Livrer" → Screen 5 (delivery confirmation)
+
+Empty state (when no active deliveries):
+  Truck icon (64px, #E2E8F0, centered, mt 64px)
+  "Aucune livraison pour le moment" (16px semibold #1C1917, centered)
+  "Passez en disponible pour recevoir des livraisons"
+    (14px #78716C, centered, max-width 240px)
+
+---
+
+SCREEN 2b — Availability Toggle Confirmation
+Route: modal overlay on Screen 2
+
+Semi-transparent overlay (rgba 0,0,0,0.4).
+Bottom sheet (white, radius 16px top, padding 24px):
+  Handle bar (gray pill, centered, mb 16px)
+  
+  If switching to Indisponible:
+    Warning icon (40px, #D97706, centered)
+    "Passer en indisponible ?" (18px semibold, centered, mt 12px)
+    "Vous ne recevrez plus de nouvelles livraisons." 
+      (14px #78716C, centered, mt 8px)
+    "Confirmer" button (full width, 48px, #D97706, mt 24px)
+    "Annuler" ghost button (full width, 48px, mt 8px)
+  
+  If switching to Disponible:
+    Green checkmark icon
+    "Passer en disponible ?" title
+    "Vous recevrez de nouvelles livraisons."
+    "Confirmer" button (#16A34A)
+
+---
+
+SCREEN 3 — Delivery Detail
+Route: /driver/livraisons/[id]
+
+Top bar: back arrow + "#PLZ-042" (16px semibold) + 
+  status badge right "A collecter" (orange)
+
+Map placeholder (full width, 200px height, #E2E8F0 bg,
+  map pin icon centered, "Carte de livraison" label,
+  gray bg — no real map needed for prototype)
+
+Section "Collecte chez le marchand" 
+  (white card, 12px radius, shadow, 16px padding, mx 16px, mt 16px):
+  Row: store icon + "Boutique Fatima" (14px semibold)
+  Row: pin icon + "12 Rue Hassan II, Casablanca" (13px #78716C)
+  Row: phone icon + "06 98 76 54 32" (13px #2563EB, tappable)
+  "Ouvrir dans Maps" button (outline blue, full width, 40px, mt 12px)
+
+Section "Livraison au client"
+  (white card, same style):
+  Row: user icon + "Fatima Zahra Benali" (14px semibold)
+  Row: pin icon + "45 Bd Mohammed V, Casablanca" (13px #78716C)
+  Row: phone icon + "06 12 34 56 78" (13px #2563EB, tappable)
+  "Ouvrir dans Maps" button (outline blue, full width, 40px, mt 12px)
+
+Section "Details de la commande"
+  (white card, same style):
+  Row: "Montant total" ... "579 MAD" (14px semibold)
+  Row: "Paiement" ... COD badge
+  Row: "Articles" ... "3 articles"
+  
+  Expandable items list (collapsed by default, chevron right):
+    "Voir les articles (3)" (13px #2563EB)
+    Expanded: 3 item rows — name + qty + price
+
+Sticky bottom (white, 80px, shadow):
+  If status = "A collecter":
+    "Confirmer la collecte" (full width, 48px, #E8632A)
+    → links Screen 4
+  If status = "En livraison":
+    "Confirmer la livraison" (full width, 48px, #16A34A)
+    → links Screen 5
+
+---
+
+SCREEN 4 — Collection Confirmation
+Route: /driver/livraisons/[id]/collecte
+
+Top bar: back + "Confirmer la collecte"
+
+Instructions card (white, 12px radius, shadow, 16px padding, mx 16px, mt 16px):
+  Orange info icon (24px) + "Avant de partir" (16px semibold) row
+  Checklist (mt 12px, 8px gap):
+    ☐ "J'ai verifie tous les articles de la commande"
+    ☐ "Le marchand a confirme le contenu du colis"
+    ☐ "Le colis est bien emballe et securise"
+  Each item: circle checkbox (24px, border 2px #E2E8F0) + 
+    label (14px #1C1917)
+  Checked state: #16A34A circle + white checkmark
+
+COD collection card (white, 12px radius, shadow, 16px padding, mx 16px, mt 12px):
+  Only visible if payment_method = COD:
+  "Encaissement a la livraison" (14px semibold #1C1917)
+  "Ne collectez PAS l'argent maintenant. 
+  Le client paiera a la reception." (13px #78716C, mt 4px)
+  Amount to collect: "579 MAD" (24px semibold #E8632A, mt 8px, centered)
+
+Photo proof section (white card, 12px radius, shadow, 16px padding, mx 16px, mt 12px):
+  "Photo du colis (optionnel)" (14px medium)
+  Upload zone (dashed border, 120px height, radius 8px):
+    Camera icon + "Prendre une photo" (13px #78716C)
+  Filled state: thumbnail (80x80px, radius 8px) + X to remove
+
+Sticky bottom:
+  "Je confirme la collecte" CTA (full width, 48px, #E8632A)
+  Disabled until all 3 checkboxes are checked
+  → on confirm: navigate to Screen 2 with order moved to 
+    "En livraison" section + success toast 
+    "Collecte confirmee ! En route vers le client."
+
+---
+
+SCREEN 5 — Delivery Confirmation
+Route: /driver/livraisons/[id]/livraison
+
+Top bar: back + "Confirmer la livraison"
+
+Customer summary card (white, 12px radius, shadow, 16px padding, mx 16px, mt 16px):
+  "Fatima Zahra Benali" (16px semibold)
+  "45 Bd Mohammed V, Casablanca" (13px #78716C, mt 4px)
+  Phone row: "06 12 34 56 78" (13px #2563EB, tappable)
+
+COD collection card (white, 12px radius, shadow, 16px padding, mx 16px, mt 12px):
+  Only if COD:
+  Warning banner (#FFFBEB bg, #D97706 border-left 4px, 12px padding):
+    "Encaissement requis" (14px semibold #D97706)
+    "Collectez exactement:" (13px #78716C)
+    "579 MAD" (28px semibold #1C1917, centered, mt 8px)
+    "Ne rendez pas la monnaie — montant exact uniquement"
+      (12px #78716C italic, centered)
+
+Proof of delivery section (white card, 12px radius, shadow, 16px padding, mx 16px, mt 12px):
+  "Preuve de livraison" (14px semibold)
+  Photo upload zone (dashed, 160px height):
+    Camera icon + "Photo obligatoire" (13px #DC2626)
+  Helper: "Prenez une photo du colis remis au client"
+    (12px #78716C, mt 8px)
+  Filled state: full-width thumbnail (160px height, radius 8px)
+
+Signature section (white card, mx 16px, mt 12px):
+  "Signature du client (optionnel)" (14px medium)
+  Signature pad placeholder (dashed border, 120px height, #FAFAF9 bg):
+    Pen icon + "Le client signe ici" (13px #78716C, centered)
+  "Effacer" link (12px #DC2626, right-aligned, mt 4px)
+
+Issue report row (mx 16px, mt 12px):
+  "Signaler un probleme" (13px #DC2626, underline) → Screen 6
+
+Sticky bottom:
+  "Confirmer la livraison" (full width, 48px, #16A34A)
+  Disabled until photo is taken
+  → on confirm: Screen 7 (success)
+
+---
+
+SCREEN 6 — Report Issue
+Route: /driver/livraisons/[id]/probleme
+
+Top bar: back + "Signaler un probleme"
+
+"Quel est le probleme ?" (16px semibold, mx 16px, mt 16px)
+
+Issue type list (white card, 12px radius, shadow, mx 16px, mt 12px):
+  Radio option rows (each 56px, border-bottom #F1F5F9):
+    "Client absent / injoignable" (radio left, chevron right)
+    "Adresse introuvable"
+    "Client refuse la commande"
+    "Colis endommage"
+    "Autre probleme"
+  Selected row: #EFF6FF bg, #2563EB radio filled
+
+"Details supplementaires" (mx 16px, mt 16px):
+  Textarea (5 rows, placeholder "Decrivez le probleme...",
+    border 1px #E2E8F0, radius 8px)
+
+Sticky bottom:
+  "Envoyer le signalement" (full width, 48px, #DC2626)
+  → returns to Screen 2 with toast 
+    "Probleme signale. Notre equipe vous contactera."
+
+---
+
+SCREEN 7 — Delivery Success
+Route: /driver/livraisons/[id]/succes
+
+Full screen celebration state:
+  #F0FDF4 bg top half, white bottom half
+
+  Top section (centered, pt 64px):
+    Green circle (100px, #16A34A bg): white checkmark (48px)
+    "Livraison effectuee !" (24px semibold #1C1917, mt 24px, centered)
+    "Commande #PLZ-042" (16px #78716C, centered, mt 4px)
+
+  Stats card (white, 12px radius, shadow, 16px padding, mx 24px, mt 32px):
+    Row: "Distance parcourue" ... "4.2 km"
+    Row: "Duree" ... "28 min"
+    Row: "Gain pour cette livraison" ... "35 MAD" (#16A34A semibold)
+    Divider
+    Row: "Gains aujourd'hui" ... "210 MAD" (16px semibold #1C1917)
+
+  "Retour aux livraisons" button 
+    (full width, 48px, #2563EB, mx 24px, mt 24px)
+    → Screen 2
+
+---
+
+SCREEN 8 — Historique (Delivery History)
+Route: /driver/historique
+
+Top bar: "Historique" (18px semibold)
+Period selector (pills, centered, mt 12px):
+  "Aujourd'hui" (active) | "Cette semaine" | "Ce mois"
+
+Summary card (white, 12px radius, shadow, 16px padding, mx 16px, mt 12px):
+  3 stats in a row:
+    "Livraisons" / "12" / (semibold)
+    "Distance" / "48 km" / (semibold)
+    "Gains" / "420 MAD" / (#16A34A semibold)
+
+Delivery history list (mx 16px, mt 16px, 8px gap):
+  Each row (white, 12px radius, shadow, 12px padding):
+    Left: green checkmark circle (32px) 
+      or red X circle (32px) if failed
+    Center: "#PLZ-042" (14px semibold) + 
+      "Boutique Fatima → Fatima Z." (12px #78716C)
+    Right: "35 MAD" (14px semibold #16A34A) + 
+      "14:32" (11px #78716C)
+  
+  Show 8 completed deliveries, 1 failed (red X, "0 MAD")
+
+Empty state: clock icon + "Aucune livraison ce jour"
+
+---
+
+SCREEN 9 — Profil (Driver Profile)
+Route: /driver/profil
+
+Top bar: "Mon profil" (18px semibold)
+
+Profile card (white, 12px radius, shadow, 24px padding, mx 16px, mt 16px, centered):
+  Avatar (80px circle, #EFF6FF bg, #2563EB text "YM", 24px semibold)
+  "Youssef Moussaoui" (20px semibold, mt 12px)
+  "Livreur Plaza — Casablanca" (14px #78716C)
+  Rating row: 5 gold stars (3 filled, 2 gray) + "4.8 / 5" (14px)
+
+Stats row (3 cards side by side, white, border 1px #E2E8F0, 
+  12px radius, 12px padding, mt 16px):
+  "Livraisons" / "284"
+  "Ce mois" / "48"
+  "Taux succes" / "97%"
+
+Section "Gains" (white card, 12px radius, shadow, 16px padding, mx 16px, mt 16px):
+  "Gains ce mois" (13px #78716C uppercase, mb 8px)
+  "1 680 MAD" (28px semibold #1C1917)
+  "Virement prevu le 15 avril" (13px #78716C, mt 4px)
+  Progress bar (full width, 8px height, radius 9999px):
+    Filled (#16A34A, 70% width) on #F0FDF4 bg
+  "70% de l'objectif mensuel (2 400 MAD)" (12px #78716C, mt 6px)
+
+Menu list (white card, 12px radius, shadow, mx 16px, mt 16px):
+  Each row (56px, border-bottom #F1F5F9, flex):
+    Icon + label (14px medium #1C1917) + chevron right
+  "Mes documents" (file icon)
+  "Parametres de notification" (bell icon)
+  "Aide & Support" (help icon)
+  "Deconnexion" (logout icon, text #DC2626)
+
+---
+
+NAVIGATION CONNECTIONS — ALL MUST BE LIVE:
+
+Bottom tab bar (all main screens):
+  Livraisons → Screen 2
+  Historique → Screen 8
+  Profil → Screen 9
+
+Screen 2:
+  Delivery card (full card) → Screen 3
+  "Collecter" button → Screen 4
+  "Livrer" button → Screen 5
+  Availability toggle → Screen 2b (bottom sheet)
+
+Screen 3:
+  "Confirmer la collecte" → Screen 4
+  "Confirmer la livraison" → Screen 5
+
+Screen 4:
+  Confirm (all checkboxes checked) → Screen 2 + toast
+
+Screen 5:
+  "Signaler un probleme" → Screen 6
+  "Confirmer la livraison" (photo taken) → Screen 7
+
+Screen 6:
+  "Envoyer" → Screen 2 + toast
+
+Screen 7:
+  "Retour aux livraisons" → Screen 2
+
+All back arrows → previous screen
+Login → Screen 2 on success
+
+---
+
+INTERACTIVE STATES:
+
+Availability toggle: tapping shows Screen 2b bottom sheet
+Checkboxes (Screen 4): tap to check/uncheck, 
+  CTA unlocks only when all 3 checked
+Photo upload zones: tap shows filled state with thumbnail
+Signature pad: shows "signed" state with squiggle line
+COD warning: only visible on COD orders (show on PLZ-042)
+All phone numbers: styled as tappable blue links
+"Ouvrir dans Maps": tappable, show pressed state
+All CTAs show loading spinner while processing
+Toast notifications: green bar top of screen for success,
+  red bar for errors
+
+Language: French throughout.
+Realistic Moroccan data — Youssef Moussaoui as driver,
+Casablanca addresses, MAD amounts.

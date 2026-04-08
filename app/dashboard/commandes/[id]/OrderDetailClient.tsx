@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, User, Phone, MapPin, Check, Loader2 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
@@ -15,26 +16,9 @@ import { formatMAD, formatDate } from '../OrdersClient';
 import type { OrderWithDetails } from '@/lib/db/orders';
 import type { OrderStatus, PaymentMethod } from '@/types/supabase';
 
-// ─── Status banner config ─────────────────────────────────────────────────────
-
-const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
-  pending:    { bg: '#FFF7ED', text: '#E8632A', label: 'En attente de confirmation' },
-  confirmed:  { bg: '#EFF6FF', text: '#2563EB', label: 'Confirmée — en préparation' },
-  dispatched: { bg: '#FFF7ED', text: '#E8632A', label: 'En cours de livraison' },
-  delivered:  { bg: '#F0FDF4', text: '#16A34A', label: 'Livrée' },
-  cancelled:  { bg: '#FEF2F2', text: '#DC2626', label: 'Annulée' },
-};
-
 // ─── Delivery timeline ────────────────────────────────────────────────────────
 
 type StepState = 'done' | 'current' | 'pending';
-
-const STEPS: { key: OrderStatus | 'received'; label: string }[] = [
-  { key: 'received',   label: 'Commande reçue' },
-  { key: 'confirmed',  label: 'Confirmée' },
-  { key: 'dispatched', label: 'Expédiée' },
-  { key: 'delivered',  label: 'Livrée' },
-];
 
 const ORDER_RANK: Record<OrderStatus | 'received', number> = {
   received:   0,
@@ -45,12 +29,14 @@ const ORDER_RANK: Record<OrderStatus | 'received', number> = {
   cancelled:  -1,
 };
 
-function DeliveryTimeline({ status }: { status: OrderStatus }) {
+type TimelineStep = { key: OrderStatus | 'received'; label: string };
+
+function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus; steps: TimelineStep[]; pendingLabel: string }) {
 
   return (
     <div className="space-y-6">
-      {STEPS.map((step, i) => {
-        const isLast = i === STEPS.length - 1;
+      {steps.map((step, i) => {
+        const isLast = i === steps.length - 1;
         let state: StepState;
 
         if (status === 'cancelled') {
@@ -81,7 +67,7 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
                 <div className="w-6 h-6 rounded-full border-2 border-[#E2E8F0] bg-white flex-shrink-0" />
               )}
               {!isLast && (
-                <div className="absolute top-6 left-3 w-0.5 h-8 bg-[#E2E8F0]" />
+                <div className="absolute top-6 start-3 w-0.5 h-8 bg-[#E2E8F0]" />
               )}
             </div>
             <div className="pt-0.5">
@@ -104,7 +90,7 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
             <div className="absolute inset-0 rounded-full bg-[#2563EB] animate-ping opacity-75" />
           </div>
           <div className="pt-0.5">
-            <div className="text-[14px] font-semibold text-[#2563EB]">En attente de confirmation</div>
+            <div className="text-[14px] font-semibold text-[#2563EB]">{pendingLabel}</div>
           </div>
         </div>
       )}
@@ -118,8 +104,25 @@ type Props = { order: OrderWithDetails };
 
 export function OrderDetailClient({ order }: Props) {
   const router = useRouter();
+  const t = useTranslations('orders');
   const [isPending, startTransition] = useTransition();
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // User-facing string arrays MUST be inside the component after t() — see memory.md BUG-013–016
+  const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
+    pending:    { bg: '#FFF7ED', text: '#E8632A', label: t('banner_pending') },
+    confirmed:  { bg: '#EFF6FF', text: '#2563EB', label: t('banner_confirmed') },
+    dispatched: { bg: '#FFF7ED', text: '#E8632A', label: t('banner_dispatched') },
+    delivered:  { bg: '#F0FDF4', text: '#16A34A', label: t('banner_delivered') },
+    cancelled:  { bg: '#FEF2F2', text: '#DC2626', label: t('banner_cancelled') },
+  };
+
+  const STEPS: TimelineStep[] = [
+    { key: 'received',   label: t('step_received') },
+    { key: 'confirmed',  label: t('step_confirmed') },
+    { key: 'dispatched', label: t('step_dispatched') },
+    { key: 'delivered',  label: t('step_delivered') },
+  ];
 
   const banner = STATUS_BANNER[order.status];
 
@@ -138,12 +141,12 @@ export function OrderDetailClient({ order }: Props) {
         <div className="bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
           <button
             onClick={() => router.back()}
-            className="absolute left-4 p-2 -ml-2"
+            className="absolute start-4 p-2 -ms-2"
           >
             <ArrowLeft size={20} className="text-[#1C1917]" />
           </button>
           <h1 className="text-[16px] font-semibold text-[#1C1917]">{order.order_number}</h1>
-          <div className="absolute right-4">
+          <div className="absolute end-4">
             <StatusBadge status={order.status} />
           </div>
         </div>
@@ -246,7 +249,7 @@ export function OrderDetailClient({ order }: Props) {
           {/* Delivery timeline */}
           <div className="bg-white rounded-xl shadow-sm p-4">
             <h3 className="text-[16px] font-semibold text-[#1C1917] mb-4">Statut de livraison</h3>
-            <DeliveryTimeline status={order.status} />
+            <DeliveryTimeline status={order.status} steps={STEPS} pendingLabel={t('step_pending_confirmation')} />
           </div>
 
           {/* Date info */}
@@ -259,7 +262,7 @@ export function OrderDetailClient({ order }: Props) {
 
       {/* Fixed action bar */}
       {order.status !== 'delivered' && order.status !== 'cancelled' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] p-4 max-w-[480px] mx-auto">
+        <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#E2E8F0] p-4 max-w-[480px] mx-auto">
           {isPending ? (
             <div className="flex items-center justify-center gap-2 h-12 text-[#78716C]">
               <Loader2 className="w-4 h-4 animate-spin" />

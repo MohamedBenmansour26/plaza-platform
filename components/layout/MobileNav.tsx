@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Home, Grid3x3, List, TrendingUp, MoreHorizontal } from 'lucide-react';
+import { Home, Grid3x3, List, BarChart3, MoreHorizontal } from 'lucide-react';
 
 export function MobileNav() {
   const t = useTranslations('nav');
@@ -13,7 +13,7 @@ export function MobileNav() {
     { href: '/dashboard',           label: t('home'),     icon: Home,          exact: true },
     { href: '/dashboard/produits',  label: t('products'), icon: Grid3x3,       exact: false },
     { href: '/dashboard/commandes', label: t('orders'),   icon: List,          exact: false },
-    { href: '/dashboard/finances',  label: t('finances'), icon: TrendingUp,    exact: false },
+    { href: '/dashboard/finances',  label: t('finances'), icon: BarChart3,     exact: false },
     { href: '/dashboard/boutique',  label: t('more'),     icon: MoreHorizontal, exact: false },
   ];
 
@@ -37,7 +37,7 @@ export function MobileNav() {
               strokeWidth={2}
             />
             <span
-              className={`text-[10px] ${
+              className={`text-xs ${
                 active ? 'text-[#2563EB] font-semibold' : 'text-[#78716C]'
               }`}
             >
