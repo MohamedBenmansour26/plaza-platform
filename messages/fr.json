@@ -39,7 +39,71 @@
     "signUpSuccess": "Compte créé ! Vérifiez votre e-mail.",
     "signInError": "E-mail ou mot de passe incorrect.",
     "signUpError": "Impossible de créer le compte. Réessayez.",
-    "signUpEmailConfirmation": "Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter."
+    "signUpEmailConfirmation": "Vérifiez votre e-mail pour confirmer votre compte avant de vous connecter.",
+    "welcome": {
+      "logo": "Plaza",
+      "tagline": "Votre boutique en ligne, en 5 minutes.",
+      "phoneLabel": "Votre numéro de téléphone",
+      "phonePlaceholder": "6 XX XX XX XX",
+      "phoneHint": "Nous enverrons un code de vérification par SMS",
+      "phoneError": "Numéro invalide. Format: 6XX XX XX XX",
+      "continue": "Continuer",
+      "terms": "En continuant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité."
+    },
+    "otp": {
+      "title": "Vérifiez votre numéro",
+      "subtitle": "Code envoyé par SMS au",
+      "checking": "Vérification...",
+      "success": "Code vérifié !",
+      "error": "Code incorrect. {attempts} tentative(s) restante(s).",
+      "locked": "Trop de tentatives. Réessayez dans 24h.",
+      "resendCountdown": "Renvoyer le code dans {time}",
+      "resend": "Renvoyer le code",
+      "wrongNumber": "Mauvais numéro ?"
+    },
+    "pin": {
+      "secureLabel": "SÉCURISEZ VOTRE COMPTE",
+      "createTitle": "Créez votre code PIN",
+      "confirmTitle": "Confirmez votre code PIN",
+      "subtitle": "Vous l'utiliserez pour vous connecter chaque jour",
+      "mismatch": "Les codes ne correspondent pas. Réessayez.",
+      "biometricLabel": "Activer Face ID / empreinte digitale",
+      "biometricSoon": "Bientôt disponible"
+    },
+    "login": {
+      "logo": "Plaza",
+      "defaultStoreName": "Ma boutique",
+      "pinLabel": "ENTREZ VOTRE CODE PIN",
+      "pinError": "PIN incorrect. {attempts} tentative(s) restante(s).",
+      "locked": "Compte verrouillé. Utilisez PIN oublié.",
+      "forgotPin": "PIN oublié ?",
+      "switchAccount": "Changer de compte"
+    },
+    "forgotPin": {
+      "title": "PIN oublié ?",
+      "subtitle": "Nous allons vérifier votre identité via SMS avant de réinitialiser votre PIN.",
+      "phoneNote": "Un code vous sera envoyé à ce numéro.",
+      "sendSms": "Envoyer un code SMS",
+      "wrongNumber": "Ce n'est pas votre numéro ?"
+    },
+    "recovery": {
+      "title": "Récupérez votre accès",
+      "subtitle": "Entrez l'email de récupération que vous avez fourni à l'inscription.",
+      "emailLabel": "Email de récupération",
+      "emailPlaceholder": "votre@email.com",
+      "emailError": "Email non reconnu. Vérifiez l'adresse ou contactez le support.",
+      "submit": "Recevoir le lien de récupération",
+      "noEmailNote": "Vous n'avez pas configuré d'email de récupération ?",
+      "contactSupport": "Contacter le support",
+      "successTitle": "Email envoyé !",
+      "successSubtitle": "Vérifiez votre boîte mail. Le lien vous permettra de changer votre numéro de téléphone.",
+      "successExpiry": "Le lien expire dans 15 minutes.",
+      "resend": "Renvoyer l'email"
+    },
+    "signup": {
+      "deprecationBanner": "Cette page sera bientôt désactivée — utilisez la connexion par téléphone.",
+      "deprecationLink": "Essayer maintenant"
+    }
   },
   "onboarding": {
     "step1Title": "Votre boutique",
@@ -69,7 +133,37 @@
     "uploadError": "Erreur lors de l'envoi",
     "next": "Suivant",
     "finish": "Lancer ma boutique",
-    "error": "Une erreur est survenue. Veuillez réessayer."
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "checklist_title": "Lancez votre boutique",
+    "checklist_subtitle": "Complétez ces étapes pour mettre votre boutique en ligne",
+    "checklist_progress": "{done}/{total} étapes complétées",
+    "checklist_progress_done": "Félicitations !",
+    "step_identity": "Identité vérifiée",
+    "step_identity_desc": "Compte vérifié par OTP",
+    "step_store_name": "Nom de la boutique",
+    "step_store_name_desc": "Nom de votre boutique défini",
+    "step_address": "Adresse et ville",
+    "step_address_desc": "Ville de livraison configurée",
+    "step_address_cta": "Configurer",
+    "step_delivery_zone": "Zone de livraison",
+    "step_delivery_desc": "Zone de livraison configurée",
+    "step_delivery_cta": "Configurer",
+    "step_product": "Au moins 1 produit publié",
+    "step_product_desc": "Au moins un produit visible",
+    "step_product_cta": "Ajouter",
+    "step_logo": "Logo de la boutique",
+    "step_logo_desc": "Logo ajouté à votre boutique",
+    "step_logo_cta": "Ajouter",
+    "step_share": "Partager votre lien",
+    "step_share_desc": "Lien partagé avec vos clients",
+    "step_share_cta": "Copier le lien",
+    "publish_cta": "Publier ma boutique",
+    "publishing": "Publication…",
+    "published_title": "Votre boutique est en ligne !",
+    "published_subtitle": "Partagez votre lien avec vos premiers clients.",
+    "published_share_cta": "Partager le lien",
+    "live_banner": "Votre boutique est en ligne",
+    "live_banner_sub": "Continuez à ajouter des produits pour attirer plus de clients."
   },
   "dashboard": {
     "title": "Tableau de bord",

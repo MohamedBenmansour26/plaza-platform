@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { Info } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,9 @@ import { signupAction } from './actions';
 export default function SignupPage() {
   const t = useTranslations('auth');
   const tc = useTranslations('common');
+  const ts = useTranslations('auth.signup');
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -43,6 +47,23 @@ export default function SignupPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
+        {/* Deprecation banner */}
+        <div
+          className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3"
+          dir={isRtl ? 'rtl' : 'ltr'}
+        >
+          <Info size={16} className="mt-0.5 shrink-0 text-amber-600" aria-hidden="true" />
+          <p className="text-sm text-amber-800">
+            {ts('deprecationBanner')}{' '}
+            <Link
+              href="/auth/login"
+              className="font-medium underline underline-offset-2 hover:text-amber-900"
+            >
+              {ts('deprecationLink')} {isRtl ? '←' : '→'}
+            </Link>
+          </p>
+        </div>
+
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-bold tracking-tight">{t('signUpTitle')}</h1>
           <p className="text-sm text-muted-foreground">{t('signUpSubtitle')}</p>
