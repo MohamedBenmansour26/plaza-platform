@@ -99,6 +99,10 @@
       "successSubtitle": "Vérifiez votre boîte mail. Le lien vous permettra de changer votre numéro de téléphone.",
       "successExpiry": "Le lien expire dans 15 minutes.",
       "resend": "Renvoyer l'email"
+    },
+    "signup": {
+      "deprecationBanner": "Cette page sera bientôt désactivée — utilisez la connexion par téléphone.",
+      "deprecationLink": "Essayer maintenant"
     }
   },
   "onboarding": {
