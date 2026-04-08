@@ -309,6 +309,7 @@
     "securityTitle": "الأمان",
     "changePassword": "تغيير كلمة المرور",
     "twoFactor": "المصادقة الثنائية",
+    "twoFactorSoon": "قريباً",
     "dangerZone": "منطقة الخطر",
     "deleteAccount": "حذف حسابي",
     "deleteAccountNote": "سيؤدي هذا الإجراء إلى حذف جميع بياناتك نهائياً.",
@@ -316,6 +317,15 @@
     "deleteAccountBody": "هذا الإجراء لا يمكن التراجع عنه. ستُحذف جميع بياناتك ومنتجاتك وطلباتك.",
     "deleteConfirm": "حذف نهائياً",
     "deleteCancel": "إلغاء"
+  },
+  "orders": {
+    "status": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكد",
+      "dispatched": "تم الشحن",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغى"
+    }
   },
   "finances": {
     "title": "المالية",

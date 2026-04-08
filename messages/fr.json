@@ -309,6 +309,7 @@
     "securityTitle": "Sécurité",
     "changePassword": "Changer le mot de passe",
     "twoFactor": "Authentification à 2 facteurs",
+    "twoFactorSoon": "Bientôt disponible",
     "dangerZone": "Zone de danger",
     "deleteAccount": "Supprimer mon compte",
     "deleteAccountNote": "Cette action supprimera toutes vos données de façon définitive.",
@@ -316,6 +317,15 @@
     "deleteAccountBody": "Cette action est irréversible. Toutes vos données, produits et commandes seront supprimés.",
     "deleteConfirm": "Supprimer définitivement",
     "deleteCancel": "Annuler"
+  },
+  "orders": {
+    "status": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "dispatched": "Expédiée",
+      "delivered": "Livrée",
+      "cancelled": "Annulée"
+    }
   },
   "finances": {
     "title": "Finances",
