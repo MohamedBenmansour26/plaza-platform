@@ -72,6 +72,7 @@
     },
     "login": {
       "logo": "Plaza",
+      "defaultStoreName": "متجري",
       "pinLabel": "أدخل رمز PIN",
       "pinError": "رمز PIN غير صحيح. {attempts} محاولة(ات) متبقية.",
       "locked": "الحساب مقفل. استخدم خيار نسيت PIN.",
@@ -98,6 +99,10 @@
       "successSubtitle": "تحقق من صندوق البريد. سيتيح الرابط تغيير رقم هاتفك.",
       "successExpiry": "الرابط صالح لمدة 15 دقيقة.",
       "resend": "إعادة إرسال البريد"
+    },
+    "signup": {
+      "deprecationBanner": "ستُوقَف هذه الصفحة قريباً — استخدم تسجيل الدخول بالهاتف.",
+      "deprecationLink": "جرّب الآن"
     }
   },
   "onboarding": {
@@ -128,7 +133,37 @@
     "uploadError": "خطأ في رفع الملف",
     "next": "التالي",
     "finish": "أطلق متجري",
-    "error": "حدث خطأ. يرجى المحاولة مجدداً."
+    "error": "حدث خطأ. يرجى المحاولة مجدداً.",
+    "checklist_title": "أطلق متجرك",
+    "checklist_subtitle": "أكمل هذه الخطوات لنشر متجرك على الإنترنت",
+    "checklist_progress": "{done}/{total} خطوات مكتملة",
+    "checklist_progress_done": "تهانينا!",
+    "step_identity": "التحقق من الهوية",
+    "step_identity_desc": "تم التحقق من الحساب عبر OTP",
+    "step_store_name": "اسم المتجر",
+    "step_store_name_desc": "تم تحديد اسم متجرك",
+    "step_address": "العنوان والمدينة",
+    "step_address_desc": "تم ضبط مدينة التوصيل",
+    "step_address_cta": "إعداد",
+    "step_delivery_zone": "منطقة التوصيل",
+    "step_delivery_desc": "تم ضبط منطقة التوصيل",
+    "step_delivery_cta": "إعداد",
+    "step_product": "منتج واحد على الأقل منشور",
+    "step_product_desc": "منتج واحد على الأقل مرئي",
+    "step_product_cta": "إضافة",
+    "step_logo": "شعار المتجر",
+    "step_logo_desc": "تمت إضافة الشعار إلى متجرك",
+    "step_logo_cta": "إضافة",
+    "step_share": "مشاركة رابطك",
+    "step_share_desc": "تمت مشاركة الرابط مع عملائك",
+    "step_share_cta": "نسخ الرابط",
+    "publish_cta": "نشر متجري",
+    "publishing": "جارٍ النشر…",
+    "published_title": "متجرك بات على الإنترنت!",
+    "published_subtitle": "شارك رابطك مع أول عملائك.",
+    "published_share_cta": "مشاركة الرابط",
+    "live_banner": "متجرك يعمل الآن",
+    "live_banner_sub": "واصل إضافة المنتجات لجذب المزيد من العملاء."
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -384,7 +419,17 @@
       "dispatched": "تم الشحن",
       "delivered": "تم التسليم",
       "cancelled": "ملغى"
-    }
+    },
+    "banner_pending": "الطلب في انتظار التأكيد",
+    "banner_confirmed": "تم تأكيد الطلب — قيد التحضير",
+    "banner_dispatched": "تم شحن الطلب — في الطريق",
+    "banner_delivered": "تم تسليم الطلب",
+    "banner_cancelled": "تم إلغاء الطلب",
+    "step_received": "تم استلام الطلب",
+    "step_confirmed": "مؤكد",
+    "step_dispatched": "تم الشحن",
+    "step_delivered": "تم التسليم",
+    "step_pending_confirmation": "في انتظار التأكيد"
   },
   "finances": {
     "title": "المالية",
@@ -443,6 +488,7 @@
     "category_order_issue": "مشكلة في الطلب",
     "category_payment_issue": "مشكلة في الدفع",
     "category_technical": "مشكلة تقنية",
-    "category_other": "أخرى"
+    "category_other": "أخرى",
+    "paperclip_tooltip": "المرفقات — قريباً"
   }
 }
