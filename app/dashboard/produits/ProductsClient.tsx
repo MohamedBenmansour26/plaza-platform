@@ -52,13 +52,13 @@ export function ProductsClient({ products }: Props) {
       {/* Search */}
       <div className="px-4 py-3 md:px-0 md:pt-0 md:pb-4">
         <div className="relative w-full md:w-[280px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
           <input
             type="text"
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+            className="w-full h-10 ps-10 pe-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
           />
         </div>
       </div>
