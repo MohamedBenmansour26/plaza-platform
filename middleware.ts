@@ -50,7 +50,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // Let next-intl handle locale routing for all requests.
+  // Skip intl rewriting for root — app/page.tsx
+  // handles its own redirect to /dashboard or /auth/login
+  if (pathname === "/") {
+    return NextResponse.next()
+  }
+  // Let next-intl handle locale routing for all other requests.
   return intlMiddleware(request) as NextResponse;
 }
 
