@@ -309,6 +309,7 @@
     "securityTitle": "Sécurité",
     "changePassword": "Changer le mot de passe",
     "twoFactor": "Authentification à 2 facteurs",
+    "twoFactorSoon": "Bientôt disponible",
     "dangerZone": "Zone de danger",
     "deleteAccount": "Supprimer mon compte",
     "deleteAccountNote": "Cette action supprimera toutes vos données de façon définitive.",

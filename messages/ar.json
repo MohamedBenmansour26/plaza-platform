@@ -309,6 +309,7 @@
     "securityTitle": "الأمان",
     "changePassword": "تغيير كلمة المرور",
     "twoFactor": "المصادقة الثنائية",
+    "twoFactorSoon": "قريباً",
     "dangerZone": "منطقة الخطر",
     "deleteAccount": "حذف حسابي",
     "deleteAccountNote": "سيؤدي هذا الإجراء إلى حذف جميع بياناتك نهائياً.",
