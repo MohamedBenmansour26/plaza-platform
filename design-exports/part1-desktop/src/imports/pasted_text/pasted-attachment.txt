@@ -1,0 +1,408 @@
+Create a fully clickable desktop prototype (1280px wide) for Plaza — a platform that helps Moroccan small business owners manage their online store end to end. All text in French. Use Inter font.
+
+Design system:
+  Primary: #2563EB | Accent: #E8632A | Success: #16A34A
+  Error: #DC2626 | Dark: #1C1917 | Mid: #78716C
+  Surface: #FAFAF9 | Card: #FFFFFF
+  Radius: 8px standard, 12px cards, 9999px badges
+  Spacing: 8px grid
+  Shadow: 0 1px 3px rgba(0,0,0,0.08)
+
+---
+
+PERSISTENT LEFT SIDEBAR (all screens, 240px wide, white, border-right 1px #E2E8F0, full viewport height, fixed position):
+
+Top (24px padding, 24px from top): Plaza wordmark — "Plaza" 22px bold #2563EB.
+
+Nav items (margin-top 24px, flex column, gap 4px, 16px horizontal padding):
+Each item (44px tall, flex row, gap 12px, align-center, radius 8px, 12px horizontal padding):
+  Icon (20x20px) + label (14px medium).
+  Active state: bg #EFF6FF, text #2563EB, icon #2563EB.
+  Inactive: text #78716C, icon #78716C. Hover: bg #F8FAFC.
+Nav items: Accueil (home icon) | Produits (grid icon) | Commandes (list icon) | Finances (chart icon) | Support (chat icon).
+
+Bottom of sidebar (absolute, 16px padding, 16px from bottom):
+  Merchant row: avatar circle 40x40px (#EFF6FF bg, "FA" #2563EB 14px semibold) + "Fatima Amrani" (14px medium #1C1917) + chevron-down icon (16px #78716C).
+  Below: "Parametres" (14px #78716C, hover underline) + "Deconnexion" (14px #DC2626, hover underline), side by side with slash separator.
+
+CONTENT AREA: margin-left 240px, bg #FAFAF9, min-height 100vh.
+All page content: max-width 1040px, centered (auto horizontal margins), padding 32px.
+
+---
+
+SCREEN 1 — Accueil — /dashboard (Accueil nav active)
+
+PAGE HEADER (max-width 1040px, margin-bottom 32px):
+"Bonjour, Fatima !" (24px semibold #1C1917). "Mardi, 7 avril 2026" (14px #78716C, margin-top 4px).
+
+STATS ROW (4 cards in a single horizontal row, equal width, gap 16px):
+Each card (white, 12px radius, shadow, 20px padding):
+  Top row: icon circle (40x40px, 9999px radius, colored bg) left + trend pill right (9999px, px 8 py 2, 12px medium).
+  Value: 28px semibold #1C1917, margin-top 12px.
+  Label: 13px #78716C, margin-top 4px.
+  Positive pill: #F0FDF4 bg, #16A34A text. Negative: #FEF2F2 bg, #DC2626 text.
+Card 1: bag icon circle #EFF6FF/#2563EB. "12". "Commandes aujourd'hui". "+3 vs hier" green.
+Card 2: banknote icon #FFF7ED/#E8632A. "1 840 MAD". "Revenus aujourd'hui". "+15%" green.
+Card 3: clock icon #FFFBEB/#D97706. "3" (tappable: links Screen 5 filtered pending). "En attente". "Action requise" amber pill.
+Card 4: check icon #F0FDF4/#16A34A. "9". "Livrees aujourd'hui". "100%" green.
+
+LOWER SECTION (two columns, gap 24px, margin-top 32px):
+Left (flex 1): Section title "Activite recente" (18px semibold #1C1917, margin-bottom 16px).
+  Data table (white, 12px radius, shadow, overflow hidden):
+    Header row (48px, #F8FAFC bg, border-bottom 1px #E2E8F0, 16px padding, 13px medium #78716C uppercase):
+      Commande (120px) | Client (160px) | Montant (120px) | Statut (140px) | Paiement (120px) | Il y a (100px)
+    5 data rows (48px each, hover #F8FAFC, cursor pointer, border-bottom 1px #F3F4F6):
+      #PLZ-042 | Fatima Z. | 879 MAD | "En attente" gray badge | COD gray badge | 23 min
+      #PLZ-041 | Youssef E. | 250 MAD | "Confirmee" blue badge | Terminal blue | 1h
+      #PLZ-040 | Meryem A. | 1 450 MAD | "Livree" green badge | COD gray | 2h
+      #PLZ-039 | Khalid B. | 600 MAD | "Expediee" orange badge | Carte purple | 3h
+      #PLZ-038 | Nadia T. | 200 MAD | "Annulee" red badge | COD gray | 5h
+    Badges: 9999px radius, px 8 py 2, 12px medium.
+    Each row tappable: links Screen 6 (Order Detail drawer).
+Right (320px): Store link card (white, 12px radius, shadow, 20px padding):
+  "Votre boutique" (13px #78716C uppercase, margin-bottom 8px).
+  "plaza.ma/fatima-store" (14px #2563EB, underline).
+  "Voir la boutique" button (full-width, 36px, outline #2563EB, radius 8px, margin-top 8px).
+  Divider. Store QR placeholder (120x120px, #F5F5F4 bg, QR icon centered, radius 8px, centered).
+  "Copier le lien" button (full-width, 36px, white border #E2E8F0, radius 8px, margin-top 12px).
+
+EMPTY / ONBOARDING STATE (annotated — show when 0 products and 0 orders):
+Replace recent activity with a setup checklist card (white, 12px radius, shadow, 24px padding):
+  "Configurez votre boutique" (18px semibold) + "3 etapes pour recevoir vos premieres commandes" (14px #78716C).
+  3 checklist rows (48px each): circle icon (empty gray / filled green checkmark) + label + arrow link.
+    "Ajoutez votre premier produit" → links Screen 4.
+    "Partagez votre lien de boutique" → copy action.
+    "Recevez votre premiere commande" → grayed out until others done.
+  Progress bar at bottom: 1/3 (33%, #2563EB fill, #E2E8F0 track, 4px height, radius 9999px).
+
+---
+
+SCREEN 2 — Produits — /dashboard/produits (Produits nav active)
+
+PAGE HEADER (flex, space-between, align-center, margin-bottom 24px):
+"Mes produits" (24px semibold) left. "Ajouter un produit" button (primary #2563EB, 40px, radius 8px, white 14px medium, + icon left) right.
+
+FILTER ROW (flex, space-between, margin-bottom 16px):
+Left: search input (280px, 40px, radius 8px, border 1px #E2E8F0, search icon, placeholder "Rechercher...").
+Right: filter chips — "Tous" (active #2563EB) | "En stock" | "Rupture" | "Masques" (9999px radius, px 12 py 6, 14px).
+
+PRODUCTS TABLE (white, 12px radius, shadow, overflow hidden):
+Header (48px, #F8FAFC, border-bottom #E2E8F0, 16px padding, 13px medium #78716C uppercase):
+  Image (64px) | Produit (flex 1) | Prix | Stock | Statut | Actions (80px)
+5 rows (64px each, hover #F8FAFC, border-bottom 1px #F3F4F6):
+  Image cell: product image 48x48px radius 8px fill #F5F5F4.
+  Product cell: name 14px semibold #1C1917 + "Robe d'ete fleurie" (truncated if long).
+  Price: "350 MAD" 14px semibold.
+  Stock: "12 en stock" 13px #78716C — or "Rupture" red pill (0 stock).
+  Status: toggle switch (ON: #2563EB, OFF: #E2E8F0).
+  Actions: edit icon button (20x20px, #78716C, hover #2563EB) + delete icon button (20x20px, #78716C, hover #DC2626). Tooltip on hover: "Modifier" / "Supprimer".
+Products: "Robe d'ete fleurie" 350 MAD 12 on | "Sac a main cuir" 580 MAD 3 on | "Sandales dorees" 220 MAD 0 RUPTURE | "Foulard soie" 180 MAD 8 OFF | "Ceinture brodee" 120 MAD 15 on.
+
+Edit icon links Screen 3. "Ajouter un produit" links Screen 4.
+
+EMPTY STATE: table area replaced with centered content: box icon 64px #E2E8F0 + "Aucun produit pour le moment" (18px semibold) + "Ajoutez votre premier produit pour commencer a vendre." (14px #78716C) + "Ajouter un produit" button (primary blue).
+
+---
+
+SCREEN 3 — Modifier le produit — /dashboard/produits/[id] (Produits nav active)
+
+BREADCRUMB (12px #78716C, margin-bottom 24px): "Produits > Robe d'ete fleurie"
+
+TWO-COLUMN LAYOUT (gap 24px):
+Left column (flex 1):
+  White card (12px radius, shadow, 24px padding):
+    Section "Informations" (16px semibold, margin-bottom 16px).
+    Form fields (flex column, gap 16px):
+      "Nom du produit (FR)": label 13px #78716C + input filled "Robe d'ete fleurie" 14px.
+      "Nom du produit (AR)": label + input placeholder "اسم المنتج" dir=rtl, hint "(ecriture de droite a gauche)" 12px #78716C.
+      "Description": label + textarea 4 rows filled with description.
+      "Prix (MAD)": label + input "350" + "MAD" suffix chip inside input right.
+      "Stock disponible": label + number input "12" with +/- stepper buttons.
+
+Right column (320px):
+  Photo card (white, 12px radius, shadow, 20px padding, margin-bottom 16px):
+    "Photo du produit" (14px semibold, margin-bottom 12px).
+    Photo zone (full width, 200px height, #F5F5F4 bg, radius 8px): camera icon 32px #A8A29E centered + "Changer la photo" 13px #2563EB below.
+    "Formats: JPG, PNG — Max 5 Mo" (12px #A8A29E, margin-top 8px).
+
+  Visibility card (white, 12px radius, shadow, 20px padding, margin-bottom 16px):
+    "Visible sur la boutique" (14px medium #1C1917) + toggle switch ON (#2563EB) — flex space-between.
+    "Ce produit est visible par vos clients." (12px #78716C, margin-top 4px).
+
+  Danger card (white, 12px radius, border 1px #FEE2E2, shadow, 20px padding):
+    "Zone de danger" (14px semibold #DC2626, margin-bottom 8px).
+    "Supprimer ce produit" button (full-width, 40px, white bg, border 1.5px #DC2626, radius 8px, text #DC2626 14px).
+    "Cette action est irreversible." (12px #78716C, margin-top 6px).
+
+ACTION BAR (page header row, right side): "Enregistrer" button (primary #2563EB, 40px, radius 8px). Loading state: "Enregistrement..." + spinner.
+
+---
+
+SCREEN 4 — Nouveau produit — /dashboard/produits/nouveau (Produits nav active)
+
+BREADCRUMB: "Produits > Nouveau produit"
+
+Same two-column layout as Screen 3 but all fields empty. Form validation: required field (name FR) shows red border + "Ce champ est obligatoire" (12px #DC2626) below on failed submit attempt.
+
+Action bar right: "Publier le produit" (primary blue, 40px). Loading: "Publication..." + spinner.
+
+---
+
+SCREEN 5 — Commandes — /dashboard/commandes (Commandes nav active)
+
+PAGE HEADER (flex, space-between): "Commandes" (24px semibold) left. No primary action button (orders come from customers).
+
+FILTER TABS (flex row, gap 8px, margin-bottom 16px):
+"Toutes (24)" active (#2563EB bg, white, 9999px, px 14 py 6) | "En attente (5)" | "Confirmees (8)" | "Expediees (6)" | "Livrees (4)" | "Annulees (1)".
+Inactive: white bg, #78716C, border 1px #E2E8F0.
+
+ORDERS TABLE (white, 12px radius, shadow, overflow hidden):
+Header (48px, #F8FAFC, border-bottom #E2E8F0, 16px padding, 13px medium #78716C uppercase):
+  N COMMANDE (120px) | CLIENT (160px) | ARTICLES (100px) | MONTANT (120px) | STATUT (140px) | PAIEMENT (120px) | DATE (120px) | ACTIONS (80px)
+6 data rows (56px each, hover #F8FAFC, cursor pointer, border-bottom 1px #F3F4F6, 16px padding):
+  Row 1: #PLZ-042 | Fatima Z. | 2 articles | 879 MAD | "En attente" gray badge | COD | 7 avr 2026 | "Voir" button
+  Row 2: #PLZ-041 | Youssef E. | 1 article | 250 MAD | "Confirmee" blue badge | Terminal | 7 avr 2026 | "Voir"
+  Row 3: #PLZ-040 | Meryem A. | 5 articles | 1 450 MAD | "Expediee" orange badge | COD | 6 avr 2026 | "Voir"
+  Row 4: #PLZ-039 | Khalid B. | 2 articles | 600 MAD | "Livree" green badge | Carte purple | 6 avr 2026 | "Voir"
+  Row 5: #PLZ-038 | Nadia T. | 1 article | 200 MAD | "Annulee" red badge | COD | 5 avr 2026 | "Voir"
+  Row 6: #PLZ-037 | Hassan M. | 3 articles | 450 MAD | "En attente" gray badge | COD | 5 avr 2026 | "Voir"
+Row click or "Voir" button → opens Screen 6 as right-side drawer (do NOT navigate away).
+Badges: 9999px radius, px 8 py 2, 12px medium.
+
+EMPTY STATE (per tab, inside table area): truck/list icon 48px #E2E8F0 centered + "Aucune commande en attente" (16px semibold) + subtext (14px #78716C).
+
+---
+
+SCREEN 6 — Order Detail Drawer — overlays Screen 5
+
+DRAWER (560px wide, full viewport height, white, shadow -4px 0 24px rgba(0,0,0,0.12), slides from right):
+BACKDROP: rgba(0,0,0,0.3) covering Screen 5 behind drawer.
+
+DRAWER HEADER (64px, white, border-bottom 1px #E2E8F0, 24px padding, flex, space-between, align-center):
+Left: "#PLZ-042" (18px semibold #1C1917) + "Commande #PLZ-042" label.
+Status banner inline: "En attente" gray pill (9999px, px 12 py 4, 13px medium) with margin-left 12px.
+Right: X close button (32x32px, #78716C, hover #1C1917, radius 8px).
+
+DRAWER CONTENT (scrollable, 24px padding, pb-96px):
+TWO-COLUMN LAYOUT inside drawer (gap 16px):
+
+Left column (flex 1):
+  Section "Client" (white card, 12px radius, shadow, 16px padding, margin-bottom 12px):
+    "Client" (13px #78716C uppercase, margin-bottom 8px).
+    Name row: user icon 16px + "Fatima Zahra Benali" (14px semibold).
+    Phone row: phone icon + "06 12 34 56 78" (14px #2563EB, tel link, dir=ltr).
+    Address row: pin icon + "12 Rue Hassan II, Casablanca" (14px #78716C).
+
+  Section "Articles" (white card, 12px radius, shadow, 16px padding):
+    "Articles" (13px #78716C uppercase, margin-bottom 8px).
+    Item rows (48px each):
+      Image 40x40px radius 6px + name 14px medium + "x1" + "250 MAD" right.
+      "Robe d'ete" x1 250 MAD. "Sac cuir" x2 300 MAD.
+    Divider. "Sous-total" + "550 MAD" 14px. "Livraison" + "29 MAD" #E8632A. Divider 2px.
+    "Total" (16px semibold) + "579 MAD" (18px semibold #1C1917) flex space-between.
+
+Right column (200px):
+  Section "Statut" (white card, 12px radius, shadow, 16px padding, margin-bottom 12px):
+    "Livraison" (13px #78716C uppercase, margin-bottom 8px).
+    Vertical timeline (4 steps, 24px between):
+      Done: green circle checkmark + "Commande recue" (13px) + time (11px #A8A29E).
+      Current: blue pulse ring + "En attente" (13px semibold #2563EB).
+      Future x2: gray circles + labels #A8A29E.
+
+  Section "Paiement" (white card, 12px radius, shadow, 16px padding):
+    COD badge + "Paiement a la livraison" (13px #78716C).
+
+DRAWER FOOTER (sticky bottom, white, border-top 1px #E2E8F0, 72px, 24px padding):
+Status=pending: "Confirmer" (primary #2563EB, 50%, 40px) + "Annuler" (red outline, 50%).
+Status=confirmed: "Marquer comme expediee" (accent #E8632A, full width).
+Status=dispatched: "Marquer comme livree" (#16A34A, full width).
+Status=done/cancelled: read-only note (14px #78716C, centered).
+
+---
+
+SCREEN 7 — Finances — /dashboard/finances (Finances nav active)
+
+PAGE HEADER: "Finances" (24px semibold) left. Period selector tabs right: "Cette semaine" | "Ce mois" | "Tout" (active: #2563EB bg, white, 9999px, inactive: border 1px #E2E8F0, #78716C).
+
+STATS ROW (3 cards, equal width, gap 16px, margin-bottom 24px):
+Card 1: "Revenus totaux" | "24 600 MAD" 24px semibold | "+18% vs mois dernier" green pill.
+Card 2: "Commandes" | "148" | "+12%" green pill.
+Card 3: "Panier moyen" | "166 MAD" | "+5%" green pill.
+
+TWO-COLUMN LAYOUT (gap 24px):
+Left (flex 1):
+  Revenue chart card (white, 12px radius, shadow, 24px padding):
+    "Evolution des revenus" (16px semibold, margin-bottom 16px).
+    Line chart (full width, 220px height, #FAFAF9 bg): orange line #E8632A smooth curve over 7 data points, X-axis days (Lun-Dim), Y-axis MAD amounts, light grid lines #F3F4F6. Chart area fill below line: gradient #E8632A to transparent.
+
+Right (340px):
+  Payment breakdown card (white, 12px radius, shadow, 24px padding, margin-bottom 16px):
+    "Repartition des paiements" (16px semibold, margin-bottom 16px).
+    Donut chart (180px centered): COD 65% gray #6B7280 | Terminal 28% #2563EB | Carte 7% #7C3AED.
+    Center of donut: "148" (20px bold #1C1917) + "commandes" (12px #78716C).
+    Legend (3 rows, 36px each): color dot 12x12px radius 9999px + label 14px + percentage (14px semibold #1C1917) right.
+
+  Top products card (white, 12px radius, shadow, 24px padding):
+    "Meilleures ventes" (16px semibold, margin-bottom 12px).
+    3 rows (48px each, border-bottom 1px #F3F4F6 on first two):
+      Rank number (18px semibold #A8A29E, 24px width) + image 40x40px + product name 14px medium + revenue "8 400 MAD" right (14px semibold). Tappable → Screen 3.
+
+---
+
+SCREEN 8 — Support — /dashboard/support (Support nav active)
+
+Two-panel layout fills the 1040px content area.
+Left panel (320px, white, 12px radius shadow, overflow hidden):
+  Header (64px, border-bottom 1px #E2E8F0, 24px padding):
+    "Support Plaza" (18px semibold #1C1917) left. "Nouveau ticket" button (primary blue #2563EB, 36px, radius 8px, 14px white) right.
+  Ticket list (scrollable):
+    3 tickets (each 72px, 16px padding, hover #F8FAFC, cursor pointer):
+      Row 1: "#PLZ-T001" 13px bold #1C1917 + "En cours" blue badge right.
+        "Commande non recue" 13px truncated #1C1917.
+        "Hier 09:14" 11px #A8A29E right.
+      Row 2: "#PLZ-T002" + "Resolu" green badge.
+        "Probleme de paiement" + "Hier" 11px.
+      Row 3: "#PLZ-T003" + "En attente" gray badge.
+        "Bug sur la plateforme" + "Il y a 5j".
+  Empty state: chat icon 48px #E2E8F0 centered + "Aucun ticket".
+
+Right panel (flex 1, #FAFAF9, 12px radius shadow):
+  Default state (no ticket): centered icon 80px gray + "Selectionnez un ticket ou creez-en un nouveau" (16px #78716C).
+  Active state (ticket #PLZ-T001 selected):
+    Top bar (white, 64px, border-bottom): "#PLZ-T001 — Commande non recue" (16px semibold) + "En cours" blue badge right.
+    Context card (white, 12px radius, shadow, 16px margin, 16px padding): "Commande liee: #PLZ-038" blue link + "Ouvert le: 5 avril 2026".
+    Chat thread (scrollable, 24px padding, gap 16px):
+      Date pill: "Aujourd'hui" (gray 9999px centered).
+      Plaza msg left: avatar 32px blue "P" + gray bubble + timestamp.
+        "Bonjour ! Nous avons recu votre demande concernant #PLZ-038. Pouvez-vous decrire le probleme ?"
+      Merchant msg right: blue bubble #2563EB white text.
+        "Le client dit qu'il n'a pas recu sa commande mais le statut dit Livree."
+      Plaza msg left: gray bubble.
+        "Merci. Nous allons contacter le livreur et revenir vers vous dans 2 heures."
+    Reply bar (white, 64px, border-top, 16px padding): paperclip icon + input "Ecrivez un message..." + send circle button #2563EB.
+
+---
+
+SCREEN 9 — Nouveau Ticket Drawer — /dashboard/support/nouveau (overlays Screen 8)
+
+Drawer 480px wide, full height, white, shadow -4px 0 24px rgba(0,0,0,0.12) from right. Backdrop rgba(0,0,0,0.3).
+
+Header (64px, border-bottom): "Nouveau ticket" 18px semibold + X right.
+Form (24px padding, scrollable, gap 16px):
+  "Sujet" Select (full-width, 44px, radius 8px): options — "Probleme avec une commande" | "Probleme de paiement" | "Probleme technique" | "Autre".
+  Conditional: "Numero de commande" input (shown only when first option selected). Placeholder "#PLZ-XXX". Helper: "Numero visible dans la section Commandes" (12px #78716C).
+  "Description" textarea (6 rows) + char count "0 / 500" (12px #78716C, bottom-right).
+  Upload zone (dashed border #E2E8F0, radius 8px, 100px height): upload icon + "Glissez ou cliquez pour ajouter un fichier" + "JPG, PNG, PDF — Max 5 Mo" (12px #A8A29E).
+  Filled: file chip "capture-commande.jpg" (gray 9999px bg, X remove).
+
+Footer (72px, border-top, 24px padding): "Annuler" ghost left + "Envoyer le ticket" primary blue right.
+Success: green check 64px + "Ticket envoye !" + "Reponse sous 24h" + "Voir mes tickets" outline button.
+
+---
+
+SCREEN 10 — Mon Compte — /dashboard/compte (accessible via sidebar bottom avatar)
+
+BREADCRUMB: "Compte"
+PAGE HEADER: "Mon compte" (24px semibold).
+
+CENTERED CONTENT (max-width 640px, margin auto):
+  Profile card (white, 12px radius, shadow, 24px padding, margin-bottom 16px):
+    Avatar 80x80px circle (#EFF6FF bg, "FA" #2563EB 24px semibold) + "Changer la photo" link (14px #2563EB) below.
+    Name: "Fatima Amrani" (20px semibold #1C1917, margin-top 12px). Email: "fatima@example.com" (14px #78716C). All centered.
+
+  Form card (white, 12px radius, shadow, 24px padding):
+    "Informations personnelles" (16px semibold, margin-bottom 16px).
+    Fields (gap 16px): "Nom complet" input "Fatima Amrani" | "Email" input | "Telephone" input dir=ltr | "Changer le mot de passe" row (chevron right, 14px #2563EB).
+
+  Save button: "Enregistrer les modifications" (max-width 640px, full-width, 44px, primary blue, margin-top 16px). Loading state.
+
+---
+
+SCREEN 11 — Ma Boutique — /dashboard/boutique (accessible via sidebar bottom)
+
+BREADCRUMB: "Boutique"
+PAGE HEADER: "Ma boutique" (24px semibold) + "Voir la boutique" outline button right (links new tab).
+
+TWO-COLUMN LAYOUT (gap 24px, max-width 1040px):
+Left (flex 1, flex column, gap 16px):
+  Card "Identite" (white, 12px radius, shadow, 24px padding):
+    "Identite" (16px semibold, margin-bottom 16px).
+    "Nom de la boutique": "Boutique Fatima".
+    "URL (slug)": "fatima-store" + preview "plaza.ma/fatima-store" below (12px #78716C). Slug change warning: "Modifier ce lien changera votre URL publique." (12px #D97706, icon warning).
+    "Description": textarea.
+
+  Card "Apparence" (white, 12px radius, shadow, 24px padding):
+    "Logo": upload zone dashed 80x80px + camera icon.
+    "Couleur principale" (margin-top 16px): 6 color swatches 40x40px each, 8px gap, 2px border on selected. Colors: #2563EB (selected) | #E8632A | #16A34A | #7C3AED | #D97706 | #EC4899. "+" custom.
+
+  Card "Livraison" (white, 12px radius, shadow, 24px padding):
+    "Zones desservies": chips row — "Casablanca" blue chip (X) + "Rabat" blue chip (X) + "+ Ajouter" dashed chip. 8px gap.
+    "Frais de livraison": number input "29" + "MAD" suffix. Below: helper "Ce montant s'applique a toutes les zones." (12px #78716C).
+
+Right (320px):
+  Store preview mockup card (white, 12px radius, shadow, 24px padding):
+    "Apercu de votre boutique" (14px semibold, margin-bottom 12px).
+    Phone mockup frame (240px wide, rounded frame border 8px #1C1917, overflow hidden, centered):
+      Mini storefront preview (320px scaled to 240px): store name "Boutique Fatima" at top + 2x2 product grid thumbnails + blue primary color applied.
+    "Mise a jour en temps reel" (12px #78716C, centered, margin-top 8px).
+
+Bottom: "Enregistrer" button (primary blue, 200px, 44px, right-aligned). Loading state.
+
+---
+
+SCREEN 12 — Parametres — /dashboard/parametres (accessible via sidebar bottom)
+
+BREADCRUMB: "Parametres"
+PAGE HEADER: "Parametres" (24px semibold).
+
+TWO-COLUMN LAYOUT (gap 24px, max-width 1040px):
+Left (flex 1, flex column, gap 16px):
+  Card "Notifications" (white, 12px radius, shadow, 24px padding):
+    "Notifications" (16px semibold, margin-bottom 16px).
+    4 toggle rows (48px each, flex space-between, border-bottom 1px #F3F4F6):
+      "Nouvelles commandes" — toggle ON #2563EB.
+      "Commandes livrees" — ON.
+      "Messages support" — ON.
+      "Promotions Plaza" — OFF gray.
+
+  Card "Langue" (white, 12px radius, shadow, 24px padding):
+    "Langue" (16px semibold, margin-bottom 12px).
+    2 option rows (48px): "Francais" + blue checkmark (selected) | "Arabe (العربية)" + empty circle.
+
+  Card "Securite" (white, 12px radius, shadow, 24px padding):
+    "Securite" (16px semibold, margin-bottom 12px).
+    "Changer le mot de passe" row (chevron right). "Authentification a 2 facteurs" row + toggle OFF.
+
+  Card "Danger" (white, 12px radius, border 1px #FEE2E2, shadow, 24px padding):
+    "Zone de danger" (16px semibold #DC2626, margin-bottom 8px).
+    "Supprimer mon compte" button (full-width, 44px, white bg, border 1.5px #DC2626, text #DC2626).
+    "Cette action supprimera toutes vos donnees de facon definitive." (12px #78716C).
+    Delete confirmation modal annotation: text field "Tapez SUPPRIMER pour confirmer" + red disabled button (becomes enabled only when text matches).
+
+---
+
+NAVIGATION CONNECTIONS (all live links in prototype):
+
+Sidebar nav: Accueil→S1 | Produits→S2 | Commandes→S5 | Finances→S7 | Support→S8
+Sidebar bottom: avatar/name → S10 | "Parametres" → S12 | "Deconnexion" → logout confirm modal
+
+S1 table rows → S6 drawer (over S1). S1 "En attente" card → S5 (filtered pending).
+S2 edit icon → S3. S2 "Ajouter" → S4.
+S5 row click or "Voir" → S6 drawer (over S5). S6 X → close drawer, return to S5.
+S8 "Nouveau ticket" → S9 drawer (over S8). S9 X → close drawer.
+S8 ticket rows → active ticket view in right panel (no page change).
+S3 breadcrumb "Produits" → S2.
+S10 "Changer le mot de passe" → password change modal.
+
+INTERACTIVE STATES:
+  Sidebar: active item bg #EFF6FF. Hover: bg #F8FAFC. Click: instant nav.
+  Table rows: hover bg #F8FAFC, cursor pointer. Click: drawer opens.
+  Drawers: backdrop rgba(0,0,0,0.3). X closes and removes backdrop.
+  Tooltips on icon-only table actions (edit / delete icons): appear on hover after 500ms delay.
+  Form inputs: focus state border #2563EB + ring shadow rgba(37,99,235,0.12).
+  Toggles: ON state #2563EB. OFF state #E2E8F0. Animated 150ms.
+  Buttons loading: spinner icon inside button, text changes, button disabled.
+  Toast success (green, top-right corner, 3s): "Produit enregistre !" / "Commande confirmee !" etc.
+  Confirmation modals: AlertDialog with overlay — Cancel (ghost) + destructive action (red).
+
+Language: French throughout. Realistic Moroccan data — names (Fatima, Youssef, Meryem, Khalid), cities (Casablanca, Rabat, Marrakech), product names, amounts in MAD.

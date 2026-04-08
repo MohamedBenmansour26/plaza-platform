@@ -45,6 +45,67 @@ breaks whenever left/right is hardcoded.
 | `rounded-l-*`                 | `rounded-s-*`                        |
 | `rounded-r-*`                 | `rounded-e-*`                        |
 
-**Root cause bug (BUG-018):** ProductsClient (`absolute left-3`, `pl-10 pr-4`),
+**Root cause bug (BUG-018 + RTL fixes on 2026-04-08):** ProductsClient (`absolute left-3`, `pl-10 pr-4`),
 OrderDetailSheet (`fixed right-0`), NewTicketSheet (`fixed right-0`, `text-right`)
 shipped with directional classes. Fixed 2026-04-08.
+
+---
+
+## UI Fix Batch — Part 1 — 08 April 2026
+
+**Source:** Antonio (Designer) — audit approved by Anas (Founder)
+**Notion page:** "Hamza — UI Fixes — Part 1" (child of "UI Fix Prompts — Part 1")
+
+**4 fixes assigned:**
+- [H1] `app/dashboard/commandes/OrdersClient.tsx` — Replace BOTH emoji 📦 empty states with `<PackageOpen className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />`. Two locations: ~line 129 (desktop) and ~line 170 (mobile). Import PackageOpen from lucide-react.
+- [H2] `app/dashboard/commandes/OrdersClient.tsx` — Filter chip padding: px-3.5 → px-3
+- [H3] `app/dashboard/finances/FinancesClient.tsx` — Replace emoji 📊 empty state with `<BarChart3Icon className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />`. Import as `import { BarChart3 as BarChart3Icon } from 'lucide-react'` to avoid conflict with recharts export.
+- [H4] `app/dashboard/support/SupportClient.tsx` — Paperclip button in ChatPanel: add `disabled` + `title="Pièces jointes — bientôt disponible"` + change classes to `p-2 text-[#E2E8F0] cursor-not-allowed`
+
+**Key note on customer names:** lib/db/orders.ts ORDER_SELECT already joins customers correctly. OrderWithDetails.customer is already typed and populated. If you see "—" in dev, it's because test data has no customer records — not a code issue. Do NOT change orders.ts.
+
+---
+
+## Sprint — 08 April 2026 — PLZ-030 + PLZ-032
+
+### PRs opened:
+- `feat/PLZ-030-ui-fixes-hamza` — Priority 1+2 UI fixes (H1-H4, RTL fixes, module-level i18n fix)
+- `feat/PLZ-032-onboarding-checklist` — OnboardingChecklist component
+
+### Priority 1 gaps found vs Figma exports:
+1. [H1] FIXED — Orders empty state: 📦 emoji → PackageOpen Lucide icon (2 locations)
+2. [H2] FIXED — Filter chip padding: px-3.5 → px-3
+3. [H3] FIXED — Finances empty state: 📊 emoji → BarChart3 Lucide icon
+4. [H4] FIXED — Support paperclip: disabled + opacity-50 + cursor-not-allowed + tooltip
+5. FIXED — OrdersClient mobile: ml-2 → ms-2, text-right → text-end (RTL fix)
+6. FIXED — OrderDetailClient: absolute left-4 → start-4, right-4 → end-4 (RTL fix)
+7. FIXED — OrderDetailClient: STATUS_BANNER + STEPS moved inside component after t() (BUG-013–016 rule)
+8. FIXED — OrderDetailClient: fixed bottom bar: left-0 right-0 → inset-x-0 (RTL fix)
+9. FIXED — Timeline connector: absolute left-3 → start-3 (RTL fix)
+
+### Customer name join:
+No code change needed — ORDER_SELECT already joins customers. The "—" in dev is test data only.
+
+### Cross-team fix:
+ParametresClient.tsx (Mehdi's file) had `setTwoFactor` unused var lint error from Mehdi's PLZ-030 commit.
+Fixed by renaming to `_setTwoFactor`. This is documented — NOT a routine cross-team edit.
+
+### Priority 3 schema findings:
+- merchants.city: NOT in schema → step 3 "Adresse et ville" always unchecked. FLAGGED to Othmane.
+- delivery_zones table: NOT in schema → step 4 "Zone de livraison" always unchecked. FLAGGED to Othmane.
+- merchants.logo_url: ✓ present
+- merchants.is_online: ✓ present
+- merchants.store_name: ✓ present (required field, always non-null)
+- products.is_visible: ✓ present
+
+### Blocker: app/dashboard/page.tsx placement
+OnboardingChecklist should be placed at top of app/dashboard/page.tsx (above stats grid).
+That file is outside Hamza's territory (CLAUDE.md "Do NOT touch").
+FLAGGED to Othmane to decide who places it.
+
+### i18n keys required for PLZ-032:
+Listed in PR description. NOT added to messages/*.json per standing rule.
+
+### StatusBadge i18n coordination:
+Mehdi's PLZ-030 PR migrated StatusBadge.tsx to useTranslations('orders').
+Pull main before opening PLZ-032 PR merge.
