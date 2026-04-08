@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Search, Edit2, Eye, EyeOff, Plus } from 'lucide-react';
+import { Search, Edit2, Trash2, Plus } from 'lucide-react';
 import type { Product } from '@/types/supabase';
+import { toggleProductVisibility, deleteProduct } from './actions';
 
 type FilterStatus = 'tous' | 'en-stock' | 'rupture' | 'masques';
 
@@ -14,10 +15,14 @@ function formatPrice(centimes: number) {
 
 type Props = { products: Product[] };
 
-export function ProductsClient({ products }: Props) {
+export function ProductsClient({ products: initialProducts }: Props) {
   const t = useTranslations('products');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('tous');
+  // Optimistic visibility state: track overrides per product id
+  const [visibilityMap, setVisibilityMap] = useState<Record<string, boolean>>({});
+  const [isPending, startTransition] = useTransition();
+  const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
 
   const filters: { id: FilterStatus; label: string }[] = [
     { id: 'tous',     label: t('filterAll') },
@@ -25,6 +30,11 @@ export function ProductsClient({ products }: Props) {
     { id: 'rupture',  label: t('filterOutOfStock') },
     { id: 'masques',  label: t('filterHidden') },
   ];
+
+  // Merge optimistic overrides into products
+  const products = initialProducts.map((p) =>
+    visibilityMap[p.id] !== undefined ? { ...p, is_visible: visibilityMap[p.id] } : p,
+  );
 
   const filtered = products.filter((p) => {
     const matchesSearch =
@@ -35,6 +45,27 @@ export function ProductsClient({ products }: Props) {
     if (filter === 'masques')  return matchesSearch && !p.is_visible;
     return matchesSearch;
   });
+
+  function handleToggleVisibility(productId: string, currentVisible: boolean) {
+    const newVisible = !currentVisible;
+    // Optimistic update
+    setVisibilityMap((prev) => ({ ...prev, [productId]: newVisible }));
+    startTransition(async () => {
+      try {
+        await toggleProductVisibility(productId, newVisible);
+      } catch {
+        // Rollback on error
+        setVisibilityMap((prev) => ({ ...prev, [productId]: currentVisible }));
+      }
+    });
+  }
+
+  function handleDeleteConfirm(productId: string) {
+    startTransition(async () => {
+      await deleteProduct(productId);
+      setDeleteModal(null);
+    });
+  }
 
   return (
     <>
@@ -69,7 +100,7 @@ export function ProductsClient({ products }: Props) {
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
-            className={`px-3 h-8 rounded-full text-sm whitespace-nowrap font-medium transition-colors ${
+            className={`px-3 h-10 rounded-full text-sm whitespace-nowrap font-medium transition-colors ${
               filter === f.id
                 ? 'bg-[#2563EB] text-white'
                 : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
@@ -83,7 +114,7 @@ export function ProductsClient({ products }: Props) {
       {/* Mobile card list */}
       <div className="px-4 space-y-2 md:hidden">
         {filtered.length === 0 ? (
-          <EmptyState hasProducts={products.length > 0} />
+          <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
           filtered.map((product) => (
             <Link key={product.id} href={`/dashboard/produits/${product.id}`}>
@@ -113,13 +144,6 @@ export function ProductsClient({ products }: Props) {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col items-end justify-start pt-1">
-                  {product.is_visible ? (
-                    <Eye size={18} className="text-[#2563EB]" />
-                  ) : (
-                    <EyeOff size={18} className="text-[#78716C]" />
-                  )}
-                </div>
               </div>
             </Link>
           ))
@@ -133,12 +157,12 @@ export function ProductsClient({ products }: Props) {
           <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase">{t('colName')}</div>
           <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">{t('colPrice')}</div>
           <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStock')}</div>
-          <div className="w-[100px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStatus')}</div>
-          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">{t('colActions')}</div>
+          <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStatus')}</div>
+          <div className="w-20 text-[13px] font-medium text-[#78716C] uppercase">{t('colActions')}</div>
         </div>
 
         {filtered.length === 0 ? (
-          <EmptyState hasProducts={products.length > 0} />
+          <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
           filtered.map((product) => (
             <div
@@ -172,18 +196,28 @@ export function ProductsClient({ products }: Props) {
                   </span>
                 )}
               </div>
-              <div className="w-[100px]">
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    product.is_visible
-                      ? 'bg-[#F0FDF4] text-[#16A34A]'
-                      : 'bg-[#F5F5F4] text-[#78716C]'
+              {/* M7 — Inline visibility toggle */}
+              <div className="w-[120px]">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={product.is_visible}
+                  aria-label={product.is_visible ? t('visible') : t('hidden')}
+                  disabled={isPending}
+                  onClick={() => handleToggleVisibility(product.id, product.is_visible)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 disabled:opacity-60 ${
+                    product.is_visible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
                   }`}
                 >
-                  {product.is_visible ? t('visible') : t('hidden')}
-                </span>
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      product.is_visible ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <div className="w-16 flex items-center gap-1">
+              {/* M8 — Edit + Delete actions */}
+              <div className="w-20 flex items-center gap-1">
                 <Link
                   href={`/dashboard/produits/${product.id}`}
                   className="p-1 text-[#78716C] hover:text-[#2563EB] transition-colors"
@@ -191,11 +225,49 @@ export function ProductsClient({ products }: Props) {
                 >
                   <Edit2 className="w-5 h-5" />
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModal({ id: product.id, name: product.name_fr })}
+                  className="p-1 text-[#78716C] hover:text-[#DC2626] transition-colors"
+                  title={t('formDelete')}
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
+            <p className="text-sm text-[#78716C] mb-6">
+              {t('formDeleteBody')}
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteModal(null)}
+                disabled={isPending}
+                className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+              >
+                {t('formDeleteCancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteConfirm(deleteModal.id)}
+                disabled={isPending}
+                className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+              >
+                {isPending ? '…' : t('formDeleteConfirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
