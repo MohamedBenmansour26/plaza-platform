@@ -7,6 +7,68 @@ import Link from 'next/link';
 import type { Product } from '@/types/supabase';
 import { createProduct, updateProduct, deleteProduct } from './actions';
 
+const PRODUCT_CATEGORIES: Record<string, Record<string, string[]>> = {
+  'Mode': {
+    'Femme': ['Robes', 'Tops & T-shirts', 'Pantalons', 'Vestes', 'Sous-vêtements', 'Chaussures', 'Accessoires'],
+    'Homme': ['Chemises', 'Pantalons', 'Vestes', 'T-shirts', 'Chaussures', 'Accessoires'],
+    'Enfants': ['Vêtements fille', 'Vêtements garçon', 'Chaussures enfant'],
+    'Autre': [],
+  },
+  'Beauté': {
+    'Soins visage': ['Crèmes hydratantes', 'Sérums', 'Masques', 'Contours des yeux'],
+    'Soins corps': ['Lotions', 'Huiles corps', 'Gommages'],
+    'Maquillage': ['Fond de teint', 'Rouge à lèvres', 'Mascara', 'Fards'],
+    'Parfums': ['Eau de parfum', 'Eau de toilette', 'Huiles parfumées'],
+    'Cheveux': ['Shampooings', 'Soins & masques', 'Colorations'],
+  },
+  'Alimentation': {
+    'Épices & condiments': ['Ras el hanout', 'Cumin', 'Paprika', 'Harissa', "Mélange d'épices"],
+    'Huiles & vinaigres': ["Huile d'olive", "Huile d'argan", 'Vinaigres'],
+    'Boissons': ['Thé & tisanes', 'Café', 'Jus naturels'],
+    'Pâtisseries & sucreries': ['Gâteaux secs', 'Miel', 'Confiture', 'Chocolats'],
+    'Produits frais': ['Fromages', 'Yaourts', 'Autres'],
+    'Autre': [],
+  },
+  'Maison': {
+    'Cuisine': ['Ustensiles', 'Art de la table', 'Rangement cuisine'],
+    'Salon & séjour': ['Coussins', 'Tapis', 'Rideaux', 'Décoration'],
+    'Chambre': ['Linge de lit', 'Oreillers & couettes'],
+    'Salle de bain': ['Serviettes', 'Accessoires salle de bain'],
+    'Autre': [],
+  },
+  'Électronique': {
+    'Smartphones & téléphonie': ['Smartphones', 'Accessoires téléphone', 'Coque & protection'],
+    'Informatique': ['PC & laptops', 'Périphériques', 'Stockage'],
+    'Audio & vidéo': ['Écouteurs', 'Enceintes', 'TV & projecteurs'],
+    'Électroménager': ['Petit électroménager', 'Gros électroménager'],
+    'Autre': [],
+  },
+  'Sport': {
+    'Fitness & musculation': ['Vêtements sport', 'Équipement fitness', 'Nutrition sportive'],
+    'Sports outdoor': ['Randonnée', 'Cyclisme', 'Football & sports collectifs'],
+    'Bien-être': ['Yoga & méditation', 'Massage'],
+    'Autre': [],
+  },
+  'Bijoux': {
+    'Colliers & pendentifs': [],
+    'Bagues': [],
+    'Bracelets': [],
+    "Boucles d'oreilles": [],
+    'Montres': [],
+    'Bijoux fantaisie': [],
+  },
+  'Enfants': {
+    'Jouets & jeux': ["Jouets d'éveil", 'Jeux de société', 'Peluches'],
+    'Vêtements enfant': ['0-2 ans', '3-6 ans', '7-12 ans'],
+    'Puériculture': ['Poussettes', 'Sièges auto', 'Accessoires bébé'],
+    'Livres & éducatif': [],
+    'Autre': [],
+  },
+  'Autre': {
+    'Autre': [],
+  },
+};
+
 type Props = {
   product?: Product;
 };
@@ -30,6 +92,17 @@ export function ProductForm({ product }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
+
+  // Categories
+  const [catL1, setCatL1] = useState(product?.category_l1 ?? '');
+  const [catL2, setCatL2] = useState(product?.category_l2 ?? '');
+  const [catL3, setCatL3] = useState(product?.category_l3 ?? '');
+
+  // Discount / promotion
+  const [discountActive, setDiscountActive] = useState(product?.discount_active ?? false);
+  const [originalPrice, setOriginalPrice] = useState(
+    product?.original_price ? String(product.original_price / 100) : ''
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +148,13 @@ export function ProductForm({ product }: Props) {
     fd.set('stock', String(stock));
     fd.set('image_url', imageUrl);
     fd.set('is_visible', String(isVisible));
+    fd.set('category_l1', catL1);
+    fd.set('category_l2', catL2);
+    fd.set('category_l3', catL3);
+    fd.set('discount_active', String(discountActive));
+    if (discountActive && originalPrice) {
+      fd.set('original_price', String(Math.round(parseFloat(originalPrice) * 100)));
+    }
     startTransition(async () => {
       if (isEdit && product) {
         await updateProduct(product.id, fd);
@@ -98,9 +178,47 @@ export function ProductForm({ product }: Props) {
       <h2 className="text-base font-semibold text-[#1C1917] mb-1">{t('formPriceTitle')}</h2>
       <p className="text-[13px] text-[#78716C] mb-4">{t('formPriceSubtitle')}</p>
 
+      {/* Promotion toggle */}
+      <div className="flex items-center justify-between mb-4 p-3 bg-[#FFF7ED] rounded-lg">
+        <div>
+          <div className="text-sm font-medium text-[#1C1917]">Activer une promotion</div>
+          <div className="text-xs text-[#78716C]">Afficher un prix barré sur le produit</div>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={discountActive}
+          onClick={() => setDiscountActive(v => !v)}
+          className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${
+            discountActive ? 'bg-[#E8632A]' : 'bg-[#E2E8F0]'
+          }`}
+        >
+          <span className={`absolute top-0.5 start-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+            discountActive ? 'translate-x-5' : 'translate-x-0'
+          }`} />
+        </button>
+      </div>
+
+      {discountActive && (
+        <div className="mb-3">
+          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+            Prix original (barré)
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              value={originalPrice}
+              onChange={(e) => setOriginalPrice(e.target.value)}
+              className="w-full h-14 px-4 pr-16 border border-[#E2E8F0] rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 transition-all"
+            />
+            <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
+          </div>
+        </div>
+      )}
+
       <div className="mb-3">
         <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
-          {t('formPriceLabel')}
+          {discountActive ? 'Prix promotionnel' : t('formPriceLabel')}
         </label>
         <div className="relative">
           <input
@@ -305,6 +423,49 @@ export function ProductForm({ product }: Props) {
             />
           </div>
 
+          {/* Product categories — 3 levels */}
+          <div>
+            <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+              Catégorie
+            </label>
+            <select
+              value={catL1}
+              onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
+              className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+            >
+              <option value="">Sélectionner une catégorie</option>
+              {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
+                <option key={l1} value={l1}>{l1}</option>
+              ))}
+            </select>
+
+            {catL1 && Object.keys(PRODUCT_CATEGORIES[catL1] ?? {}).length > 0 && (
+              <select
+                value={catL2}
+                onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
+                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+              >
+                <option value="">Sous-catégorie</option>
+                {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
+                  <option key={l2} value={l2}>{l2}</option>
+                ))}
+              </select>
+            )}
+
+            {catL1 && catL2 && (PRODUCT_CATEGORIES[catL1]?.[catL2] ?? []).length > 0 && (
+              <select
+                value={catL3}
+                onChange={(e) => setCatL3(e.target.value)}
+                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+              >
+                <option value="">Type (optionnel)</option>
+                {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
+                  <option key={l3} value={l3}>{l3}</option>
+                ))}
+              </select>
+            )}
+          </div>
+
           {/* Stock */}
           <div>
             <label className="block text-sm font-medium text-[#1C1917] mb-2">
@@ -440,6 +601,49 @@ export function ProductForm({ product }: Props) {
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] resize-none"
                   />
+                </div>
+
+                {/* Product categories — 3 levels */}
+                <div>
+                  <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+                    Catégorie
+                  </label>
+                  <select
+                    value={catL1}
+                    onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
+                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
+                      <option key={l1} value={l1}>{l1}</option>
+                    ))}
+                  </select>
+
+                  {catL1 && Object.keys(PRODUCT_CATEGORIES[catL1] ?? {}).length > 0 && (
+                    <select
+                      value={catL2}
+                      onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
+                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+                    >
+                      <option value="">Sous-catégorie</option>
+                      {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
+                        <option key={l2} value={l2}>{l2}</option>
+                      ))}
+                    </select>
+                  )}
+
+                  {catL1 && catL2 && (PRODUCT_CATEGORIES[catL1]?.[catL2] ?? []).length > 0 && (
+                    <select
+                      value={catL3}
+                      onChange={(e) => setCatL3(e.target.value)}
+                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+                    >
+                      <option value="">Type (optionnel)</option>
+                      {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
+                        <option key={l3} value={l3}>{l3}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 {/* Stock with stepper */}

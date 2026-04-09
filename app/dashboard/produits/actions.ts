@@ -33,6 +33,12 @@ export async function createProduct(formData: FormData): Promise<void> {
   const stock = Math.max(0, parseInt(formData.get('stock') as string) || 0);
   const imageUrl = (formData.get('image_url') as string | null) || null;
   const isVisible = formData.get('is_visible') === 'true';
+  const discountActive = formData.get('discount_active') === 'true';
+  const originalPriceRaw = formData.get('original_price');
+  const originalPrice = originalPriceRaw ? parseInt(originalPriceRaw as string) : null;
+  const catL1 = (formData.get('category_l1') as string) || null;
+  const catL2 = (formData.get('category_l2') as string) || null;
+  const catL3 = (formData.get('category_l3') as string) || null;
 
   await supabase.from('products').insert({
     merchant_id: merchantId,
@@ -43,6 +49,11 @@ export async function createProduct(formData: FormData): Promise<void> {
     stock,
     image_url: imageUrl,
     is_visible: isVisible,
+    discount_active: discountActive,
+    original_price: originalPrice,
+    category_l1: catL1,
+    category_l2: catL2,
+    category_l3: catL3,
   } as never);
 
   revalidatePath('/dashboard/produits');
@@ -60,6 +71,12 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   const stock = Math.max(0, parseInt(formData.get('stock') as string) || 0);
   const imageUrl = (formData.get('image_url') as string | null) || null;
   const isVisible = formData.get('is_visible') === 'true';
+  const discountActive = formData.get('discount_active') === 'true';
+  const originalPriceRaw = formData.get('original_price');
+  const originalPrice = originalPriceRaw ? parseInt(originalPriceRaw as string) : null;
+  const catL1 = (formData.get('category_l1') as string) || null;
+  const catL2 = (formData.get('category_l2') as string) || null;
+  const catL3 = (formData.get('category_l3') as string) || null;
 
   await supabase
     .from('products')
@@ -71,6 +88,11 @@ export async function updateProduct(productId: string, formData: FormData): Prom
       stock,
       image_url: imageUrl,
       is_visible: isVisible,
+      discount_active: discountActive,
+      original_price: originalPrice,
+      category_l1: catL1,
+      category_l2: catL2,
+      category_l3: catL3,
     } as never)
     .eq('id', productId)
     .eq('merchant_id', merchantId);

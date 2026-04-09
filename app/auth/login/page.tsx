@@ -116,6 +116,16 @@ export default function PhoneEntryPage() {
             {t('terms')}
           </div>
         </div>
+
+        <div className="mt-6 text-center">
+          <span className="text-sm text-[#78716C]">Vous avez déjà un compte ?{' '}</span>
+          <a
+            href="/auth/pin-login"
+            className="text-sm font-medium text-[#2563EB] hover:underline"
+          >
+            Se connecter
+          </a>
+        </div>
       </div>
     </main>
   );
