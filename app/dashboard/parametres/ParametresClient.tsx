@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronRight, Check, Circle } from 'lucide-react';
+import { ChevronRight, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type NotifKey = 'newOrders' | 'delivered' | 'support' | 'promotions';
@@ -18,7 +18,6 @@ export function ParametresClient() {
     promotions: false,
   });
 
-  const [selectedLanguage, setSelectedLanguage] = useState('fr');
   const [twoFactor, _setTwoFactor] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -28,17 +27,6 @@ export function ParametresClient() {
     { id: 'support', label: t('notifSupport') },
     { id: 'promotions', label: t('notifPromotions') },
   ];
-
-  const languages = [
-    { id: 'fr', label: t('langFr') },
-    { id: 'ar', label: t('langAr') },
-  ];
-
-  function handleLanguageChange(lang: string) {
-    setSelectedLanguage(lang);
-    // Set next-intl locale cookie — picked up on next navigation
-    document.cookie = `NEXT_LOCALE=${lang};path=/;max-age=31536000;samesite=lax`;
-  }
 
   function handleDeleteAccount() {
     startDeleteTransition(async () => {
@@ -109,25 +97,20 @@ export function ParametresClient() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-base font-semibold text-[#1C1917] mb-3">{t('languageTitle')}</h2>
           <div>
-            {languages.map((lang, idx) => (
-              <button
-                key={lang.id}
-                type="button"
-                onClick={() => handleLanguageChange(lang.id)}
-                className={`h-12 w-full flex items-center justify-between text-left hover:bg-[#F8FAFC] transition-colors px-1 ${
-                  idx < languages.length - 1 ? 'border-b border-[#F3F4F6]' : ''
-                }`}
-              >
-                <span className="text-sm text-[#1C1917]">{lang.label}</span>
-                {selectedLanguage === lang.id ? (
-                  <div className="w-5 h-5 rounded-full bg-[#2563EB] flex items-center justify-center">
-                    <Check className="w-3 h-3 text-white" />
-                  </div>
-                ) : (
-                  <Circle className="w-5 h-5 text-[#E2E8F0]" />
-                )}
-              </button>
-            ))}
+            {/* French — active, always selected */}
+            <div className="h-12 w-full flex items-center justify-between px-1 border-b border-[#F3F4F6]">
+              <span className="text-sm text-[#1C1917]">{t('langFr')}</span>
+              <div className="w-5 h-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+                <Check className="w-3 h-3 text-white" />
+              </div>
+            </div>
+            {/* Arabic — coming soon */}
+            <div className="h-12 w-full flex items-center justify-between px-1 opacity-50 cursor-not-allowed">
+              <span className="text-sm text-[#78716C]">{t('langAr')}</span>
+              <span className="text-xs text-[#A8A29E] bg-[#F5F5F4] px-2 py-1 rounded-full">
+                Bientôt disponible
+              </span>
+            </div>
           </div>
         </div>
 
@@ -160,7 +143,6 @@ export function ParametresClient() {
 
         {/* Danger zone */}
         <div className="bg-white rounded-xl border border-[#FEE2E2] shadow-sm p-6">
-          <h2 className="text-base font-semibold text-[#DC2626] mb-2">{t('dangerZone')}</h2>
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
