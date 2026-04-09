@@ -19,6 +19,8 @@ type Props = {
   onDescription: (v: string) => void;
   onLogoFile: (f: File) => void;
   onNext: () => void;
+  submitting?: boolean;
+  error?: string | null;
 };
 
 export function StepStoreDetails({
@@ -32,6 +34,8 @@ export function StepStoreDetails({
   onDescription,
   onLogoFile,
   onNext,
+  submitting = false,
+  error = null,
 }: Props) {
   const t = useTranslations('onboarding');
 
@@ -113,8 +117,11 @@ export function StepStoreDetails({
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={!canContinue}>
-        {t('next')}
+      {error && (
+        <p className="text-sm text-destructive text-center">{error}</p>
+      )}
+      <Button type="submit" className="w-full" disabled={!canContinue || submitting}>
+        {submitting ? '…' : t('finish')}
       </Button>
     </form>
   );

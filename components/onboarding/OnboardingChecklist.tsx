@@ -1,40 +1,39 @@
 'use client';
 
 /**
- * OnboardingChecklist — PLZ-032
+ * OnboardingChecklist — PLZ-032 / PLZ-037
  *
  * Shows a checklist to help merchants complete their store setup.
- * Displayed at the top of the dashboard when the store is not yet live (is_online = false).
+ * Displayed at the top of the dashboard when the store is not yet live (is_online = false)
+ * or when required setup steps are incomplete.
  *
- * Schema notes (flagged to Othmane for founder approval):
- *   - merchants.city is NOT in current schema → step 3 (Adresse et ville) is always unchecked
- *   - delivery_zones table does NOT exist → step 4 (Zone de livraison) is always unchecked
- *   These two columns must be added via migration before steps 3/4 can auto-check.
- *
- * i18n keys required (to be added to messages/fr.json and messages/ar.json):
+ * i18n keys required (messages/fr.json):
  *   onboarding.checklist_title
  *   onboarding.checklist_subtitle
  *   onboarding.checklist_progress  (params: {done, total})
  *   onboarding.checklist_progress_done (= "Félicitations !")
  *   onboarding.step_identity        (= "Identité vérifiée")
  *   onboarding.step_store_name      (= "Nom de la boutique")
- *   onboarding.step_address         (= "Adresse et ville")
- *   onboarding.step_delivery_zone   (= "Zone de livraison")
+ *   onboarding.step_location        (= "Localisation de la boutique")
+ *   onboarding.step_photo           (= "Photo de la boutique")
+ *   onboarding.step_description     (= "Description de la boutique")
+ *   onboarding.step_category        (= "Catégorie")
  *   onboarding.step_product         (= "Au moins 1 produit publié")
- *   onboarding.step_logo            (= "Logo de la boutique")
  *   onboarding.step_share           (= "Partager votre lien")
  *   onboarding.step_identity_desc   (= "Compte vérifié par OTP")
  *   onboarding.step_store_name_desc (= "Nom de votre boutique défini")
- *   onboarding.step_address_desc    (= "Ville de livraison configurée")
- *   onboarding.step_delivery_desc   (= "Zone de livraison configurée")
+ *   onboarding.step_location_desc   (= "Coordonnées GPS de votre boutique")
+ *   onboarding.step_photo_desc      (= "Logo ou photo ajouté à votre boutique")
+ *   onboarding.step_description_desc(= "Description de votre boutique rédigée")
+ *   onboarding.step_category_desc   (= "Catégorie de votre boutique définie")
  *   onboarding.step_product_desc    (= "Au moins un produit visible")
- *   onboarding.step_logo_desc       (= "Logo ajouté à votre boutique")
  *   onboarding.step_share_desc      (= "Lien partagé avec vos clients")
- *   onboarding.step_share_cta       (= "Copier le lien")
- *   onboarding.step_address_cta     (= "Configurer")
- *   onboarding.step_delivery_cta    (= "Configurer")
+ *   onboarding.step_location_cta    (= "Configurer")
+ *   onboarding.step_photo_cta       (= "Ajouter")
+ *   onboarding.step_description_cta (= "Rédiger")
+ *   onboarding.step_category_cta    (= "Choisir")
  *   onboarding.step_product_cta     (= "Ajouter")
- *   onboarding.step_logo_cta        (= "Ajouter")
+ *   onboarding.step_share_cta       (= "Copier le lien")
  *   onboarding.publish_cta          (= "Publier ma boutique")
  *   onboarding.publishing           (= "Publication…")
  *   onboarding.published_title      (= "Votre boutique est en ligne !")
@@ -62,15 +61,18 @@ import { publishStoreAction } from './actions';
 export type OnboardingData = {
   merchantId: string;
   storeName: string | null;
-  /** city — NOT in current schema, always null until migration */
-  city: string | null;
+  /** true when both location_lat AND location_lng are non-null */
+  hasLocation: boolean;
+  /** true when logo_url is non-null */
   logoUrl: string | null;
+  /** true when description is non-null and non-empty */
+  hasDescription: boolean;
+  /** true when category is non-null */
+  hasCategory: boolean;
   isOnline: boolean;
   storeSlug: string;
   /** count of products with is_visible=true */
   visibleProductCount: number;
-  /** whether merchant has at least 1 delivery zone — NOT in current schema, always false */
-  hasDeliveryZone: boolean;
 };
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -152,12 +154,12 @@ export function OnboardingChecklist({ data }: Props) {
 
   // Steps definition — must be inside component after t() (BUG-013–016 rule)
   const steps = [
-    // Auto-checked
+    // Auto-checked (not blocking)
     {
       id: 'identity',
       label: t('step_identity'),
       desc: t('step_identity_desc'),
-      checked: true, // always true once logged in (phone OTP done)
+      checked: true,
       required: false,
       cta: null as string | null,
       href: null as string | null,
@@ -173,24 +175,44 @@ export function OnboardingChecklist({ data }: Props) {
       href: null,
       isShare: false,
     },
-    // Merchant action required (blocking for go-live)
+    // Required (blocking for go-live)
     {
-      id: 'address',
-      label: t('step_address'),
-      desc: t('step_address_desc'),
-      checked: data.city !== null,
+      id: 'location',
+      label: t('step_location'),
+      desc: t('step_location_desc'),
+      checked: data.hasLocation,
       required: true,
-      cta: t('step_address_cta'),
+      cta: t('step_location_cta'),
       href: '/dashboard/boutique',
       isShare: false,
     },
     {
-      id: 'delivery_zone',
-      label: t('step_delivery_zone'),
-      desc: t('step_delivery_desc'),
-      checked: data.hasDeliveryZone,
+      id: 'photo',
+      label: t('step_photo'),
+      desc: t('step_photo_desc'),
+      checked: data.logoUrl !== null,
       required: true,
-      cta: t('step_delivery_cta'),
+      cta: t('step_photo_cta'),
+      href: '/dashboard/boutique',
+      isShare: false,
+    },
+    {
+      id: 'description',
+      label: t('step_description'),
+      desc: t('step_description_desc'),
+      checked: data.hasDescription,
+      required: true,
+      cta: t('step_description_cta'),
+      href: '/dashboard/boutique',
+      isShare: false,
+    },
+    {
+      id: 'category',
+      label: t('step_category'),
+      desc: t('step_category_desc'),
+      checked: data.hasCategory,
+      required: true,
+      cta: t('step_category_cta'),
       href: '/dashboard/boutique',
       isShare: false,
     },
@@ -204,17 +226,7 @@ export function OnboardingChecklist({ data }: Props) {
       href: '/dashboard/produits',
       isShare: false,
     },
-    // Recommended (non-blocking)
-    {
-      id: 'logo',
-      label: t('step_logo'),
-      desc: t('step_logo_desc'),
-      checked: data.logoUrl !== null,
-      required: false,
-      cta: t('step_logo_cta'),
-      href: '/dashboard/boutique',
-      isShare: false,
-    },
+    // Non-blocking
     {
       id: 'share',
       label: t('step_share'),
@@ -228,7 +240,7 @@ export function OnboardingChecklist({ data }: Props) {
   ] as const;
 
   const requiredStepsDone = steps.filter((s) => s.required && s.checked).length;
-  const totalRequired = steps.filter((s) => s.required).length; // 3
+  const totalRequired = steps.filter((s) => s.required).length; // 5
   const totalDone = steps.filter((s) => s.checked).length;
   const totalSteps = steps.length;
   const progressPercent = Math.round((totalDone / totalSteps) * 100);
