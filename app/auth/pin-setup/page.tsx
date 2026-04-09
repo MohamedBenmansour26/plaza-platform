@@ -110,15 +110,52 @@ function PINSetupContent() {
         </h1>
         <p className="text-sm text-[#78716C] mt-2">{t('subtitle')}</p>
 
-        {/* PIN dots */}
-        <div className={`flex justify-center gap-4 mt-8 ${shake ? 'animate-bounce' : ''}`}>
+        {/* PIN dots — mobile only */}
+        <div className="lg:hidden">
+          <div className={`flex justify-center gap-4 mt-8 ${shake ? 'animate-bounce' : ''}`}>
+            {([0, 1, 2, 3] as const).map((index) => (
+              <div
+                key={index}
+                className={`w-5 h-5 rounded-full transition-all ${
+                  currentPin.length > index
+                    ? error ? 'bg-[#DC2626]' : 'bg-[#2563EB]'
+                    : 'border-2 border-[#E2E8F0] bg-white'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: 4 separate input fields */}
+        <div className="hidden lg:flex justify-center gap-3 mt-8">
           {([0, 1, 2, 3] as const).map((index) => (
-            <div
+            <input
               key={index}
-              className={`w-5 h-5 rounded-full transition-all ${
-                currentPin.length > index
-                  ? error ? 'bg-[#DC2626]' : 'bg-[#2563EB]'
-                  : 'border-2 border-[#E2E8F0] bg-white'
+              type="password"
+              inputMode="numeric"
+              maxLength={1}
+              value={currentPin[index] ?? ''}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '').slice(-1);
+                const arr = (currentPin + '    ').slice(0, 4).split('');
+                arr[index] = val;
+                const newPin = arr.join('').trimEnd();
+                if (step === 1) setPin(newPin);
+                else setConfirmPin(newPin);
+                if (val && index < 3) {
+                  const next = document.getElementById(`pin-input-${index + 1}`);
+                  if (next) (next as HTMLInputElement).focus();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Backspace' && !currentPin[index] && index > 0) {
+                  const prev = document.getElementById(`pin-input-${index - 1}`);
+                  if (prev) (prev as HTMLInputElement).focus();
+                }
+              }}
+              id={`pin-input-${index}`}
+              className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
+                error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
               }`}
             />
           ))}
@@ -128,46 +165,50 @@ function PINSetupContent() {
           <div className="text-[13px] text-[#DC2626] text-center mt-4">{t('mismatch')}</div>
         )}
 
-        {/* Custom numpad */}
-        <div className="grid grid-cols-3 gap-3 mt-8 max-w-[280px] mx-auto">
-          {NUMPAD.map((num) => (
+        {/* Custom numpad — mobile only */}
+        <div className="lg:hidden">
+          <div className="grid grid-cols-3 gap-3 mt-8 max-w-[280px] mx-auto">
+            {NUMPAD.map((num) => (
+              <button
+                key={num}
+                onClick={() => handleNumberPress(num.toString())}
+                className="h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all"
+              >
+                {num}
+              </button>
+            ))}
+            {/* Bottom row */}
+            <div />
             <button
-              key={num}
-              onClick={() => handleNumberPress(num.toString())}
+              onClick={() => handleNumberPress('0')}
               className="h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all"
             >
-              {num}
+              0
             </button>
-          ))}
-          {/* Bottom row */}
-          <div />
-          <button
-            onClick={() => handleNumberPress('0')}
-            className="h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all"
-          >
-            0
-          </button>
-          {/* TODO PLZ-033: migrate to i18n */}
-          <button
-            onClick={handleBackspace}
-            className="h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all"
-            aria-label="Effacer"
-          >
-            <Delete className="w-5 h-5 text-[#1C1917]" />
-          </button>
+            {/* TODO PLZ-033: migrate to i18n */}
+            <button
+              onClick={handleBackspace}
+              className="h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all"
+              aria-label="Effacer"
+            >
+              <Delete className="w-5 h-5 text-[#1C1917]" />
+            </button>
+          </div>
         </div>
 
-        {/* Biometric (disabled, coming soon) */}
-        <div className="flex items-center gap-3 mt-6 p-4 bg-[#FAFAF9] rounded-xl">
-          <Fingerprint className="w-5 h-5 text-[#A8A29E] flex-shrink-0" />
-          <span className="text-[13px] text-[#78716C] flex-1">{t('biometricLabel')}</span>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-6 rounded-full bg-[#E2E8F0] relative">
-              <div className="w-5 h-5 rounded-full bg-white absolute start-0.5 top-0.5" />
+        {/* Biometric (disabled, coming soon) — mobile only */}
+        <div className="lg:hidden">
+          <div className="flex items-center gap-3 mt-6 p-4 bg-[#FAFAF9] rounded-xl">
+            <Fingerprint className="w-5 h-5 text-[#A8A29E] flex-shrink-0" />
+            <span className="text-[13px] text-[#78716C] flex-1">{t('biometricLabel')}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-6 rounded-full bg-[#E2E8F0] relative">
+                <div className="w-5 h-5 rounded-full bg-white absolute start-0.5 top-0.5" />
+              </div>
+              <span className="text-xs text-[#A8A29E] bg-[#F5F5F4] px-2 py-1 rounded-full">
+                {t('biometricSoon')}
+              </span>
             </div>
-            <span className="text-xs text-[#A8A29E] bg-[#F5F5F4] px-2 py-1 rounded-full">
-              {t('biometricSoon')}
-            </span>
           </div>
         </div>
       </div>
