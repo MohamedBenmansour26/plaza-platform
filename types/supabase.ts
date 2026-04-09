@@ -64,7 +64,11 @@ export type Database = {
           locked_until:             string | null
           phone:                    string | null
           // Onboarding checklist columns (migration 2026-04-08)
-          city:                     string | null
+          city:                     string | null   // deprecated — use location_lat/lng
+          // Store location — Mapbox map pin (migration 2026-04-10)
+          location_lat:             number | null
+          location_lng:             number | null
+          location_description:     string | null
         }
         Insert: {
           id?:                      string
@@ -85,6 +89,9 @@ export type Database = {
           locked_until?:            string | null
           phone?:                   string | null
           city?:                    string | null
+          location_lat?:            number | null
+          location_lng?:            number | null
+          location_description?:    string | null
         }
         Update: {
           id?:                      string
@@ -105,6 +112,9 @@ export type Database = {
           locked_until?:            string | null
           phone?:                   string | null
           city?:                    string | null
+          location_lat?:            number | null
+          location_lng?:            number | null
+          location_description?:    string | null
         }
         Relationships: [
           {
@@ -120,40 +130,57 @@ export type Database = {
       // ── Products ───────────────────────────────────────
       products: {
         Row: {
-          id:          string
-          merchant_id: string
-          name_fr:     string
-          name_ar:     string | null
-          description: string | null
-          price:       number
-          stock:       number
-          image_url:   string | null
-          is_visible:  boolean
-          created_at:  string
+          id:              string
+          merchant_id:     string
+          name_fr:         string
+          name_ar:         string | null
+          description:     string | null
+          price:           number
+          stock:           number
+          image_url:       string | null
+          is_visible:      boolean
+          created_at:      string
+          // 3-level product categories (migration 2026-04-10)
+          category_l1:     string | null
+          category_l2:     string | null
+          category_l3:     string | null
+          // Promotions (migration 2026-04-10)
+          original_price:  number | null
+          discount_active: boolean
         }
         Insert: {
-          id?:          string
-          merchant_id:  string
-          name_fr:      string
-          name_ar?:     string | null
-          description?: string | null
-          price:        number
-          stock?:       number
-          image_url?:   string | null
-          is_visible?:  boolean
-          created_at?:  string
+          id?:              string
+          merchant_id:      string
+          name_fr:          string
+          name_ar?:         string | null
+          description?:     string | null
+          price:            number
+          stock?:           number
+          image_url?:       string | null
+          is_visible?:      boolean
+          created_at?:      string
+          category_l1?:     string | null
+          category_l2?:     string | null
+          category_l3?:     string | null
+          original_price?:  number | null
+          discount_active?: boolean
         }
         Update: {
-          id?:          string
-          merchant_id?: string
-          name_fr?:     string
-          name_ar?:     string | null
-          description?: string | null
-          price?:       number
-          stock?:       number
-          image_url?:   string | null
-          is_visible?:  boolean
-          created_at?:  string
+          id?:              string
+          merchant_id?:     string
+          name_fr?:         string
+          name_ar?:         string | null
+          description?:     string | null
+          price?:           number
+          stock?:           number
+          image_url?:       string | null
+          is_visible?:      boolean
+          created_at?:      string
+          category_l1?:     string | null
+          category_l2?:     string | null
+          category_l3?:     string | null
+          original_price?:  number | null
+          discount_active?: boolean
         }
         Relationships: [
           {
