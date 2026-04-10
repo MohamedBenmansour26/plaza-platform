@@ -15,14 +15,14 @@ function getStockDisplay(stock: number) {
   if (stock > 5) return null;
   if (stock >= 1) {
     return (
-      <p style={{ color: '#E8632A', fontSize: '11px', fontWeight: 500 }} className="mb-1">
+      <p className="text-[12px] font-medium mb-1" style={{ color: '#D97706' }}>
         Plus que {stock} en stock
       </p>
     );
   }
   // stock === 0
   return (
-    <p style={{ color: '#DC2626', fontSize: '11px' }} className="mb-1">
+    <p className="text-[12px] font-medium mb-1" style={{ color: '#DC2626' }}>
       Rupture de stock
     </p>
   );
@@ -58,7 +58,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
   const card = (
     <motion.div
       whileHover={!outOfStock ? { y: -2 } : {}}
-      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col ${outOfStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col shadow-sm hover:shadow-md transition-shadow duration-200 ${outOfStock ? 'pointer-events-none opacity-50' : ''}`}
       style={{ aspectRatio: '0.75' }}
     >
       <div className="relative w-full flex-1 overflow-hidden">
@@ -74,7 +74,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           </div>
         )}
         {discountPct != null && (
-          <div className="absolute top-1.5 right-1.5 bg-[#E8632A] text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+          <div className="absolute top-2 left-2 bg-[#E8632A] text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
             -{discountPct}%
           </div>
         )}
@@ -85,13 +85,13 @@ export function ProductCard({ product, slug }: ProductCardProps) {
         )}
       </div>
 
-      <div className="p-2 flex flex-col justify-between">
-        <h3 className="font-medium text-[12px] line-clamp-2 leading-tight mb-1">
+      <div className="p-3 flex flex-col justify-between">
+        <h3 className="font-medium text-[14px] line-clamp-2 leading-tight mb-1">
           {product.name_fr}
         </h3>
         <div>{getStockDisplay(product.stock)}</div>
         <div className="flex items-baseline gap-1 mb-1.5">
-          <span className="font-bold text-[13px]">{priceMAD} MAD</span>
+          <span className="font-bold text-[15px]">{priceMAD} MAD</span>
           {originalPriceMAD != null && showDiscount && (
             <span className="text-[10px] text-[#A8A29E] line-through">
               {originalPriceMAD} MAD
@@ -102,7 +102,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
         <button
           onClick={handleAddToCart}
           disabled={outOfStock}
-          className={`w-full h-11 rounded text-[11px] font-medium transition-colors ${
+          className={`w-full h-11 rounded text-[13px] font-medium transition-colors ${
             outOfStock
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]'

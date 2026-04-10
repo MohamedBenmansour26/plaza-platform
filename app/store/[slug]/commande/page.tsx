@@ -6,6 +6,7 @@ import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import DateTimePicker from '../_components/DateTimePicker';
+import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
 import { getMerchantBySlug } from '../actions';
 import type { Merchant } from '@/types/supabase';
@@ -47,6 +48,8 @@ export default function CheckoutPage() {
   const [addressNotes, setAddressNotes] = useState('');
   const [city, setCity] = useState('');
   const [notes, setNotes] = useState('');
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
 
   const [codConfirmed, setCodConfirmed] = useState(false);
   useEffect(() => setCodConfirmed(false), [paymentMethod]);
@@ -64,6 +67,7 @@ export default function CheckoutPage() {
     if (!/^0[5-7]\d{8}$/.test(phone.trim())) return false;
     if (!deliveryDateTime.date) return false;
     if (!deliveryDateTime.time) return false;
+    if (locationLat === null || locationLng === null) return false;
     if (!city) return false;
     if (paymentMethod === 'cash' || paymentMethod === 'card-delivery') {
       if (!codConfirmed) return false;
@@ -84,12 +88,14 @@ export default function CheckoutPage() {
         name,
         phone,
         address: addressNotes,
+        notes: notes || null,
         city,
+        locationLat,
+        locationLng,
         deliveryDate: deliveryDateTime.date?.toISOString(),
         deliveryTime: deliveryDateTime.time,
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
-        notes: notes || null,
         orderNumber,
         merchantId: merchant.id,
         merchantSlug: slug,
@@ -152,15 +158,35 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Adresse de livraison</h2>
 
+          <MapLocationPicker
+            onLocationSelect={(lat, lng, cityGuess) => {
+              setLocationLat(lat);
+              setLocationLng(lng);
+              if (cityGuess) setCity(cityGuess);
+            }}
+          />
+
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Ville
+              Indications supplémentaires <span className="text-[#A8A29E] font-normal">(optionnel)</span>
+            </label>
+            <textarea
+              placeholder="Appartement, étage, résidence, point de repère..."
+              rows={2}
+              value={addressNotes}
+              onChange={(e) => setAddressNotes(e.target.value)}
+              className="w-full px-4 py-3 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
+              Ville <span className="text-[#A8A29E] font-normal">(si la carte ne fonctionne pas)</span>
             </label>
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
-              required
             >
               <option value="">Sélectionner une ville</option>
               {DELIVERY_CITIES.map((c) => (
@@ -169,19 +195,6 @@ export default function CheckoutPage() {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Informations supplémentaires
-            </label>
-            <textarea
-              placeholder="Appartement, étage, code du bâtiment, point de repère, instructions spéciales..."
-              rows={3}
-              value={addressNotes}
-              onChange={(e) => setAddressNotes(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] resize-none"
-            />
           </div>
         </div>
 

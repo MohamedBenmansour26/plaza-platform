@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Check, Copy, CheckCheck } from 'lucide-react';
+import { Check, Copy, CheckCheck, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
+import type { CartItem } from '../_components/CartProvider';
 
 interface ConfirmedOrder {
   name?: string;
@@ -29,8 +30,12 @@ export default function ConfirmationPage() {
   const [order, setOrder] = useState<ConfirmedOrder>({});
   const [animate, setAnimate] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [snapshotItems, setSnapshotItems] = useState<CartItem[]>([]);
+  const [snapshotTotal, setSnapshotTotal] = useState(0);
 
   useEffect(() => {
+    setSnapshotItems([...items]);
+    setSnapshotTotal(total);
     const stored = sessionStorage.getItem('plaza_pending_order');
     if (stored) {
       try {
@@ -46,7 +51,7 @@ export default function ConfirmationPage() {
   }, []);
 
   const orderNumber = order.orderNumber ?? 'PLZ-???';
-  const deliveryFee = getDeliveryFee(total);
+  const deliveryFee = getDeliveryFee(snapshotTotal);
 
   const handleCopy = async () => {
     try {
@@ -190,17 +195,10 @@ export default function ConfirmationPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] text-[#2563EB] rounded-full text-[14px] font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] text-[#2563EB] rounded-full text-[14px] font-medium mt-3"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Livraison estimée : {order.deliveryTime ?? 'à confirmer'}
+            <Clock className="w-4 h-4" />
+            Livraison confirmée sous 30–60 min
           </motion.div>
         </div>
 
@@ -212,7 +210,7 @@ export default function ConfirmationPage() {
         >
           <h2 className="font-bold text-[16px] mb-4">Résumé de commande</h2>
           <div className="space-y-3 mb-4">
-            {items.map((item) => (
+            {snapshotItems.map((item) => (
               <div key={item.id} className="flex items-center gap-3 py-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -233,7 +231,7 @@ export default function ConfirmationPage() {
           <div className="border-t border-[#E2E8F0] pt-4 space-y-2">
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Sous-total</span>
-              <span className="font-medium">{total} MAD</span>
+              <span className="font-medium">{snapshotTotal} MAD</span>
             </div>
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Livraison</span>
@@ -245,7 +243,7 @@ export default function ConfirmationPage() {
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0] text-[15px]">
               <span className="font-bold">Total</span>
-              <span className="font-bold">{total + deliveryFee} MAD</span>
+              <span className="font-bold">{snapshotTotal + deliveryFee} MAD</span>
             </div>
             {order.address && (
               <div className="flex items-start gap-2 text-[13px] text-[#78716C] pt-2 mt-2 border-t border-[#E2E8F0]">
@@ -284,29 +282,15 @@ export default function ConfirmationPage() {
           className="space-y-3"
         >
           <button
-            onClick={() => router.push('/track')}
-            className="w-full h-14 bg-[#2563EB] text-white rounded-lg font-medium hover:bg-[#1d4ed8] transition-colors shadow-sm"
+            onClick={() => router.push(`/store/${slug}/commande/${orderNumber}`)}
+            className="w-full h-12 bg-[#2563EB] text-white rounded-lg font-medium text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm"
           >
             Suivre ma commande
           </button>
 
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              `Ma commande ${orderNumber} a été confirmée sur Plaza ! Je peux la suivre avec ce numéro.`,
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-14 border-2 border-[#25D366] text-[#25D366] rounded-xl font-medium text-[16px] hover:bg-[#F0FDF4] transition-colors flex items-center justify-center gap-2"
-          >
-            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-            Partager sur WhatsApp
-          </a>
-
           <button
             onClick={() => router.push(`/store/${slug}`)}
-            className="w-full h-14 border-2 border-[#E2E8F0] text-[#1C1917] rounded-lg font-medium hover:bg-white hover:border-[#2563EB] transition-colors"
+            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg font-medium text-[15px] hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
           >
             Retour à la boutique
           </button>

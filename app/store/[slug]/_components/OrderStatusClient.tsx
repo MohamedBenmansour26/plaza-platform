@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Phone, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Phone, Check, RefreshCw, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Order, OrderItem, Customer, OrderStatus } from '@/types/supabase';
 
@@ -22,7 +22,7 @@ function buildSteps(status: OrderStatus): Step[] {
   const steps: Step[] = [
     { id: 1, label: 'Commande reçue', completed: false, current: false },
     { id: 2, label: 'En cours de confirmation', completed: false, current: false },
-    { id: 3, label: 'En livraison', completed: false, current: false },
+    { id: 3, label: 'En route', completed: false, current: false },
     { id: 4, label: 'Livrée', completed: false, current: false },
   ];
 
@@ -57,6 +57,12 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
+  useEffect(() => {
+    if (order.status === 'delivered' || order.status === 'cancelled') return;
+    const interval = setInterval(() => router.refresh(), 30_000);
+    return () => clearInterval(interval);
+  }, [order.status, router]);
+
   const steps = buildSteps(order.status);
   const isCancelled = order.status === 'cancelled';
 
@@ -71,7 +77,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-[#FAFAF9]" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
       <div className="sticky top-0 z-50 bg-white border-b border-[#E2E8F0] h-14 flex items-center px-4">
         <button
           onClick={() => router.back()}
@@ -162,6 +168,16 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
             </div>
           )}
         </div>
+
+        {order.notes && (
+          <div className="bg-[#EFF6FF] rounded-xl p-4 flex items-start gap-3">
+            <Clock className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[13px] font-medium text-[#1C1917]">Créneau demandé</p>
+              <p className="text-[13px] text-[#78716C]">{order.notes}</p>
+            </div>
+          </div>
+        )}
 
         {/* Customer Info */}
         <div className="bg-white rounded-xl p-4 space-y-3">
