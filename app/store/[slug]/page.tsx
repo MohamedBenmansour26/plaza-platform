@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getLocale } from 'next-intl/server';
 
-import { createClient } from '@/lib/supabase/server';
-import type { Merchant, Product } from '@/types/supabase';
-import { StorefrontClient } from './StorefrontClient';
+import { getMerchantBySlug, getProductsByMerchant } from './actions';
+import { StoreHomeClient } from './_components/StoreHomeClient';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -12,13 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('store_name, description')
-    .eq('store_slug', slug)
-    .single<Pick<Merchant, 'store_name' | 'description'>>();
+  const merchant = await getMerchantBySlug(slug);
 
   if (!merchant) {
     return { title: 'Boutique introuvable' };
@@ -32,32 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StorefrontPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const locale = await getLocale();
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('*')
-    .eq('store_slug', slug)
-    .single<Merchant>();
+  const merchant = await getMerchantBySlug(slug);
 
   if (!merchant) {
     notFound();
   }
 
-  const { data: products } = await supabase
-    .from('products')
-    .select('*')
-    .eq('merchant_id', merchant.id)
-    .eq('is_visible', true)
-    .order('created_at', { ascending: false })
-    .returns<Product[]>();
+  const products = await getProductsByMerchant(merchant.id);
 
   return (
-    <StorefrontClient
-      merchant={merchant}
-      products={products ?? []}
-      locale={locale}
-    />
+    <StoreHomeClient merchant={merchant} products={products} slug={slug} />
   );
 }
