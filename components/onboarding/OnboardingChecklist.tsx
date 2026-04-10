@@ -45,7 +45,7 @@
  *   onboarding.live_banner_sub      (= "Continuez à ajouter des produits pour attirer plus de clients.")
  */
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
@@ -137,14 +137,6 @@ export function OnboardingChecklist({ data }: Props) {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showBanner, setShowBanner] = useState(data.isOnline);
 
-  // "Share" step tracked client-side via localStorage
-  const [hasShared, setHasShared] = useState(false);
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setHasShared(localStorage.getItem(`plaza_shared_${data.merchantId}`) === 'true');
-    }
-  }, [data.merchantId]);
-
   // If already online on mount, show only the banner (not the checklist)
   if (published && showBanner && !showCelebration) {
     return <LiveBanner t={t} />;
@@ -152,46 +144,15 @@ export function OnboardingChecklist({ data }: Props) {
 
   // ── Compute step checks ──────────────────────────────────────────────────────
 
-  // Steps definition — must be inside component after t() (BUG-013–016 rule)
+  // The 5 required steps — exactly what must be done before going live.
+  // Identity (phone OTP) and store name are auto-completed at registration,
+  // so they are deliberately excluded here.
   const steps = [
-    // Auto-checked (not blocking)
-    {
-      id: 'identity',
-      label: t('step_identity'),
-      desc: t('step_identity_desc'),
-      checked: true,
-      required: false,
-      cta: null as string | null,
-      href: null as string | null,
-      isShare: false,
-    },
-    {
-      id: 'store_name',
-      label: t('step_store_name'),
-      desc: t('step_store_name_desc'),
-      checked: data.storeName !== null && data.storeName.trim().length > 0,
-      required: false,
-      cta: null,
-      href: null,
-      isShare: false,
-    },
-    // Required (blocking for go-live)
-    {
-      id: 'location',
-      label: t('step_location'),
-      desc: t('step_location_desc'),
-      checked: data.hasLocation,
-      required: true,
-      cta: t('step_location_cta'),
-      href: '/dashboard/boutique',
-      isShare: false,
-    },
     {
       id: 'photo',
       label: t('step_photo'),
       desc: t('step_photo_desc'),
-      checked: data.logoUrl !== null,
-      required: true,
+      checked: data.logoUrl !== null && data.logoUrl.trim().length > 0,
       cta: t('step_photo_cta'),
       href: '/dashboard/boutique',
       isShare: false,
@@ -201,7 +162,6 @@ export function OnboardingChecklist({ data }: Props) {
       label: t('step_description'),
       desc: t('step_description_desc'),
       checked: data.hasDescription,
-      required: true,
       cta: t('step_description_cta'),
       href: '/dashboard/boutique',
       isShare: false,
@@ -211,8 +171,16 @@ export function OnboardingChecklist({ data }: Props) {
       label: t('step_category'),
       desc: t('step_category_desc'),
       checked: data.hasCategory,
-      required: true,
       cta: t('step_category_cta'),
+      href: '/dashboard/boutique',
+      isShare: false,
+    },
+    {
+      id: 'location',
+      label: t('step_location'),
+      desc: t('step_location_desc'),
+      checked: data.hasLocation,
+      cta: t('step_location_cta'),
       href: '/dashboard/boutique',
       isShare: false,
     },
@@ -221,30 +189,16 @@ export function OnboardingChecklist({ data }: Props) {
       label: t('step_product'),
       desc: t('step_product_desc'),
       checked: data.visibleProductCount >= 1,
-      required: true,
       cta: t('step_product_cta'),
       href: '/dashboard/produits',
       isShare: false,
     },
-    // Non-blocking
-    {
-      id: 'share',
-      label: t('step_share'),
-      desc: t('step_share_desc'),
-      checked: hasShared,
-      required: false,
-      cta: t('step_share_cta'),
-      href: null,
-      isShare: true,
-    },
   ] as const;
 
-  const requiredStepsDone = steps.filter((s) => s.required && s.checked).length;
-  const totalRequired = steps.filter((s) => s.required).length; // 5
-  const totalDone = steps.filter((s) => s.checked).length;
-  const totalSteps = steps.length;
-  const progressPercent = Math.round((totalDone / totalSteps) * 100);
-  const canPublish = steps.filter((s) => s.required).every((s) => s.checked);
+  const TOTAL_STEPS = 5; // always 5 — keep header and body in sync
+  const stepsDone = steps.filter((s) => s.checked).length;
+  const progressPercent = Math.round((stepsDone / TOTAL_STEPS) * 100);
+  const canPublish = steps.every((s) => s.checked);
 
   const handleShare = () => {
     const url = `https://plaza.ma/store/${data.storeSlug}`;
@@ -255,10 +209,6 @@ export function OnboardingChecklist({ data }: Props) {
     } else {
       fallbackCopy(url);
     }
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`plaza_shared_${data.merchantId}`, 'true');
-    }
-    setHasShared(true);
   };
 
   const handlePublish = () => {
@@ -342,7 +292,7 @@ export function OnboardingChecklist({ data }: Props) {
         >
           {isComplete
             ? t('checklist_progress_done')
-            : t('checklist_progress', { done: totalDone, total: totalSteps })}
+            : t('checklist_progress', { done: stepsDone, total: TOTAL_STEPS })}
         </p>
 
         {/* Steps */}
@@ -426,8 +376,8 @@ export function OnboardingChecklist({ data }: Props) {
           {!canPublish && (
             <p className="text-xs text-[#A8A29E] text-center mt-2">
               {t('checklist_progress', {
-                done: requiredStepsDone,
-                total: totalRequired,
+                done: stepsDone,
+                total: TOTAL_STEPS,
               })}
             </p>
           )}

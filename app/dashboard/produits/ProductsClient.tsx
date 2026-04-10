@@ -131,8 +131,20 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-[#1C1917]">{product.name_fr}</div>
-                  <div className="text-sm font-semibold text-[#1C1917] mt-1">
-                    {formatPrice(product.price)}
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    <span className="text-sm font-semibold text-[#1C1917]">
+                      {formatPrice(product.price)}
+                    </span>
+                    {product.discount_active && product.original_price != null && (
+                      <>
+                        <span className="text-xs text-[#A8A29E] line-through">
+                          {formatPrice(product.original_price)}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FEF2F2] text-[#DC2626]">
+                          -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                        </span>
+                      </>
+                    )}
                   </div>
                   {product.stock === 0 ? (
                     <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-[#FEF2F2] text-[#DC2626] mt-1">
@@ -167,7 +179,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
           filtered.map((product) => (
             <div
               key={product.id}
-              className="h-16 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] transition-colors"
+              className="min-h-16 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] transition-colors"
             >
               <div className="w-16">
                 {product.image_url ? (
@@ -182,8 +194,18 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 )}
               </div>
               <div className="flex-1 text-sm font-semibold text-[#1C1917]">{product.name_fr}</div>
-              <div className="w-[120px] text-sm font-semibold text-[#1C1917]">
-                {formatPrice(product.price)}
+              <div className="w-[120px]">
+                <div className="text-sm font-semibold text-[#1C1917]">{formatPrice(product.price)}</div>
+                {product.discount_active && product.original_price != null && (
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-xs text-[#A8A29E] line-through">
+                      {formatPrice(product.original_price)}
+                    </span>
+                    <span className="px-1 py-0.5 rounded text-[10px] font-semibold bg-[#FEF2F2] text-[#DC2626]">
+                      -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="w-[140px]">
                 {product.stock === 0 ? (

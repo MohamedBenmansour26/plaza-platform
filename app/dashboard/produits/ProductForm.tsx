@@ -80,7 +80,7 @@ export function ProductForm({ product }: Props) {
 
   // Form state
   const [nameFr, setNameFr] = useState(product?.name_fr ?? '');
-  const [nameAr, setNameAr] = useState(product?.name_ar ?? '');
+  const nameAr = product?.name_ar ?? '';
   const [description, setDescription] = useState(product?.description ?? '');
   const [price, setPrice] = useState(
     product ? String(product.price / 100) : ''
@@ -395,21 +395,6 @@ export function ProductForm({ product }: Props) {
             )}
           </div>
 
-          {/* Name AR */}
-          <div>
-            <label className="block text-sm font-medium text-[#1C1917] mb-2">
-              {t('formNameAr')}
-            </label>
-            <input
-              type="text"
-              dir="rtl"
-              placeholder="اسم المنتج"
-              value={nameAr}
-              onChange={(e) => setNameAr(e.target.value)}
-              className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
-            />
-          </div>
-
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-[#1C1917] mb-2">
@@ -576,20 +561,6 @@ export function ProductForm({ product }: Props) {
                   {errors.nameFr && (
                     <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
                   )}
-                </div>
-
-                {/* Name AR */}
-                <div>
-                  <label className="block text-[13px] text-[#78716C] mb-1.5">{t('formNameAr')}</label>
-                  <input
-                    type="text"
-                    dir="rtl"
-                    placeholder="اسم المنتج"
-                    value={nameAr}
-                    onChange={(e) => setNameAr(e.target.value)}
-                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
-                  />
-                  <p className="text-xs text-[#78716C] mt-1">{t('formNameArHint')}</p>
                 </div>
 
                 {/* Description */}
