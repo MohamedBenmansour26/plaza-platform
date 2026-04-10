@@ -13,6 +13,7 @@ import {
   Check,
 } from 'lucide-react';
 import type { Merchant, DeliveryZone } from '@/types/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { updateBoutique } from './actions';
 import { DeliveryZones } from './DeliveryZones';
 
@@ -183,7 +184,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   const [storeName, setStoreName] = useState(merchant.store_name);
   const [storeSlug, setStoreSlug] = useState(merchant.store_slug);
   const [description, setDescription] = useState(merchant.description ?? '');
-  const [category, setCategory] = useState(merchant.category ?? 'fashion');
+  const [category, setCategory] = useState(merchant.category ?? '');
   const [locationLat, setLocationLat] = useState<number | null>(merchant.location_lat ?? null);
   const [locationLng, setLocationLng] = useState<number | null>(merchant.location_lng ?? null);
   const [locationDescription, setLocationDescription] = useState(merchant.location_description ?? '');
@@ -204,6 +205,69 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
 
   // Status
   const [isOnline, setIsOnline] = useState(merchant.is_online ?? true);
+
+  // Checklist gate modal
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+  const [missingItems, setMissingItems] = useState<{ label: string; href: string }[]>([]);
+
+  /**
+   * handleToggleOnline — gate logic before setting is_online = true.
+   * Toggling offline is always allowed.
+   * Toggling online requires logo, description, category, location pin, and
+   * at least 1 visible product — otherwise a blocking modal is shown.
+   */
+  async function handleToggleOnline() {
+    if (isOnline) {
+      // Turning off — always allow
+      setIsOnline(false);
+      return;
+    }
+
+    // Turning on — re-fetch saved merchant record from DB to verify saved state
+    // (prevents gap where form is filled but not yet saved)
+    const supabase = createClient();
+    type GateFields = Pick<Merchant, 'logo_url' | 'description' | 'category' | 'location_lat'>;
+    const gateResult = await supabase
+      .from('merchants')
+      .select('logo_url, description, category, location_lat')
+      .eq('id', merchant.id)
+      .maybeSingle();
+    const saved = gateResult.data as GateFields | null;
+
+    const missing: { label: string; href: string }[] = [];
+
+    if (!saved?.logo_url || saved.logo_url.trim().length === 0) {
+      missing.push({ label: 'Photo de la boutique', href: '#logo' });
+    }
+    if (!saved?.description || saved.description.trim().length === 0) {
+      missing.push({ label: 'Description de la boutique', href: '#description' });
+    }
+    if (!saved?.category || saved.category.trim().length === 0) {
+      missing.push({ label: 'Catégorie', href: '#category' });
+    }
+    if (saved?.location_lat === null || saved?.location_lat === undefined) {
+      missing.push({ label: 'Localisation — épingle sur la carte', href: '#location' });
+    }
+
+    // Check visible products
+    const { count: visibleCount } = await supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('merchant_id', merchant.id)
+      .eq('is_visible', true);
+
+    if ((visibleCount ?? 0) < 1) {
+      missing.push({ label: 'Au moins 1 produit publié', href: '/dashboard/produits' });
+    }
+
+    if (missing.length > 0) {
+      setMissingItems(missing);
+      setShowIncompleteModal(true);
+      return; // toggle must NOT flip to true
+    }
+
+    setIsOnline(true);
+  }
 
   // Preview copy
   const [copied, setCopied] = useState(false);
@@ -330,6 +394,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
           >
+            <option value="" disabled>Choisir une catégorie…</option>
             {STORE_CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
@@ -619,7 +684,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             {isOnline ? t('online') : t('offline')}
           </span>
         </div>
-        <Toggle checked={isOnline} onChange={() => setIsOnline((v) => !v)} />
+        <Toggle checked={isOnline} onChange={handleToggleOnline} />
       </div>
       {!isOnline && (
         <p className="text-xs text-[#78716C] mt-2">{t('offlineNote')}</p>
@@ -793,6 +858,46 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     <>
       {mobileLayout}
       {desktopLayout}
+
+      {/* ── Checklist gate modal ─────────────────────────────────────────────── */}
+      {showIncompleteModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="incomplete-modal-title"
+        >
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
+            <h2
+              id="incomplete-modal-title"
+              className="text-base font-semibold text-[#1C1917] mb-4"
+            >
+              Complétez d&apos;abord ces étapes :
+            </h2>
+            <ul className="space-y-2 mb-6">
+              {missingItems.map((item) => (
+                <li key={item.label} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626] flex-shrink-0 mt-0.5" />
+                  <a
+                    href={item.href}
+                    onClick={() => setShowIncompleteModal(false)}
+                    className="text-sm text-[#2563EB] hover:underline"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={() => setShowIncompleteModal(false)}
+              className="w-full h-10 rounded-xl border border-[#E2E8F0] text-sm font-medium text-[#1C1917] hover:bg-[#F8FAFC] transition-colors"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
