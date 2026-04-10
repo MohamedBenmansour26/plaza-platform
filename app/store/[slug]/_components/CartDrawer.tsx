@@ -30,7 +30,7 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
     <Drawer.Root open={open} onOpenChange={onClose}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-        <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 max-h-[90vh] flex flex-col">
+        <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 flex flex-col max-h-[70vh] md:bottom-auto md:left-auto md:right-0 md:top-0 md:h-full md:w-[420px] md:max-h-full md:rounded-none md:rounded-l-2xl">
           <div className="flex-shrink-0">
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
             <div className="flex items-center justify-between px-4 pb-4 border-b border-[#E2E8F0]">

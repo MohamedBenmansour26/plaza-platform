@@ -12,20 +12,19 @@ interface ProductCardProps {
 }
 
 function getStockDisplay(stock: number) {
-  if (stock === 0) return null;
-  if (stock <= 5) {
+  if (stock > 5) return null;
+  if (stock >= 1) {
     return (
-      <div className="flex items-center gap-0.5 text-[10px] text-[#D97706] mb-1">
-        <div className="w-1 h-1 rounded-full bg-[#D97706]" />
-        <span>+{stock}</span>
-      </div>
+      <p style={{ color: '#E8632A', fontSize: '11px', fontWeight: 500 }} className="mb-1">
+        Plus que {stock} en stock
+      </p>
     );
   }
+  // stock === 0
   return (
-    <div className="flex items-center gap-0.5 text-[10px] text-[#16A34A] mb-1">
-      <div className="w-1 h-1 rounded-full bg-[#16A34A]" />
-      <span>Stock</span>
-    </div>
+    <p style={{ color: '#DC2626', fontSize: '11px' }} className="mb-1">
+      Rupture de stock
+    </p>
   );
 }
 
@@ -59,7 +58,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
   const card = (
     <motion.div
       whileHover={!outOfStock ? { y: -2 } : {}}
-      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col ${outOfStock ? 'opacity-60' : ''}`}
+      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col ${outOfStock ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ aspectRatio: '0.75' }}
     >
       <div className="relative w-full flex-1 overflow-hidden">

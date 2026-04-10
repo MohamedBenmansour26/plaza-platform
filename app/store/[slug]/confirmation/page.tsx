@@ -232,14 +232,20 @@ export default function ConfirmationPage() {
           </div>
           <div className="border-t border-[#E2E8F0] pt-4 space-y-2">
             <div className="flex justify-between text-[15px]">
-              <span className="text-[#78716C]">Total</span>
-              <span className="font-bold">{total} MAD</span>
+              <span className="text-[#78716C]">Sous-total</span>
+              <span className="font-medium">{total} MAD</span>
             </div>
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Livraison</span>
-              <span className="text-[#16A34A] font-medium">
-                {deliveryFee === 0 ? 'Gratuite' : `${deliveryFee} MAD`}
+              <span
+                className={deliveryFee === 0 ? 'text-[#16A34A] font-medium' : 'font-medium'}
+              >
+                {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee} MAD`}
               </span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-[#E2E8F0] text-[15px]">
+              <span className="font-bold">Total</span>
+              <span className="font-bold">{total + deliveryFee} MAD</span>
             </div>
             {order.address && (
               <div className="flex items-start gap-2 text-[13px] text-[#78716C] pt-2 mt-2 border-t border-[#E2E8F0]">

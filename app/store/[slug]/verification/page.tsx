@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { createOrder } from '../actions';
 import type { CreateOrderPayload } from '../actions';
 import { useCart } from '../_components/CartProvider';
+import { getDeliveryFee } from '../_lib/deliveryUtils';
 
 interface PendingOrder {
   name: string;
@@ -119,9 +120,8 @@ export default function VerificationPage() {
           unitPrice: item.price,
         })),
         subtotal: total,
-        deliveryFee:
-          total >= 500 ? 0 : 30,
-        total: total + (total >= 500 ? 0 : 30),
+        deliveryFee: getDeliveryFee(total),
+        total: total + getDeliveryFee(total),
       };
 
       const { orderNumber } = await createOrder(payload);
