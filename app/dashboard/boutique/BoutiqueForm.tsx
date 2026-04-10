@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Camera,
@@ -25,15 +25,153 @@ const COLOR_OPTIONS = [
   { value: '#EC4899', name: 'Rose' },
 ];
 
-const CATEGORY_KEYS = [
-  'fashion',
-  'food',
-  'beauty',
-  'electronics',
-  'home',
-  'sport',
-  'other',
+const STORE_CATEGORIES = [
+  { value: 'fashion',     label: 'Mode & Vêtements' },
+  { value: 'beauty',      label: 'Beauté & Bien-être' },
+  { value: 'food',        label: 'Alimentation & Boissons' },
+  { value: 'home',        label: 'Maison & Décoration' },
+  { value: 'electronics', label: 'Électronique & Tech' },
+  { value: 'sport',       label: 'Sport & Loisirs' },
+  { value: 'jewelry',     label: 'Bijoux & Accessoires' },
+  { value: 'kids',        label: 'Enfants & Jouets' },
+  { value: 'other',       label: 'Autre' },
 ] as const;
+
+// ─── Mapbox Location Picker ──────────────────────────────────────────────────
+
+type MapboxLocationPickerProps = {
+  lat: number | null;
+  lng: number | null;
+  onLocationChange: (lat: number, lng: number) => void;
+};
+
+function MapboxLocationPicker({ lat, lng, onLocationChange }: MapboxLocationPickerProps) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<unknown>(null);
+  const markerRef = useRef<unknown>(null);
+
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+  useEffect(() => {
+    if (!token) return;
+    if (!mapContainerRef.current) return;
+    if (mapRef.current) return; // already initialized
+
+    // Add mapbox CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
+    document.head.appendChild(link);
+
+    let map: unknown;
+    let marker: unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dynamicImport = (mod: string): Promise<any> => import(/* webpackIgnore: true */ mod as never);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dynamicImport('mapbox-gl').then((mapboxgl: any) => {
+      const mbgl = mapboxgl.default ?? mapboxgl;
+      (mbgl as { accessToken: string }).accessToken = token;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const MapClass = mbgl as any;
+      map = new MapClass.Map({
+        container: mapContainerRef.current!,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [lng ?? -7.09, lat ?? 31.79],
+        zoom: lat && lng ? 13 : 5,
+      });
+
+      mapRef.current = map;
+
+      if (lat !== null && lng !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        marker = new MapClass.Marker({ color: '#2563EB' })
+          .setLngLat([lng, lat])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .addTo(map as any);
+        markerRef.current = marker;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (map as any).on('click', (e: { lngLat: { lat: number; lng: number } }) => {
+        const { lat: clickLat, lng: clickLng } = e.lngLat;
+
+        if (markerRef.current) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (markerRef.current as any).setLngLat([clickLng, clickLat]);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const newMarker = new MapClass.Marker({ color: '#2563EB' })
+            .setLngLat([clickLng, clickLat])
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .addTo(map as any);
+          markerRef.current = newMarker;
+        }
+
+        onLocationChange(clickLat, clickLng);
+      });
+    });
+
+    return () => {
+      if (map) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (map as any).remove();
+      }
+      mapRef.current = null;
+      markerRef.current = null;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  if (!token) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs text-[#78716C] bg-[#FFF7ED] border border-[#FDE68A] rounded-lg p-2">
+          Token Mapbox non configuré. Saisie manuelle :
+        </p>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-xs text-[#78716C] mb-1">Latitude</label>
+            <input
+              type="number"
+              step="any"
+              placeholder="31.6295"
+              defaultValue={lat ?? ''}
+              onChange={(e) => {
+                const newLat = parseFloat(e.target.value);
+                if (!isNaN(newLat)) onLocationChange(newLat, lng ?? 0);
+              }}
+              className="w-full h-9 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-[#78716C] mb-1">Longitude</label>
+            <input
+              type="number"
+              step="any"
+              placeholder="-7.9811"
+              defaultValue={lng ?? ''}
+              onChange={(e) => {
+                const newLng = parseFloat(e.target.value);
+                if (!isNaN(newLng)) onLocationChange(lat ?? 0, newLng);
+              }}
+              className="w-full h-9 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={mapContainerRef}
+      suppressHydrationWarning
+      className="w-full h-[260px] rounded-lg border border-[#E2E8F0] overflow-hidden"
+    />
+  );
+}
 
 type Props = { merchant: Merchant; deliveryZones: DeliveryZone[] };
 
@@ -46,7 +184,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   const [storeSlug, setStoreSlug] = useState(merchant.store_slug);
   const [description, setDescription] = useState(merchant.description ?? '');
   const [category, setCategory] = useState(merchant.category ?? 'fashion');
-  const [city, setCity] = useState(merchant.city ?? '');
+  const [locationLat, setLocationLat] = useState<number | null>(merchant.location_lat ?? null);
+  const [locationLng, setLocationLng] = useState<number | null>(merchant.location_lng ?? null);
+  const [locationDescription, setLocationDescription] = useState(merchant.location_description ?? '');
 
   // Appearance
   const [logoUrl, setLogoUrl] = useState(merchant.logo_url ?? '');
@@ -98,7 +238,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     fd.set('store_slug', storeSlug);
     fd.set('description', description);
     fd.set('category', category);
-    fd.set('city', city);
+    if (locationLat !== null) fd.set('location_lat', String(locationLat));
+    if (locationLng !== null) fd.set('location_lng', String(locationLng));
+    fd.set('location_description', locationDescription);
     fd.set('logo_url', logoUrl);
     fd.set('banner_url', bannerUrl);
     fd.set('primary_color', primaryColor);
@@ -188,20 +330,43 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
           >
-            {CATEGORY_KEYS.map((key) => (
-              <option key={key} value={key}>
-                {t(`categories.${key}`)}
+            {STORE_CATEGORIES.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">{t('city')}</label>
+          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+            Localisation de la boutique
+          </label>
+          <p className="text-xs text-[#78716C] mb-2">
+            Cliquez sur la carte pour épingler l&apos;adresse exacte de votre boutique.
+          </p>
+          <MapboxLocationPicker
+            lat={locationLat}
+            lng={locationLng}
+            onLocationChange={(lat, lng) => {
+              setLocationLat(lat);
+              setLocationLng(lng);
+            }}
+          />
+          {locationLat && locationLng && (
+            <p className="text-xs text-[#16A34A] mt-1.5">
+              ✓ Position enregistrée ({locationLat.toFixed(5)}, {locationLng.toFixed(5)})
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+            Indications supplémentaires
+          </label>
           <input
             type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder={t('cityPlaceholder')}
+            value={locationDescription}
+            onChange={(e) => setLocationDescription(e.target.value)}
+            placeholder="Ex: 2ème étage, porte bleue, en face du café..."
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
           />
         </div>

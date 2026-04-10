@@ -81,17 +81,55 @@ function PINLoginContent() {
         <div className="mt-8">
           <div className="text-xs text-[#78716C] uppercase tracking-wide text-center">{t('pinLabel')}</div>
 
-          <div className="flex justify-center gap-4 mt-6">
+          {/* Mobile: PIN dots */}
+          <div className="lg:hidden">
+            <div className="flex justify-center gap-4 mt-6">
+              {([0, 1, 2, 3] as const).map((index) => (
+                <div
+                  key={index}
+                  className={`w-5 h-5 rounded-full transition-all ${
+                    isLocked
+                      ? 'border-2 border-[#A8A29E] bg-[#F5F5F4]'
+                      : pin.length > index
+                      ? 'bg-[#2563EB]'
+                      : 'border-2 border-[#E2E8F0] bg-white'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: 4 separate input fields */}
+          <div className="hidden lg:flex justify-center gap-3 mt-6">
             {([0, 1, 2, 3] as const).map((index) => (
-              <div
+              <input
                 key={index}
-                className={`w-5 h-5 rounded-full transition-all ${
-                  isLocked
-                    ? 'border-2 border-[#A8A29E] bg-[#F5F5F4]'
-                    : pin.length > index
-                    ? 'bg-[#2563EB]'
-                    : 'border-2 border-[#E2E8F0] bg-white'
-                }`}
+                type="password"
+                inputMode="numeric"
+                maxLength={1}
+                disabled={isLocked || isSubmitting}
+                value={pin[index] ?? ''}
+                onChange={(e) => {
+                  if (isLocked || isSubmitting) return;
+                  const val = e.target.value.replace(/\D/g, '').slice(-1);
+                  const arr = (pin + '    ').slice(0, 4).split('');
+                  arr[index] = val;
+                  setPin(arr.join('').trimEnd());
+                  if (val && index < 3) {
+                    const next = document.getElementById(`pin-login-${index + 1}`);
+                    if (next) (next as HTMLInputElement).focus();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Backspace' && !pin[index] && index > 0) {
+                    const prev = document.getElementById(`pin-login-${index - 1}`);
+                    if (prev) (prev as HTMLInputElement).focus();
+                  }
+                }}
+                id={`pin-login-${index}`}
+                className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
+                  isLocked ? 'border-[#E2E8F0] bg-[#F5F5F4]' : error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               />
             ))}
           </div>
@@ -108,41 +146,43 @@ function PINLoginContent() {
             </div>
           )}
 
-          {/* Custom numpad */}
-          <div className="grid grid-cols-3 gap-3 mt-8 max-w-[280px] mx-auto">
-            {NUMPAD.map((num) => (
+          {/* Mobile: Custom numpad */}
+          <div className="lg:hidden">
+            <div className="grid grid-cols-3 gap-3 mt-8 max-w-[280px] mx-auto">
+              {NUMPAD.map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleNumberPress(num.toString())}
+                  disabled={isLocked || isSubmitting}
+                  className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
+                    isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+              <div />
               <button
-                key={num}
-                onClick={() => handleNumberPress(num.toString())}
+                onClick={() => handleNumberPress('0')}
                 disabled={isLocked || isSubmitting}
                 className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
                   isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {num}
+                0
               </button>
-            ))}
-            <div />
-            <button
-              onClick={() => handleNumberPress('0')}
-              disabled={isLocked || isSubmitting}
-              className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
-                isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              0
-            </button>
-            {/* TODO PLZ-033: migrate to i18n */}
-            <button
-              onClick={handleBackspace}
-              disabled={isLocked || isSubmitting}
-              className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all ${
-                isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              aria-label="Effacer"
-            >
-              <Delete className="w-5 h-5 text-[#1C1917]" />
-            </button>
+              {/* TODO PLZ-033: migrate to i18n */}
+              <button
+                onClick={handleBackspace}
+                disabled={isLocked || isSubmitting}
+                className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all ${
+                  isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                aria-label="Effacer"
+              >
+                <Delete className="w-5 h-5 text-[#1C1917]" />
+              </button>
+            </div>
           </div>
 
           <button
@@ -154,6 +194,15 @@ function PINLoginContent() {
         </div>
 
         <div className="pt-8 text-center">
+          <div className="text-center mb-3">
+            <span className="text-sm text-[#78716C]">Pas encore de compte ?{' '}</span>
+            <a
+              href="/auth/login"
+              className="text-sm font-medium text-[#2563EB] hover:underline"
+            >
+              S&apos;inscrire
+            </a>
+          </div>
           <button
             onClick={() => router.push('/auth/login')}
             className="text-xs text-[#A8A29E]"

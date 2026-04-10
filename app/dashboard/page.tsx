@@ -251,7 +251,7 @@ export default async function DashboardPage() {
                 <div className="w-[130px] text-[13px] font-medium text-[#78716C] uppercase">Montant</div>
                 <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">Statut</div>
                 <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">Paiement</div>
-                <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase">Il y a</div>
+                <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase whitespace-nowrap min-w-[60px]">Il y a</div>
               </div>
 
               {(recentOrders ?? []).length === 0 ? (
@@ -280,7 +280,7 @@ export default async function DashboardPage() {
                     <div className="w-[120px]">
                       <PaymentBadge method={order.payment_method as PaymentMethod} />
                     </div>
-                    <div className="flex-1 text-sm text-[#78716C]">{timeAgo(order.created_at)}</div>
+                    <div className="flex-1 text-sm text-[#78716C] whitespace-nowrap">{timeAgo(order.created_at)}</div>
                   </Link>
                 ))
               )}

@@ -84,7 +84,6 @@ export async function updateBoutique(formData: FormData): Promise<void> {
     .replace(/[^a-z0-9-]/g, '-');
   const description = (formData.get('description') as string | null)?.trim() || null;
   const category = (formData.get('category') as string | null) || null;
-  const city = (formData.get('city') as string | null)?.trim() || null;
   const logoUrl = (formData.get('logo_url') as string | null) || null;
   const bannerUrl = (formData.get('banner_url') as string | null) || null;
   const primaryColor = (formData.get('primary_color') as string) || '#2563EB';
@@ -93,6 +92,9 @@ export async function updateBoutique(formData: FormData): Promise<void> {
   const deliveryFreeThreshold = freeDeliveryRaw
     ? Math.round(parseFloat(freeDeliveryRaw as string) * 100)
     : null;
+  const locationLat = formData.get('location_lat');
+  const locationLng = formData.get('location_lng');
+  const locationDescription = formData.get('location_description') as string | null;
 
   await supabase
     .from('merchants')
@@ -101,12 +103,14 @@ export async function updateBoutique(formData: FormData): Promise<void> {
       store_slug: storeSlug,
       description,
       category,
-      city,
       logo_url: logoUrl,
       banner_url: bannerUrl,
       primary_color: primaryColor,
       is_online: isOnline,
       delivery_free_threshold: deliveryFreeThreshold,
+      ...(locationLat ? { location_lat: parseFloat(locationLat as string) } : {}),
+      ...(locationLng ? { location_lng: parseFloat(locationLng as string) } : {}),
+      location_description: locationDescription || null,
     } as never)
     .eq('id', merchant.id);
 
