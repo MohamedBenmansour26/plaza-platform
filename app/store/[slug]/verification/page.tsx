@@ -18,10 +18,11 @@ interface PendingOrder {
   deliveryTime: string;
   paymentMethod: string;
   paymentMethodDb: 'cod' | 'terminal' | 'card';
-  notes: string | null;
+  notes?: string | null;
   orderNumber: string;
   merchantId: string;
   merchantSlug: string;
+  deliveryFeeThreshold?: number | null;
 }
 
 export default function VerificationPage() {
@@ -112,7 +113,7 @@ export default function VerificationPage() {
         deliveryDate: pendingOrder.deliveryDate,
         deliveryTime: pendingOrder.deliveryTime,
         paymentMethod: pendingOrder.paymentMethodDb,
-        notes: pendingOrder.notes,
+        notes: pendingOrder.notes ?? null,
         items: items.map((item) => ({
           productId: item.id,
           nameFr: item.name,
@@ -120,8 +121,8 @@ export default function VerificationPage() {
           unitPrice: item.price,
         })),
         subtotal: total,
-        deliveryFee: getDeliveryFee(total),
-        total: total + getDeliveryFee(total),
+        deliveryFee: getDeliveryFee(total, pendingOrder.deliveryFeeThreshold ?? undefined),
+        total: total + getDeliveryFee(total, pendingOrder.deliveryFeeThreshold ?? undefined),
       };
 
       const { orderNumber } = await createOrder(payload);

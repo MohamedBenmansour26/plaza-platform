@@ -97,6 +97,7 @@ export default function CheckoutPage() {
         orderNumber,
         merchantId: merchant.id,
         merchantSlug: slug,
+        deliveryFeeThreshold: threshold ?? null,
       }),
     );
 

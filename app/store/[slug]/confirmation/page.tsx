@@ -20,6 +20,7 @@ interface ConfirmedOrder {
   paymentMethod?: string;
   orderNumber?: string;
   merchantId?: string;
+  deliveryFeeThreshold?: number | null;
   merchantSlug?: string;
 }
 
@@ -53,7 +54,7 @@ export default function ConfirmationPage() {
   }, []);
 
   const orderNumber = order.orderNumber ?? 'PLZ-???';
-  const deliveryFee = getDeliveryFee(snapshotTotal);
+  const deliveryFee = getDeliveryFee(snapshotTotal, order.deliveryFeeThreshold ?? undefined);
 
   const handleCopy = async () => {
     try {

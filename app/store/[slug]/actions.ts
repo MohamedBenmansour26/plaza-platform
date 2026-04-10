@@ -169,20 +169,4 @@ export async function getOrderByNumber(
   return data as Order & { customer: Customer; order_items: OrderItem[] };
 }
 
-export async function getSlugByOrderNumber(
-  orderNumber: string,
-): Promise<string | null> {
-  const supabase = await createClient();
-  const { data: orderData } = (await supabase
-    .from('orders')
-    .select('merchant_id')
-    .eq('order_number', orderNumber)
-    .single()) as { data: { merchant_id: string } | null };
-  if (!orderData) return null;
-  const { data: merchant } = (await supabase
-    .from('merchants')
-    .select('store_slug')
-    .eq('id', orderData.merchant_id)
-    .single()) as { data: { store_slug: string } | null };
-  return merchant?.store_slug ?? null;
-}
+// getSlugByOrderNumber lives in app/_actions/trackOrder.ts — import from there

@@ -81,7 +81,7 @@ export function StoreHomeClient({
       <div className="px-4 py-4 space-y-4">
         {/* Track order link */}
         <Link
-          href={`/store/${slug}/suivi`}
+          href="/track"
           className="flex items-center gap-3 p-3 bg-[#EFF6FF] border border-[#2563EB]/20 rounded-xl hover:bg-[#DBEAFE] transition-colors"
         >
           <div className="w-10 h-10 bg-[#2563EB] rounded-full flex items-center justify-center flex-shrink-0">
