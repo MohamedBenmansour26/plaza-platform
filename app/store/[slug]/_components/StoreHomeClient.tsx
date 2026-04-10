@@ -56,7 +56,7 @@ export function StoreHomeClient({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative h-[200px] w-full overflow-hidden"
+          className="relative h-[240px] sm:h-[280px] w-full overflow-hidden"
         >
           <img
             src={merchant.banner_url}
@@ -73,18 +73,36 @@ export function StoreHomeClient({
                 </span>
               )}
             </div>
+            <div className="flex items-center gap-1.5 mt-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full w-fit">
+              <span className="text-white/90 text-[12px]">Livraison</span>
+              <span className="text-white font-semibold text-[12px]">30 MAD</span>
+              <span className="text-white/60 text-[12px]">·</span>
+              <span className="text-white/90 text-[12px]">Gratuite dès 500 MAD</span>
+            </div>
             <button
               onClick={() => setInfoOpen(true)}
-              className="flex items-center gap-1 text-[13px] text-white/90 hover:text-white"
+              className="flex items-center gap-1 text-[13px] text-white/90 hover:text-white mt-2"
             >
               <Info className="w-4 h-4" />
               Voir les infos
             </button>
           </div>
+          <div className="absolute bottom-0 left-4 translate-y-1/2 flex items-end gap-3">
+            {merchant.logo_url ? (
+              <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={merchant.logo_url} alt={merchant.store_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full border-4 border-white bg-[#2563EB] flex items-center justify-center text-white font-bold text-[16px] shadow-lg flex-shrink-0">
+                {merchant.store_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+            )}
+          </div>
         </motion.div>
       )}
 
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-4 py-4 space-y-4 pt-12">
         {/* Track order link */}
         <Link
           href={`/store/${slug}/suivi`}
@@ -138,7 +156,7 @@ export function StoreHomeClient({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
           >
             {filtered.map((product, index) => (
               <motion.div
