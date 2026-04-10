@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition, useRef, useEffect } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import {
   Camera,
   Image as ImageIcon,
@@ -16,6 +17,11 @@ import type { Merchant, DeliveryZone } from '@/types/supabase';
 import { createClient } from '@/lib/supabase/client';
 import { updateBoutique } from './actions';
 import { DeliveryZones } from './DeliveryZones';
+
+const MapboxLocationPicker = dynamic(
+  () => import('@/components/MapboxMap'),
+  { ssr: false }
+);
 
 const COLOR_OPTIONS = [
   { value: '#2563EB', name: 'Bleu' },
@@ -38,141 +44,6 @@ const STORE_CATEGORIES = [
   { value: 'other',       label: 'Autre' },
 ] as const;
 
-// ─── Mapbox Location Picker ──────────────────────────────────────────────────
-
-type MapboxLocationPickerProps = {
-  lat: number | null;
-  lng: number | null;
-  onLocationChange: (lat: number, lng: number) => void;
-};
-
-function MapboxLocationPicker({ lat, lng, onLocationChange }: MapboxLocationPickerProps) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
-  const markerRef = useRef<unknown>(null);
-
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-
-  useEffect(() => {
-    if (!token) return;
-    if (!mapContainerRef.current) return;
-    if (mapRef.current) return; // already initialized
-
-    // Add mapbox CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
-    document.head.appendChild(link);
-
-    let map: unknown;
-    let marker: unknown;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dynamicImport = (mod: string): Promise<any> => import(/* webpackIgnore: true */ mod as never);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dynamicImport('mapbox-gl').then((mapboxgl: any) => {
-      const mbgl = mapboxgl.default ?? mapboxgl;
-      (mbgl as { accessToken: string }).accessToken = token;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const MapClass = mbgl as any;
-      map = new MapClass.Map({
-        container: mapContainerRef.current!,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [lng ?? -7.09, lat ?? 31.79],
-        zoom: lat && lng ? 13 : 5,
-      });
-
-      mapRef.current = map;
-
-      if (lat !== null && lng !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        marker = new MapClass.Marker({ color: '#2563EB' })
-          .setLngLat([lng, lat])
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .addTo(map as any);
-        markerRef.current = marker;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).on('click', (e: { lngLat: { lat: number; lng: number } }) => {
-        const { lat: clickLat, lng: clickLng } = e.lngLat;
-
-        if (markerRef.current) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (markerRef.current as any).setLngLat([clickLng, clickLat]);
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const newMarker = new MapClass.Marker({ color: '#2563EB' })
-            .setLngLat([clickLng, clickLat])
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .addTo(map as any);
-          markerRef.current = newMarker;
-        }
-
-        onLocationChange(clickLat, clickLng);
-      });
-    });
-
-    return () => {
-      if (map) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (map as any).remove();
-      }
-      mapRef.current = null;
-      markerRef.current = null;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  if (!token) {
-    return (
-      <div className="space-y-2">
-        <p className="text-xs text-[#78716C] bg-[#FFF7ED] border border-[#FDE68A] rounded-lg p-2">
-          Token Mapbox non configuré. Saisie manuelle :
-        </p>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="block text-xs text-[#78716C] mb-1">Latitude</label>
-            <input
-              type="number"
-              step="any"
-              placeholder="31.6295"
-              defaultValue={lat ?? ''}
-              onChange={(e) => {
-                const newLat = parseFloat(e.target.value);
-                if (!isNaN(newLat)) onLocationChange(newLat, lng ?? 0);
-              }}
-              className="w-full h-9 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs text-[#78716C] mb-1">Longitude</label>
-            <input
-              type="number"
-              step="any"
-              placeholder="-7.9811"
-              defaultValue={lng ?? ''}
-              onChange={(e) => {
-                const newLng = parseFloat(e.target.value);
-                if (!isNaN(newLng)) onLocationChange(lat ?? 0, newLng);
-              }}
-              className="w-full h-9 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      ref={mapContainerRef}
-      suppressHydrationWarning
-      className="w-full h-[260px] rounded-lg border border-[#E2E8F0] overflow-hidden"
-    />
-  );
-}
 
 type Props = { merchant: Merchant; deliveryZones: DeliveryZone[] };
 
