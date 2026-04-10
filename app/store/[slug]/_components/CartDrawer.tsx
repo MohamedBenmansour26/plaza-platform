@@ -39,7 +39,7 @@ function CartContent({
   return (
     <>
       <div className="flex-shrink-0">
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3 md:hidden" />
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3 lg:hidden" />
         <div className="flex items-center justify-between px-4 pb-4 border-b border-[#E2E8F0]">
           <div>
             <p className="font-bold text-[18px]">Mon panier</p>
@@ -231,19 +231,19 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
     <>
       {/* Desktop: right side panel */}
       <div
-        className={`hidden md:flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`hidden lg:flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <CartContent {...contentProps} />
       </div>
       {open && (
         <div
-          className="hidden md:block fixed inset-0 bg-black/40 z-40"
+          className="hidden lg:block fixed inset-0 bg-black/40 z-40"
           onClick={onClose}
         />
       )}
 
       {/* Mobile: vaul Drawer */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <Drawer.Root open={open} onOpenChange={onClose}>
           <Drawer.Portal>
             <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />

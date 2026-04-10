@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Info, Package } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 
@@ -56,53 +56,29 @@ export function StoreHomeClient({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative h-[240px] sm:h-[280px] w-full overflow-hidden"
+          className="h-[240px] sm:h-[280px] w-full overflow-hidden"
         >
           <img
             src={merchant.banner_url}
             alt={`${merchant.store_name} banner`}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-          <div className="absolute bottom-4 left-4 text-white">
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="font-bold text-[24px]">{merchant.store_name}</h1>
-              {merchant.category && (
-                <span className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-[12px]">
-                  {merchant.category}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 mt-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full w-fit">
-              <span className="text-white/90 text-[12px]">Livraison</span>
-              <span className="text-white font-semibold text-[12px]">30 MAD</span>
-              <span className="text-white/60 text-[12px]">·</span>
-              <span className="text-white/90 text-[12px]">Gratuite dès 500 MAD</span>
-            </div>
-            <button
-              onClick={() => setInfoOpen(true)}
-              className="flex items-center gap-1 text-[13px] text-white/90 hover:text-white mt-2"
-            >
-              <Info className="w-4 h-4" />
-              Voir les infos
-            </button>
-          </div>
-          <div className="absolute bottom-0 left-4 translate-y-1/2 flex items-end gap-3">
-            {merchant.logo_url ? (
-              <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg flex-shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={merchant.logo_url} alt={merchant.store_name} className="w-full h-full object-cover" />
-              </div>
-            ) : (
-              <div className="w-16 h-16 rounded-full border-4 border-white bg-[#2563EB] flex items-center justify-center text-white font-bold text-[16px] shadow-lg flex-shrink-0">
-                {merchant.store_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
-              </div>
-            )}
-          </div>
         </motion.div>
       )}
 
-      <div className="px-4 py-4 space-y-4 pt-12">
+      {/* Store info section */}
+      <div className="px-4 py-4 border-b border-[#F3F4F6]">
+        <h1 className="text-[20px] font-bold text-[#1C1917]">{merchant.store_name}</h1>
+        {merchant.description && (
+          <p className="text-[14px] text-[#78716C] mt-1 line-clamp-2">{merchant.description}</p>
+        )}
+        <div className="flex items-center gap-2 mt-2">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#EFF6FF] text-[#2563EB] text-[12px] font-medium rounded-full">Livraison 30 MAD</span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F0FDF4] text-[#16A34A] text-[12px] font-medium rounded-full">Gratuite dès 500 MAD</span>
+        </div>
+      </div>
+
+      <div className="px-4 py-4 space-y-4">
         {/* Track order link */}
         <Link
           href={`/store/${slug}/suivi`}

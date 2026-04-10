@@ -267,9 +267,8 @@ export function ProductDetailClient({
                 <Truck className="w-5 h-5 text-[#16A34A]" />
                 <div>
                   <div className="text-[13px] font-medium">
-                    Livraison rapide
+                    Livraison à votre convenance
                   </div>
-                  <div className="text-[12px] text-[#78716C]">2-3 jours</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-[#EFF6FF] rounded-lg">

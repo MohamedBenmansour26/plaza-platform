@@ -23,17 +23,21 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-7.09, 31.79],
-      zoom: 5.5,
+      center: [-6.8, 31.5] as [number, number],
+      zoom: 4.5,
     });
     mapRef.current = map;
+
+    map.fitBounds([[-17.5, 20.5], [-0.5, 36.5]] as [[number, number], [number, number]], { padding: 20, duration: 0 });
+
+    map.getCanvas().style.cursor = 'crosshair';
 
     map.on('click', async (e) => {
       const { lng, lat } = e.lngLat;
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
       } else {
-        markerRef.current = new mapboxgl.Marker({ color: '#2563EB' })
+        markerRef.current = new mapboxgl.Marker({ color: '#E8632A' })
           .setLngLat([lng, lat])
           .addTo(map);
       }

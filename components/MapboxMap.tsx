@@ -27,14 +27,18 @@ export default function MapboxMap({ lat, lng, onLocationChange }: Props) {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [lng ?? -7.09, lat ?? 31.79],
-      zoom: lat && lng ? 13 : 5,
+      center: [lng ?? -6.8, lat ?? 31.5] as [number, number],
+      zoom: lat && lng ? 13 : 4.5,
     });
 
     mapRef.current = map;
 
+    if (!(lat && lng)) {
+      map.fitBounds([[-17.5, 20.5], [-0.5, 36.5]] as [[number, number], [number, number]], { padding: 20, duration: 0 });
+    }
+
     if (lat !== null && lng !== null) {
-      const marker = new mapboxgl.Marker({ color: '#2563EB' })
+      const marker = new mapboxgl.Marker({ color: '#E8632A' })
         .setLngLat([lng, lat])
         .addTo(map);
       markerRef.current = marker;
@@ -46,7 +50,7 @@ export default function MapboxMap({ lat, lng, onLocationChange }: Props) {
       if (markerRef.current) {
         markerRef.current.setLngLat([clickLng, clickLat]);
       } else {
-        const newMarker = new mapboxgl.Marker({ color: '#2563EB' })
+        const newMarker = new mapboxgl.Marker({ color: '#E8632A' })
           .setLngLat([clickLng, clickLat])
           .addTo(map);
         markerRef.current = newMarker;

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
+import { format } from 'date-fns/format';
+import { fr } from 'date-fns/locale/fr';
+import { ArrowLeft, CreditCard, Banknote } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import DateTimePicker from '../_components/DateTimePicker';
@@ -12,21 +14,12 @@ import { getMerchantBySlug } from '../actions';
 import type { Merchant } from '@/types/supabase';
 import type { PaymentMethod } from '@/types/supabase';
 
-const DELIVERY_CITIES = [
-  'Casablanca',
-  'Rabat',
-  'Marrakech',
-  'Agadir',
-  'Fès',
-  'Tanger',
-] as const;
 
-type UIPaymentMethod = 'cash' | 'card-delivery' | 'online';
+type UIPaymentMethod = 'cash' | 'card-delivery';
 
 function uiPaymentToDb(method: UIPaymentMethod): PaymentMethod {
   if (method === 'cash') return 'cod';
-  if (method === 'card-delivery') return 'terminal';
-  return 'card';
+  return 'terminal';
 }
 
 export default function CheckoutPage() {
@@ -43,11 +36,11 @@ export default function CheckoutPage() {
     time?: string;
   }>({});
 
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressNotes, setAddressNotes] = useState('');
   const [city, setCity] = useState('');
-  const [notes, setNotes] = useState('');
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
 
@@ -63,15 +56,13 @@ export default function CheckoutPage() {
   const finalTotal = total + deliveryFee;
 
   const isFormValid = (): boolean => {
-    if (!name.trim()) return false;
+    if (!firstName.trim()) return false;
+    if (!lastName.trim()) return false;
     if (!/^0[5-7]\d{8}$/.test(phone.trim())) return false;
     if (!deliveryDateTime.date) return false;
     if (!deliveryDateTime.time) return false;
     if (locationLat === null || locationLng === null) return false;
-    if (!city) return false;
-    if (paymentMethod === 'cash' || paymentMethod === 'card-delivery') {
-      if (!codConfirmed) return false;
-    }
+    if (!codConfirmed) return false;
     return true;
   };
 
@@ -82,18 +73,25 @@ export default function CheckoutPage() {
 
     const orderNumber = generateOrderNumber();
 
+    const formattedDate = deliveryDateTime.date
+      ? format(deliveryDateTime.date, "EEEE d MMMM yyyy", { locale: fr })
+      : undefined;
+
     sessionStorage.setItem(
       'plaza_pending_order',
       JSON.stringify({
-        name,
+        name: `${firstName.trim()} ${lastName.trim()}`,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         phone,
         address: addressNotes,
-        notes: notes || null,
         city,
         locationLat,
         locationLng,
         deliveryDate: deliveryDateTime.date?.toISOString(),
         deliveryTime: deliveryDateTime.time,
+        deliveryDisplayDate: formattedDate,
+        deliveryDisplayTime: deliveryDateTime.time,
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
         orderNumber,
@@ -128,20 +126,33 @@ export default function CheckoutPage() {
           <h2 className="font-bold text-[17px]">Informations de contact</h2>
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Nom complet
+              Prénom <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Votre nom complet"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Votre prénom"
               className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
               required
             />
           </div>
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Téléphone
+              Nom <span className="text-[#DC2626] ml-0.5">*</span>
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Votre nom"
+              className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
+              Téléphone <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <input
               type="tel"
@@ -156,7 +167,7 @@ export default function CheckoutPage() {
 
         {/* Delivery Location */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
-          <h2 className="font-bold text-[17px]">Adresse de livraison</h2>
+          <h2 className="font-bold text-[17px]">Adresse de livraison <span className="text-[#DC2626] ml-0.5">*</span></h2>
 
           <MapLocationPicker
             onLocationSelect={(lat, lng, cityGuess) => {
@@ -171,57 +182,27 @@ export default function CheckoutPage() {
               Indications supplémentaires <span className="text-[#A8A29E] font-normal">(optionnel)</span>
             </label>
             <textarea
-              placeholder="Appartement, étage, résidence, point de repère..."
+              placeholder="Étage, code d'entrée, point de repère..."
               rows={2}
               value={addressNotes}
               onChange={(e) => setAddressNotes(e.target.value)}
               className="w-full px-4 py-3 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] resize-none"
             />
           </div>
-
-          <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Ville <span className="text-[#A8A29E] font-normal">(si la carte ne fonctionne pas)</span>
-            </label>
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
-            >
-              <option value="">Sélectionner une ville</option>
-              {DELIVERY_CITIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {/* Delivery Time */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
-          <h2 className="font-bold text-[17px]">Horaire de livraison préféré</h2>
+          <h2 className="font-bold text-[17px]">Date de livraison souhaitée <span className="text-[#DC2626] ml-0.5">*</span></h2>
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Date et heure
+              Date et heure <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <DateTimePicker
               value={deliveryDateTime}
               onChange={(value) => setDeliveryDateTime(value)}
             />
           </div>
-        </div>
-
-        {/* Notes */}
-        <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
-          <h2 className="font-bold text-[17px]">Notes (optionnel)</h2>
-          <textarea
-            placeholder="Instructions spéciales, allergies, préférences..."
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-4 py-3 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] resize-none"
-          />
         </div>
 
         {/* Payment Method */}
@@ -248,7 +229,7 @@ export default function CheckoutPage() {
             </div>
             <Banknote className="w-5 h-5 text-[#78716C]" />
             <div className="flex-1 text-left">
-              <div className="font-medium text-[15px]">Espèces à la livraison</div>
+              <div className="font-medium text-[15px]">Paiement à la livraison</div>
               <div className="text-[13px] text-[#78716C]">Payez en espèces au livreur</div>
             </div>
           </button>
@@ -273,33 +254,8 @@ export default function CheckoutPage() {
             </div>
             <CreditCard className="w-5 h-5 text-[#78716C]" />
             <div className="flex-1 text-left">
-              <div className="font-medium text-[15px]">Carte bancaire à la livraison</div>
+              <div className="font-medium text-[15px]">Carte à la livraison</div>
               <div className="text-[13px] text-[#78716C]">Payez par carte au livreur</div>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('online')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
-              paymentMethod === 'online'
-                ? 'border-[#2563EB] bg-[#EFF6FF]'
-                : 'border-[#E2E8F0] bg-white hover:border-[#2563EB]/30'
-            }`}
-          >
-            <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'online' ? 'border-[#2563EB]' : 'border-[#E2E8F0]'
-              }`}
-            >
-              {paymentMethod === 'online' && (
-                <div className="w-3 h-3 rounded-full bg-[#2563EB]" />
-              )}
-            </div>
-            <Smartphone className="w-5 h-5 text-[#78716C]" />
-            <div className="flex-1 text-left">
-              <div className="font-medium text-[15px]">Paiement en ligne</div>
-              <div className="text-[13px] text-[#78716C]">Carte bancaire ou mobile money</div>
             </div>
           </button>
 
