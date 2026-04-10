@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { checkSlugAction, submitOnboardingAction } from './actions';
 import { StepStoreDetails } from './StepStoreDetails';
-import { StepFirstProduct } from './StepFirstProduct';
 
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken';
 
@@ -35,9 +34,6 @@ export function OnboardingForm({ merchantId }: Props) {
   const t = useTranslations('onboarding');
   const router = useRouter();
 
-  const [step, setStep] = useState<1 | 2>(1);
-
-  // Step 1
   const [storeName, setStoreName] = useState('');
   const [storeSlug, setStoreSlug] = useState('');
   const [description, setDescription] = useState('');
@@ -46,13 +42,6 @@ export function OnboardingForm({ merchantId }: Props) {
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
   const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Step 2
-  const [nameFr, setNameFr] = useState('');
-  const [nameAr, setNameAr] = useState('');
-  const [price, setPrice] = useState('');
-  const [stock, setStock] = useState('0');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,28 +72,15 @@ export function OnboardingForm({ merchantId }: Props) {
     setLogoUploading(false);
   }
 
-  async function handleImageFile(file: File) {
-    setImageUploading(true);
-    const url = await uploadFile(file, 'product-images');
-    setImageUrl(url);
-    setImageUploading(false);
-  }
-
   async function handleSubmit() {
     setSubmitting(true);
     setError(null);
-    const priceInCentimes = Math.round(parseFloat(price) * 100);
     const result = await submitOnboardingAction({
       merchantId,
       storeName,
       storeSlug,
       description,
       logoUrl,
-      nameFr,
-      nameAr,
-      price: priceInCentimes,
-      stock: parseInt(stock, 10) || 0,
-      imageUrl,
     });
     if (result.error) {
       setError(result.error);
@@ -118,49 +94,28 @@ export function OnboardingForm({ merchantId }: Props) {
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-            {step === 1 ? '1 / 2' : '2 / 2'}
-          </p>
           <h1 className="text-2xl font-bold tracking-tight">
-            {step === 1 ? t('step1Title') : t('step2Title')}
+            {t('step1Title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {step === 1 ? t('step1Subtitle') : t('step2Subtitle')}
+            {t('step1Subtitle')}
           </p>
         </div>
 
-        {step === 1 ? (
-          <StepStoreDetails
-            storeName={storeName}
-            storeSlug={storeSlug}
-            description={description}
-            logoUploading={logoUploading}
-            slugStatus={slugStatus}
-            onStoreName={setStoreName}
-            onStoreSlug={setStoreSlug}
-            onDescription={setDescription}
-            onLogoFile={handleLogoFile}
-            onNext={() => setStep(2)}
-          />
-        ) : (
-          <StepFirstProduct
-            nameFr={nameFr}
-            nameAr={nameAr}
-            price={price}
-            stock={stock}
-            imageUrl={imageUrl}
-            imageUploading={imageUploading}
-            submitting={submitting}
-            error={error}
-            onNameFr={setNameFr}
-            onNameAr={setNameAr}
-            onPrice={setPrice}
-            onStock={setStock}
-            onImageFile={handleImageFile}
-            onBack={() => setStep(1)}
-            onSubmit={handleSubmit}
-          />
-        )}
+        <StepStoreDetails
+          storeName={storeName}
+          storeSlug={storeSlug}
+          description={description}
+          logoUploading={logoUploading}
+          slugStatus={slugStatus}
+          onStoreName={setStoreName}
+          onStoreSlug={setStoreSlug}
+          onDescription={setDescription}
+          onLogoFile={handleLogoFile}
+          onNext={handleSubmit}
+          submitting={submitting}
+          error={error}
+        />
       </div>
     </main>
   );

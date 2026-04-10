@@ -131,13 +131,15 @@ export default async function DashboardPage() {
         </div>
 
         {/* Onboarding checklist — shown when store is not yet live OR setup is incomplete.
-            New merchants default to is_online=true in the DB, so we must also check
-            for incomplete required steps (city, delivery zone, first product) so the
+            New merchants default to is_online=false in the DB, so we must also check
+            for incomplete required steps (location, photo, description, category, first product) so the
             checklist renders for brand-new stores that haven't finished setup. */}
         {onboardingData !== null &&
           (!onboardingData.isOnline ||
-            !onboardingData.city ||
-            !onboardingData.hasDeliveryZone ||
+            !onboardingData.hasLocation ||
+            !onboardingData.logoUrl ||
+            !onboardingData.hasDescription ||
+            !onboardingData.hasCategory ||
             onboardingData.visibleProductCount < 1) && (
           <Suspense fallback={<OnboardingChecklistSkeleton />}>
             <OnboardingChecklist data={onboardingData} />

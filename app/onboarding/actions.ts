@@ -9,12 +9,6 @@ export type OnboardingData = {
   storeSlug: string;
   description: string;
   logoUrl: string | null;
-  nameFr: string;
-  nameAr: string;
-  /** Price in centimes MAD (e.g. 10000 = 100 MAD) */
-  price: number;
-  stock: number;
-  imageUrl: string | null;
 };
 
 export async function checkSlugAction(
@@ -51,8 +45,6 @@ export async function submitOnboardingAction(
 
   // Basic validation.
   if (!data.storeName || !data.storeSlug) return { error: 'validation' };
-  if (!data.nameFr || !data.nameAr) return { error: 'validation' };
-  if (data.price < 0 || data.stock < 0) return { error: 'validation' };
 
   const service = createServiceClient();
   let merchantId = data.merchantId;
@@ -90,21 +82,6 @@ export async function submitOnboardingAction(
       return { error: 'merchant_insert_failed' };
     }
     merchantId = inserted.id;
-  }
-
-  const { error: productError } = await service.from('products').insert({
-    merchant_id: merchantId,
-    name_fr: data.nameFr,
-    name_ar: data.nameAr,
-    price: data.price,
-    stock: data.stock,
-    image_url: data.imageUrl,
-    is_active: true,
-  });
-
-  if (productError) {
-    console.error('[onboarding] product insert failed:', productError.message);
-    return { error: 'product_insert_failed' };
   }
 
   return { error: null };
