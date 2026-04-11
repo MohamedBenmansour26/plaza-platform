@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Check, Copy, CheckCheck, Clock } from 'lucide-react';
+import { Copy, CheckCheck, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
@@ -32,7 +32,6 @@ export default function ConfirmationPage() {
   const { items, total, clearCart } = useCart();
 
   const [order, setOrder] = useState<ConfirmedOrder>({});
-  const [animate, setAnimate] = useState(false);
   const [copied, setCopied] = useState(false);
   const [snapshotItems, setSnapshotItems] = useState<CartItem[]>([]);
   const [snapshotTotal, setSnapshotTotal] = useState(0);
@@ -50,7 +49,6 @@ export default function ConfirmationPage() {
     }
     clearCart();
     sessionStorage.removeItem('plaza_pending_order');
-    setTimeout(() => setAnimate(true), 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -90,43 +88,8 @@ export default function ConfirmationPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md space-y-6"
       >
-        <div className="bg-[#16A34A] h-28 -mx-4 flex items-center justify-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: animate ? 1 : 0 }}
-            transition={{ type: 'spring', delay: 0.2 }}
-            className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: animate ? 1 : 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Check className="w-10 h-10 text-[#16A34A]" strokeWidth={3} />
-            </motion.div>
-          </motion.div>
-        </div>
-
         <div className="text-center space-y-4">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="font-bold text-[26px]"
-          >
-            Commande confirmée !
-          </motion.h1>
-
-          {order.name && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.35 }}
-              className="text-[15px] text-[#78716C]"
-            >
-              Merci, <span className="font-medium text-[#1C1917]">{order.name}</span> !
-            </motion.p>
-          )}
+          <h1 className="font-bold text-[26px] text-center">Commande confirmée ! ✓</h1>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -179,65 +142,6 @@ export default function ConfirmationPage() {
               <p className="text-[12px] text-[#78716C]">Communiquez ce code au livreur pour confirmer la réception de votre commande.</p>
             </motion.div>
           )}
-
-          {order.paymentMethod === 'cash' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="flex items-start gap-3 p-4 bg-[#F0FDF4] border border-[#16A34A]/30 rounded-xl"
-            >
-              <svg
-                className="w-5 h-5 text-[#16A34A] flex-shrink-0 mt-0.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-[14px] text-[#78716C]">
-                Vous paierez <span className="font-semibold text-[#1C1917]">{snapshotTotal + deliveryFee} MAD</span> en espèces à la livraison.
-              </p>
-            </motion.div>
-          )}
-
-          {order.paymentMethod === 'card-delivery' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="flex items-start gap-3 p-4 bg-[#F0FDF4] border border-[#16A34A]/30 rounded-xl"
-            >
-              <svg
-                className="w-5 h-5 text-[#16A34A] flex-shrink-0 mt-0.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-[14px] text-[#78716C]">
-                Vous paierez <span className="font-semibold text-[#1C1917]">{snapshotTotal + deliveryFee} MAD</span> par carte à la livraison.
-              </p>
-            </motion.div>
-          )}
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-[15px] text-[#78716C] px-4"
-          >
-            Nous vous contacterons dans les{' '}
-            <span className="font-medium text-[#1C1917]">30 minutes</span> pour confirmer la
-            livraison.
-          </motion.p>
 
           {(order.deliveryDisplayDate || order.deliverySlot) && (
             <motion.div

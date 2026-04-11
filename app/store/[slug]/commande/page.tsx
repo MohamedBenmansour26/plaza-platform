@@ -7,7 +7,7 @@ import { fr } from 'date-fns/locale/fr';
 import { ArrowLeft, CreditCard, Banknote } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
-import { DeliverySlotPicker } from '../_components/DeliverySlotPicker';
+import DateTimePicker from '../_components/DateTimePicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
 import { getMerchantBySlug } from '../actions';
@@ -31,11 +31,9 @@ export default function CheckoutPage() {
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<UIPaymentMethod>('cash');
-  const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
-  const [deliverySlot, setDeliverySlot] = useState<string>('');
+  const [deliveryDateTime, setDeliveryDateTime] = useState<{ date?: Date; time?: string }>({});
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressNotes, setAddressNotes] = useState('');
   const [city, setCity] = useState('');
@@ -46,17 +44,6 @@ export default function CheckoutPage() {
   useEffect(() => setCodConfirmed(false), [paymentMethod]);
 
   useEffect(() => {
-    const today = new Date();
-    setDeliveryDate(today);
-    const nowHour = today.getHours();
-    const firstSlot = ['09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00',
-      '13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00',
-      '17:00-18:00','18:00-19:00','19:00-20:00']
-      .find(s => parseInt(s.split(':')[0], 10) > nowHour) ?? '09:00-10:00';
-    setDeliverySlot(firstSlot);
-  }, []);
-
-  useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
   }, [slug]);
 
@@ -65,11 +52,10 @@ export default function CheckoutPage() {
   const finalTotal = total + deliveryFee;
 
   const isFormValid = (): boolean => {
-    if (!firstName.trim()) return false;
-    if (!lastName.trim()) return false;
+    if (!fullName.trim()) return false;
     if (!/^0[5-7]\d{8}$/.test(phone.trim())) return false;
-    if (!deliveryDate) return false;
-    if (!deliverySlot) return false;
+    if (!deliveryDateTime.date) return false;
+    if (!deliveryDateTime.time) return false;
     if (locationLat === null || locationLng === null) return false;
     if (!codConfirmed) return false;
     return true;
@@ -82,25 +68,21 @@ export default function CheckoutPage() {
 
     const orderNumber = generateOrderNumber();
 
-    const formattedDate = deliveryDate
-      ? format(deliveryDate, "d MMMM yyyy", { locale: fr })
-      : null;
-
     sessionStorage.setItem(
       'plaza_pending_order',
       JSON.stringify({
-        name: `${firstName.trim()} ${lastName.trim()}`,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        name: fullName.trim(),
         phone,
         address: addressNotes,
         city,
         locationLat,
         locationLng,
-        deliveryDate: deliveryDate?.toISOString().split('T')[0] ?? null,
-        deliverySlot,
-        deliveryDisplayDate: formattedDate,
-        deliveryDisplaySlot: deliverySlot,
+        deliveryDate: deliveryDateTime.date?.toISOString().split('T')[0] ?? null,
+        deliverySlot: deliveryDateTime.time ?? '',
+        deliveryDisplayDate: deliveryDateTime.date
+          ? format(deliveryDateTime.date, "d MMMM yyyy", { locale: fr })
+          : null,
+        deliveryDisplaySlot: deliveryDateTime.time ?? '',
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
         orderNumber,
@@ -136,26 +118,13 @@ export default function CheckoutPage() {
           <h2 className="font-bold text-[17px]">Informations de contact</h2>
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Prénom <span className="text-[#DC2626] ml-0.5">*</span>
+              Nom complet <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <input
               type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Votre prénom"
-              className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Nom <span className="text-[#DC2626] ml-0.5">*</span>
-            </label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Votre nom"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Votre nom complet"
               className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
               required
             />
@@ -204,12 +173,9 @@ export default function CheckoutPage() {
         {/* Delivery Time */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Date de livraison souhaitée <span className="text-[#DC2626] ml-0.5">*</span></h2>
-          <DeliverySlotPicker
-            selectedDate={deliveryDate}
-            selectedSlot={deliverySlot}
-            onDateChange={setDeliveryDate}
-            onSlotChange={setDeliverySlot}
-            workingHours={null}
+          <DateTimePicker
+            value={deliveryDateTime}
+            onChange={setDeliveryDateTime}
           />
         </div>
 

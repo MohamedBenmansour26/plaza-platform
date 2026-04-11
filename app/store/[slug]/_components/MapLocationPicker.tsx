@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -12,10 +12,12 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const onLocationSelectRef = useRef(onLocationSelect);
   const [picked, setPicked] = useState(false);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
 
-  const handleSelect = useCallback(onLocationSelect, [onLocationSelect]);
+  // Keep ref up-to-date without triggering effect
+  onLocationSelectRef.current = onLocationSelect;
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current || !token) return;
@@ -29,7 +31,6 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     mapRef.current = map;
 
     map.fitBounds([[-17.5, 20.5], [-0.5, 36.5]] as [[number, number], [number, number]], { padding: 20, duration: 0 });
-
     map.getCanvas().style.cursor = 'crosshair';
 
     map.on('click', async (e) => {
@@ -47,14 +48,18 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place&language=fr&access_token=${token}`
         );
         const data = await res.json() as { features?: Array<{ text?: string }> };
-        handleSelect(lat, lng, data.features?.[0]?.text ?? '');
+        onLocationSelectRef.current(lat, lng, data.features?.[0]?.text ?? '');
       } catch {
-        handleSelect(lat, lng, '');
+        onLocationSelectRef.current(lat, lng, '');
       }
     });
 
-    return () => { map.remove(); mapRef.current = null; };
-  }, [token, handleSelect]);
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    };
+  }, [token]); // ONLY token — never re-initialize when parent re-renders
 
   if (!token) {
     return (
