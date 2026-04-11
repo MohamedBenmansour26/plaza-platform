@@ -2,71 +2,93 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Grid3X3, ShoppingCart, Info } from 'lucide-react';
+import { Home, Grid3X3, ShoppingBag, Info } from 'lucide-react';
+
 import { useCart } from './CartProvider';
 
 interface BottomTabBarProps {
   slug: string;
+  onInfoClick?: () => void;
+  onCartClick?: () => void;
 }
 
-export function BottomTabBar({ slug }: BottomTabBarProps) {
+export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarProps) {
   const pathname = usePathname();
   const { items } = useCart();
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  const handleCart = onCartClick ?? (() => window.dispatchEvent(new CustomEvent('plaza:open-cart')));
+  const handleInfo = onInfoClick ?? (() => {});
+
   const tabs = [
-    { label: 'Accueil', icon: Home, href: `/store/${slug}` },
-    { label: 'Produits', icon: Grid3X3, href: `/store/${slug}/produits` },
-    { label: 'Panier', icon: ShoppingCart, href: null, badge: cartCount > 0 ? cartCount : null },
-    { label: 'Infos', icon: Info, href: `/store/${slug}/infos` },
+    { name: 'Accueil', icon: Home, href: `/store/${slug}` as const, onClick: undefined as (() => void) | undefined, badge: 0 },
+    { name: 'Produits', icon: Grid3X3, href: `/store/${slug}#produits` as const, onClick: undefined as (() => void) | undefined, badge: 0 },
+    { name: 'Panier', icon: ShoppingBag, href: null, onClick: handleCart, badge: cartCount },
+    { name: 'Infos', icon: Info, href: null, onClick: handleInfo, badge: 0 },
   ];
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] z-40 flex"
+      className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] h-14 flex items-center justify-around z-40"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = tab.href
-          ? pathname === tab.href || pathname.startsWith(tab.href + '/')
+          ? tab.name === 'Accueil'
+            ? pathname === `/store/${slug}`
+            : pathname === tab.href || pathname.startsWith(tab.href.split('#')[0] + '/')
           : false;
-        return (
-          <div
-            key={tab.label}
-            className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 relative"
-          >
-            {tab.href ? (
-              <Link
-                href={tab.href}
-                className={`flex flex-col items-center gap-0.5 ${isActive ? '' : 'text-[#A8A29E]'}`}
-                style={isActive ? { color: 'var(--color-primary)' } : {}}
+
+        const content = (
+          <div className="relative">
+            <Icon
+              className="w-5 h-5"
+              strokeWidth={2}
+              style={isActive ? { color: 'var(--color-primary)' } : { color: '#78716C' }}
+            />
+            {tab.badge > 0 && (
+              <div
+                className="absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
-                <div className="relative">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('plaza:open-cart'))}
-                className="flex flex-col items-center gap-0.5 text-[#A8A29E]"
-              >
-                <div className="relative">
-                  <Icon className="w-5 h-5" />
-                  {tab.badge != null && (
-                    <span
-                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center"
-                      style={{ backgroundColor: 'var(--color-primary)' }}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </button>
+                {tab.badge}
+              </div>
             )}
           </div>
+        );
+
+        const label = (
+          <span
+            className="text-[10px]"
+            style={isActive ? { color: 'var(--color-primary)', fontWeight: 600 } : { color: '#78716C' }}
+          >
+            {tab.name}
+          </span>
+        );
+
+        if (tab.onClick) {
+          return (
+            <button
+              key={tab.name}
+              onClick={tab.onClick}
+              className="flex flex-col items-center justify-center gap-1 relative flex-1"
+            >
+              {content}
+              {label}
+            </button>
+          );
+        }
+
+        return (
+          <Link
+            key={tab.name}
+            href={tab.href!}
+            className="flex flex-col items-center justify-center gap-1 relative flex-1"
+          >
+            {content}
+            {label}
+          </Link>
         );
       })}
     </nav>
