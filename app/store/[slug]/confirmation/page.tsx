@@ -132,13 +132,14 @@ export default function ConfirmationPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl p-5 border-2 border-[#2563EB] shadow-sm"
+            className="bg-white rounded-xl p-5 border-2 shadow-sm"
+            style={{ borderColor: 'var(--color-primary)' }}
           >
             <div className="text-[13px] text-[#78716C] mb-2 font-medium">
               📋 Votre numéro de commande
             </div>
             <div className="flex items-center justify-center gap-3 mb-3">
-              <span className="font-bold text-[28px] text-[#2563EB] tracking-wide">
+              <span className="font-bold text-[28px] tracking-wide" style={{ color: 'var(--color-primary)' }}>
                 {orderNumber}
               </span>
               <button
@@ -164,12 +165,13 @@ export default function ConfirmationPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="border-2 border-[#2563EB] bg-[#EFF6FF] rounded-xl p-5 text-center"
+              className="border-2 rounded-xl p-5 text-center"
+              style={{ borderColor: 'var(--color-primary)', backgroundColor: 'var(--color-primary-50, #EFF6FF)' }}
             >
-              <p className="text-[13px] font-medium text-[#2563EB] mb-3">Votre code de réception</p>
+              <p className="text-[13px] font-medium mb-3" style={{ color: 'var(--color-primary)' }}>Votre code de réception</p>
               <div className="flex justify-center gap-3 mb-3">
                 {String(order.customerPin).padStart(4, '0').split('').map((digit, i) => (
-                  <div key={i} className="w-12 h-14 bg-white border-2 border-[#2563EB] rounded-lg flex items-center justify-center text-[28px] font-bold text-[#1C1917]">
+                  <div key={i} className="w-12 h-14 bg-white rounded-lg flex items-center justify-center text-[28px] font-bold text-[#1C1917]" style={{ border: '2px solid var(--color-primary)' }}>
                     {digit}
                   </div>
                 ))}
@@ -242,7 +244,8 @@ export default function ConfirmationPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] text-[#2563EB] rounded-full text-[14px] font-medium mt-3"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] rounded-full text-[14px] font-medium mt-3"
+              style={{ color: 'var(--color-primary)' }}
             >
               <Clock className="w-4 h-4" />
               {order.deliveryDisplayDate && order.deliverySlot
@@ -335,14 +338,15 @@ export default function ConfirmationPage() {
         >
           <button
             onClick={() => router.push(`/store/${slug}/commande/${orderNumber}`)}
-            className="w-full h-12 bg-[#2563EB] text-white rounded-lg font-medium text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm"
+            className="w-full h-12 text-white rounded-lg font-medium text-[15px] transition-colors shadow-sm"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Suivre ma commande
           </button>
 
           <button
             onClick={() => router.push(`/store/${slug}`)}
-            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg font-medium text-[15px] hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
+            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg font-medium text-[15px] transition-colors"
           >
             Retour à la boutique
           </button>

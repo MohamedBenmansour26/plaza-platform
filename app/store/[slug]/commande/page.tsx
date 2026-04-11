@@ -333,7 +333,7 @@ export default function CheckoutPage() {
             )}
             <div className="flex justify-between pt-3 border-t border-[#E2E8F0]">
               <span className="font-bold text-[19px]">Total</span>
-              <span className="font-bold text-[19px] text-[#2563EB]">{finalTotal} MAD</span>
+              <span className="font-bold text-[19px]" style={{ color: 'var(--color-primary)' }}>{finalTotal} MAD</span>
             </div>
           </div>
         </div>
@@ -346,7 +346,8 @@ export default function CheckoutPage() {
             onClick={handleSubmit}
             disabled={loading || !isFormValid() || !merchant}
             whileTap={{ scale: 0.98 }}
-            className="w-full h-14 bg-[#2563EB] text-white rounded-lg font-medium text-[16px] hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-14 text-white rounded-lg font-medium text-[16px] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             {loading ? (
               <>

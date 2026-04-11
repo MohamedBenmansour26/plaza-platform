@@ -88,9 +88,10 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
                 onClick={() => onDateChange(date)}
                 className={`flex-shrink-0 px-3 py-2 rounded-lg text-[13px] font-medium border transition-colors whitespace-nowrap ${
                   isSelected
-                    ? 'bg-[#2563EB] text-white border-[#2563EB]'
-                    : 'bg-white text-[#1C1917] border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB]'
+                    ? 'text-white'
+                    : 'bg-white text-[#1C1917] border-[#E2E8F0]'
                 }`}
+                style={isSelected ? { backgroundColor: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'white' } : {}}
               >
                 {formatDateLabel(date)}
               </button>
