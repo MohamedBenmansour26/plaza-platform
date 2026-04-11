@@ -238,6 +238,10 @@ export type Database = {
           notes:            string | null
           created_at:       string
           updated_at:       string
+          // PLZ-038: reception PIN + delivery scheduling (migration 2026-04-10)
+          customer_pin:     number | null
+          delivery_date:    string | null   // YYYY-MM-DD from Postgres date
+          delivery_slot:    string | null   // format: "09:00-10:00"
         }
         Insert: {
           id?:               string
@@ -253,6 +257,9 @@ export type Database = {
           notes?:            string | null
           created_at?:       string
           updated_at?:       string
+          customer_pin?:     number | null
+          delivery_date?:    string | null
+          delivery_slot?:    string | null
         }
         Update: {
           id?:               string
@@ -268,6 +275,9 @@ export type Database = {
           notes?:            string | null
           created_at?:       string
           updated_at?:       string
+          customer_pin?:     number | null
+          delivery_date?:    string | null
+          delivery_slot?:    string | null
         }
         Relationships: [
           {
