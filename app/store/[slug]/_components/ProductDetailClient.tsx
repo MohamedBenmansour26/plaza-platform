@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   ShoppingCart,
@@ -76,6 +76,12 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [cartOpen, setCartOpen] = useState(false);
   const [showMaxMsg, setShowMaxMsg] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setCartOpen(true);
+    window.addEventListener('plaza:open-cart', handler);
+    return () => window.removeEventListener('plaza:open-cart', handler);
+  }, []);
 
   const priceMAD = product.price / 100;
   const originalPriceMAD =

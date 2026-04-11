@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -26,6 +26,12 @@ export function StoreHomeClient({
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [cartOpen, setCartOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setCartOpen(true);
+    window.addEventListener('plaza:open-cart', handler);
+    return () => window.removeEventListener('plaza:open-cart', handler);
+  }, []);
 
   // Derive unique category_l1 values from products
   const categories = [
@@ -166,7 +172,7 @@ export function StoreHomeClient({
         )}
       </div>
 
-      <FloatingCartBar onOpenCart={() => setCartOpen(true)} />
+      <FloatingCartBar onOpenCart={() => setCartOpen(true)} freeThreshold={merchant.delivery_free_threshold ?? undefined} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}

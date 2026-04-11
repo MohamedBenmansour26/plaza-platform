@@ -48,7 +48,10 @@ export function BottomTabBar({ slug }: BottomTabBarProps) {
                 <span className="text-[10px] font-medium">{tab.label}</span>
               </Link>
             ) : (
-              <button className="flex flex-col items-center gap-0.5 text-[#A8A29E]">
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('plaza:open-cart'))}
+                className="flex flex-col items-center gap-0.5 text-[#A8A29E]"
+              >
                 <div className="relative">
                   <Icon className="w-5 h-5" />
                   {tab.badge != null && (
