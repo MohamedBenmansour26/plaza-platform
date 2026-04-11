@@ -14,8 +14,10 @@ interface PendingOrder {
   phone: string;
   address: string;
   city: string;
-  deliveryDate: string;
-  deliveryTime: string;
+  deliveryDate?: string | null;       // YYYY-MM-DD
+  deliverySlot?: string | null;       // "09:00-10:00"
+  deliveryDisplayDate?: string | null;
+  deliveryDisplaySlot?: string | null;
   paymentMethod: string;
   paymentMethodDb: 'cod' | 'terminal' | 'card';
   notes?: string | null;
@@ -110,8 +112,8 @@ export default function VerificationPage() {
         customerPhone: pendingOrder.phone,
         customerAddress: pendingOrder.address || null,
         customerCity: pendingOrder.city || null,
-        deliveryDate: pendingOrder.deliveryDate,
-        deliveryTime: pendingOrder.deliveryTime,
+        deliveryDate: pendingOrder.deliveryDate ?? null,
+        deliverySlot: pendingOrder.deliverySlot ?? null,
         paymentMethod: pendingOrder.paymentMethodDb,
         notes: pendingOrder.notes ?? null,
         items: items.map((item) => ({
@@ -125,10 +127,18 @@ export default function VerificationPage() {
         total: total + getDeliveryFee(total, pendingOrder.deliveryFeeThreshold ?? undefined),
       };
 
-      const { orderNumber } = await createOrder(payload);
+      const result = await createOrder(payload);
 
-      const updatedOrder = { ...pendingOrder, orderNumber };
-      sessionStorage.setItem('plaza_pending_order', JSON.stringify(updatedOrder));
+      // Update sessionStorage with confirmed data including PIN
+      const existing = JSON.parse(sessionStorage.getItem('plaza_pending_order') ?? '{}');
+      sessionStorage.setItem('plaza_pending_order', JSON.stringify({
+        ...existing,
+        orderNumber: result.orderNumber,
+        customerPin: result.customerPin,
+        deliveryDisplayDate: pendingOrder.deliveryDisplayDate,
+        deliveryDisplaySlot: pendingOrder.deliveryDisplaySlot,
+        deliverySlot: pendingOrder.deliverySlot,
+      }));
 
       router.push(`/store/${slug}/confirmation`);
     } catch {

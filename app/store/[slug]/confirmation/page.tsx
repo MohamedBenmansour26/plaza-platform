@@ -14,14 +14,15 @@ interface ConfirmedOrder {
   address?: string;
   city?: string;
   deliveryDate?: string;
-  deliveryTime?: string;
+  deliverySlot?: string;      // "09:00-10:00"
   deliveryDisplayDate?: string;
-  deliveryDisplayTime?: string;
+  deliveryDisplaySlot?: string;
   paymentMethod?: string;
   orderNumber?: string;
   merchantId?: string;
   deliveryFeeThreshold?: number | null;
   merchantSlug?: string;
+  customerPin?: number;
 }
 
 export default function ConfirmationPage() {
@@ -158,7 +159,24 @@ export default function ConfirmationPage() {
             </div>
           </motion.div>
 
-          {/* TODO: show customer_pin here after schema migration */}
+          {order.customerPin && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+              className="border-2 border-[#2563EB] bg-[#EFF6FF] rounded-xl p-5 text-center"
+            >
+              <p className="text-[13px] font-medium text-[#2563EB] mb-3">Votre code de réception</p>
+              <div className="flex justify-center gap-3 mb-3">
+                {String(order.customerPin).padStart(4, '0').split('').map((digit, i) => (
+                  <div key={i} className="w-12 h-14 bg-white border-2 border-[#2563EB] rounded-lg flex items-center justify-center text-[28px] font-bold text-[#1C1917]">
+                    {digit}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[12px] text-[#78716C]">Communiquez ce code au livreur pour confirmer la réception de votre commande.</p>
+            </motion.div>
+          )}
 
           {order.paymentMethod === 'cash' && (
             <motion.div
@@ -219,7 +237,7 @@ export default function ConfirmationPage() {
             livraison.
           </motion.p>
 
-          {order.deliveryDisplayDate && (
+          {(order.deliveryDisplayDate || order.deliverySlot) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -227,8 +245,11 @@ export default function ConfirmationPage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] text-[#2563EB] rounded-full text-[14px] font-medium mt-3"
             >
               <Clock className="w-4 h-4" />
-              Livraison prévue le {order.deliveryDisplayDate}
-              {order.deliveryDisplayTime ? ` · ${order.deliveryDisplayTime}` : ''}
+              {order.deliveryDisplayDate && order.deliverySlot
+                ? `Livraison le ${order.deliveryDisplayDate} entre ${order.deliverySlot.replace('-', ' et ').replace(/(\d{2}):00/g, '$1h00')}`
+                : order.deliveryDisplayDate
+                  ? `Livraison le ${order.deliveryDisplayDate}`
+                  : 'Livraison planifiée'}
             </motion.div>
           )}
         </div>

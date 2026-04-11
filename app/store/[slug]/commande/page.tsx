@@ -7,7 +7,7 @@ import { fr } from 'date-fns/locale/fr';
 import { ArrowLeft, CreditCard, Banknote } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
-import DateTimePicker from '../_components/DateTimePicker';
+import { DeliverySlotPicker } from '../_components/DeliverySlotPicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
 import { getMerchantBySlug } from '../actions';
@@ -31,10 +31,8 @@ export default function CheckoutPage() {
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<UIPaymentMethod>('cash');
-  const [deliveryDateTime, setDeliveryDateTime] = useState<{
-    date?: Date;
-    time?: string;
-  }>({});
+  const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
+  const [deliverySlot, setDeliverySlot] = useState<string>('');
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -48,6 +46,17 @@ export default function CheckoutPage() {
   useEffect(() => setCodConfirmed(false), [paymentMethod]);
 
   useEffect(() => {
+    const today = new Date();
+    setDeliveryDate(today);
+    const nowHour = today.getHours();
+    const firstSlot = ['09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00',
+      '13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00',
+      '17:00-18:00','18:00-19:00','19:00-20:00']
+      .find(s => parseInt(s.split(':')[0], 10) > nowHour) ?? '09:00-10:00';
+    setDeliverySlot(firstSlot);
+  }, []);
+
+  useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
   }, [slug]);
 
@@ -59,8 +68,8 @@ export default function CheckoutPage() {
     if (!firstName.trim()) return false;
     if (!lastName.trim()) return false;
     if (!/^0[5-7]\d{8}$/.test(phone.trim())) return false;
-    if (!deliveryDateTime.date) return false;
-    if (!deliveryDateTime.time) return false;
+    if (!deliveryDate) return false;
+    if (!deliverySlot) return false;
     if (locationLat === null || locationLng === null) return false;
     if (!codConfirmed) return false;
     return true;
@@ -73,9 +82,9 @@ export default function CheckoutPage() {
 
     const orderNumber = generateOrderNumber();
 
-    const formattedDate = deliveryDateTime.date
-      ? format(deliveryDateTime.date, "EEEE d MMMM yyyy", { locale: fr })
-      : undefined;
+    const formattedDate = deliveryDate
+      ? format(deliveryDate, "d MMMM yyyy", { locale: fr })
+      : null;
 
     sessionStorage.setItem(
       'plaza_pending_order',
@@ -88,10 +97,10 @@ export default function CheckoutPage() {
         city,
         locationLat,
         locationLng,
-        deliveryDate: deliveryDateTime.date?.toISOString(),
-        deliveryTime: deliveryDateTime.time,
+        deliveryDate: deliveryDate?.toISOString().split('T')[0] ?? null,
+        deliverySlot,
         deliveryDisplayDate: formattedDate,
-        deliveryDisplayTime: deliveryDateTime.time,
+        deliveryDisplaySlot: deliverySlot,
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
         orderNumber,
@@ -195,15 +204,13 @@ export default function CheckoutPage() {
         {/* Delivery Time */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Date de livraison souhaitée <span className="text-[#DC2626] ml-0.5">*</span></h2>
-          <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
-              Date et heure <span className="text-[#DC2626] ml-0.5">*</span>
-            </label>
-            <DateTimePicker
-              value={deliveryDateTime}
-              onChange={(value) => setDeliveryDateTime(value)}
-            />
-          </div>
+          <DeliverySlotPicker
+            selectedDate={deliveryDate}
+            selectedSlot={deliverySlot}
+            onDateChange={setDeliveryDate}
+            onSlotChange={setDeliverySlot}
+            workingHours={null}
+          />
         </div>
 
         {/* Payment Method */}

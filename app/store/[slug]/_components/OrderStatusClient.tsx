@@ -14,16 +14,35 @@ type OrderWithRelations = Order & {
 interface Step {
   id: number;
   label: string;
+  eta?: string;
   completed: boolean;
   current: boolean;
 }
 
-function buildSteps(status: OrderStatus): Step[] {
+function formatDeliverySlot(slot: string | null): string {
+  if (!slot) return '';
+  return slot.replace('-', ' – ').replace(/(\d{2}):00/g, '$1h00');
+}
+
+function buildSteps(status: OrderStatus, deliverySlot: string | null): Step[] {
+  const slotEnd = deliverySlot ? deliverySlot.split('-')[1] : null;
   const steps: Step[] = [
     { id: 1, label: 'Commande reçue', completed: false, current: false },
-    { id: 2, label: 'En cours de confirmation', completed: false, current: false },
-    { id: 3, label: 'En route', completed: false, current: false },
-    { id: 4, label: 'Livrée', completed: false, current: false },
+    { id: 2, label: 'En cours de confirmation', eta: 'Dans 30–60 min', completed: false, current: false },
+    {
+      id: 3,
+      label: 'En route',
+      eta: deliverySlot ? `Départ ${formatDeliverySlot(deliverySlot)}` : 'Selon votre créneau',
+      completed: false,
+      current: false,
+    },
+    {
+      id: 4,
+      label: 'Livrée',
+      eta: slotEnd ? `Avant ${slotEnd.replace(':00', 'h00')}` : undefined,
+      completed: false,
+      current: false,
+    },
   ];
 
   if (status === 'pending') {
@@ -63,7 +82,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
     return () => clearInterval(interval);
   }, [order.status, router]);
 
-  const steps = buildSteps(order.status);
+  const steps = buildSteps(order.status, order.delivery_slot ?? null);
   const isCancelled = order.status === 'cancelled';
 
   const handleRefresh = () => {
@@ -162,6 +181,9 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                     >
                       {step.label}
                     </h3>
+                    {step.eta && step.current && (
+                      <p className="text-[12px] text-[#78716C] mt-0.5">{step.eta}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -169,7 +191,30 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           )}
         </div>
 
-        {order.notes && (
+        {order.customer_pin && (
+          <div className="bg-[#EFF6FF] border border-[#2563EB]/20 rounded-xl p-4 flex items-center gap-4">
+            <div className="flex gap-1.5">
+              {String(order.customer_pin).padStart(4, '0').split('').map((d, i) => (
+                <div key={i} className="w-8 h-9 bg-white border border-[#2563EB] rounded flex items-center justify-center text-[16px] font-bold text-[#1C1917]">
+                  {d}
+                </div>
+              ))}
+            </div>
+            <p className="text-[12px] text-[#78716C] flex-1">Code à communiquer au livreur à la réception</p>
+          </div>
+        )}
+
+        {order.delivery_slot && (
+          <div className="bg-[#EFF6FF] rounded-xl p-4 flex items-start gap-3">
+            <Clock className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[13px] font-medium text-[#1C1917]">Créneau de livraison</p>
+              <p className="text-[13px] text-[#78716C]">{formatDeliverySlot(order.delivery_slot)}</p>
+            </div>
+          </div>
+        )}
+
+        {!order.delivery_slot && order.notes && (
           <div className="bg-[#EFF6FF] rounded-xl p-4 flex items-start gap-3">
             <Clock className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
             <div>

@@ -25,8 +25,8 @@ export type CreateOrderPayload = {
   customerPhone: string;
   customerAddress: string | null;
   customerCity: string | null;
-  deliveryDate: string;
-  deliveryTime: string;
+  deliveryDate?: string | null;    // ISO date string YYYY-MM-DD
+  deliverySlot?: string | null;    // "09:00-10:00"
   paymentMethod: PaymentMethod;
   notes: string | null;
   items: Array<{
@@ -91,8 +91,10 @@ export async function getProductById(
 
 export async function createOrder(
   payload: CreateOrderPayload,
-): Promise<{ orderNumber: string }> {
+): Promise<{ orderNumber: string; customerPin: number }> {
   const supabase = await createClient();
+
+  const customerPin = Math.floor(1000 + Math.random() * 9000);
 
   // 1. Insert customer
   const { data: customer, error: custError } = (await supabase
@@ -122,6 +124,9 @@ export async function createOrder(
         delivery_fee: payload.deliveryFee,
         total: payload.total,
         notes: payload.notes,
+        customer_pin: customerPin,
+        delivery_date: payload.deliveryDate ?? null,
+        delivery_slot: payload.deliverySlot ?? null,
       } as never)
       .select('id')
       .single()) as { data: { id: string } | null; error: unknown };
@@ -147,7 +152,7 @@ export async function createOrder(
     .insert(orderItems as never);
   if (itemsError) throw new Error('Failed to create order items');
 
-  return { orderNumber };
+  return { orderNumber, customerPin };
 }
 
 export async function getOrderByNumber(
