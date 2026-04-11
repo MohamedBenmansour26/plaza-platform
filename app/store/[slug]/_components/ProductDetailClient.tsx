@@ -152,7 +152,8 @@ export function ProductDetailClient({
         >
           <ShoppingCart className="w-5 h-5" />
           {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#2563EB] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-medium">
+            <span className="absolute -top-1 -right-1 text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-medium"
+              style={{ backgroundColor: 'var(--color-primary)' }}>
               {cartCount}
             </span>
           )}
@@ -195,7 +196,7 @@ export function ProductDetailClient({
               </h1>
 
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="font-bold text-[32px] text-[#2563EB]">
+                <span className="font-bold text-[32px]" style={{ color: 'var(--color-primary)' }}>
                   {priceMAD} MAD
                 </span>
                 {showDiscount && originalPriceMAD != null && (
@@ -262,11 +263,10 @@ export function ProductDetailClient({
                 onClick={handleAddToCart}
                 whileTap={outOfStock ? undefined : { scale: 0.98 }}
                 disabled={outOfStock}
-                className={`w-full h-14 bg-[#2563EB] text-white rounded-lg font-medium text-[16px] transition-colors ${
-                  outOfStock
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:bg-[#1d4ed8]'
+                  className={`w-full h-14 text-white rounded-lg font-medium text-[16px] transition-colors ${
+                  outOfStock ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {outOfStock
                   ? 'Rupture de stock'

@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 
 import { useCart } from './CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
+import { useIsDesktop } from '../_hooks/useIsDesktop';
 import type { CartItem } from './CartProvider';
 
 interface CartDrawerProps {
@@ -93,7 +94,8 @@ function CartContent({
                     <h3 className="font-medium text-[14px] mb-1 line-clamp-2">
                       {item.name}
                     </h3>
-                    <span className="font-bold text-[16px] text-[#2563EB] mt-auto">
+                    <span className="font-bold text-[16px] mt-auto"
+                      style={{ color: 'var(--color-primary)' }}>
                       {item.price} MAD
                     </span>
                   </div>
@@ -189,7 +191,8 @@ function CartContent({
         <button
           onClick={onCheckout}
           disabled={items.length === 0}
-          className={`w-full h-14 bg-[#2563EB] text-white rounded-lg font-medium hover:bg-[#1d4ed8] transition-colors ${items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-full h-14 text-white rounded-lg font-medium transition-colors ${items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          style={{ backgroundColor: 'var(--color-primary)' }}
         >
           Passer la commande
         </button>
@@ -207,6 +210,7 @@ function CartContent({
 export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
   const { items, updateQuantity, removeItem, total } = useCart();
   const router = useRouter();
+  const isDesktop = useIsDesktop();
 
   const deliveryFee = getDeliveryFee(total);
   const finalTotal = total + deliveryFee;
@@ -229,21 +233,23 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
 
   return (
     <>
-      {/* Desktop: right side panel */}
-      <div
-        className={`hidden lg:flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        <CartContent {...contentProps} />
-      </div>
-      {open && (
-        <div
-          className="hidden lg:block fixed inset-0 bg-black/40 z-40"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Mobile: vaul Drawer */}
-      <div className="lg:hidden">
+      {isDesktop ? (
+        <>
+          {/* Desktop: right side panel — only mounted on desktop */}
+          <div
+            className={`flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+          >
+            <CartContent {...contentProps} />
+          </div>
+          {open && (
+            <div
+              className="fixed inset-0 bg-black/40 z-40"
+              onClick={onClose}
+            />
+          )}
+        </>
+      ) : (
+        /* Mobile: vaul Drawer — only mounted on mobile */
         <Drawer.Root open={open} onOpenChange={onClose}>
           <Drawer.Portal>
             <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
@@ -256,7 +262,7 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
             </Drawer.Content>
           </Drawer.Portal>
         </Drawer.Root>
-      </div>
+      )}
     </>
   );
 }

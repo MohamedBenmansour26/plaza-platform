@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { getMerchantBySlug } from './actions';
 import { CartProvider } from './_components/CartProvider';
+import { BottomTabBar } from './_components/BottomTabBar';
 
 type Props = {
   children: ReactNode;
@@ -17,5 +18,17 @@ export default async function StoreLayout({ children, params }: Props) {
     notFound();
   }
 
-  return <CartProvider slug={slug}>{children}</CartProvider>;
+  const primaryColor = merchant.primary_color?.trim() || '#2563EB';
+
+  return (
+    <CartProvider slug={slug}>
+      <div
+        style={{ '--color-primary': primaryColor } as React.CSSProperties}
+        className="pb-[calc(56px+env(safe-area-inset-bottom))] lg:pb-0"
+      >
+        {children}
+        <BottomTabBar slug={slug} />
+      </div>
+    </CartProvider>
+  );
 }

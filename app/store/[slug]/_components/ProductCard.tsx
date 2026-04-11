@@ -63,9 +63,8 @@ export function ProductCard({ product, slug }: ProductCardProps) {
     <motion.div
       whileHover={!outOfStock ? { y: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.10)' } : {}}
       className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col transition-all duration-200 ${outOfStock ? 'pointer-events-none opacity-50' : 'hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]'}`}
-      style={{ aspectRatio: '0.75' }}
     >
-      <div className="relative w-full flex-1 overflow-hidden">
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '3/4' }}>
         {product.image_url ? (
           <img
             src={product.image_url}

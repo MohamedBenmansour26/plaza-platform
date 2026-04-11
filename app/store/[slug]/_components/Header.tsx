@@ -58,7 +58,8 @@ export function Header({
                     />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-[#2563EB] flex items-center justify-center text-white font-bold text-[14px]">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-[14px]"
+                    style={{ backgroundColor: 'var(--color-primary)' }}>
                     {initials}
                   </div>
                 )}
@@ -79,7 +80,8 @@ export function Header({
                 {onInfoClick && (
                   <button
                     onClick={onInfoClick}
-                    className="text-[12px] text-[#2563EB] text-left hover:underline"
+                    className="text-[12px] text-left hover:underline"
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     Voir les infos
                   </button>
@@ -96,7 +98,8 @@ export function Header({
           >
             <ShoppingCart className="w-5 h-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#2563EB] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-medium"
+                style={{ backgroundColor: 'var(--color-primary)' }}>
                 {cartCount}
               </span>
             )}

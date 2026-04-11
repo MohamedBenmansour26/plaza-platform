@@ -10,6 +10,7 @@ import { Header } from './Header';
 import { ProductCard } from './ProductCard';
 import { CartDrawer } from './CartDrawer';
 import { StoreInfoSheet } from './StoreInfoSheet';
+import { FloatingCartBar } from './FloatingCartBar';
 
 interface StoreHomeClientProps {
   merchant: Merchant;
@@ -99,7 +100,8 @@ export function StoreHomeClient({
           href="/track"
           className="flex items-center gap-3 p-3 bg-[#EFF6FF] border border-[#2563EB]/20 rounded-xl hover:bg-[#DBEAFE] transition-colors"
         >
-          <div className="w-10 h-10 bg-[#2563EB] rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: 'var(--color-primary)' }}>
             <Package className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
@@ -121,9 +123,10 @@ export function StoreHomeClient({
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
                   selectedCategory === category
-                    ? 'bg-[#2563EB] text-white'
+                    ? 'text-white'
                     : 'bg-white text-[#1C1917] border border-[#E2E8F0]'
                 }`}
+                style={selectedCategory === category ? { backgroundColor: 'var(--color-primary)' } : {}}
               >
                 {category}
               </button>
@@ -147,7 +150,7 @@ export function StoreHomeClient({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4"
           >
             {filtered.map((product, index) => (
               <motion.div
@@ -163,6 +166,7 @@ export function StoreHomeClient({
         )}
       </div>
 
+      <FloatingCartBar onOpenCart={() => setCartOpen(true)} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
