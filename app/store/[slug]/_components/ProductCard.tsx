@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 
@@ -30,6 +31,7 @@ function getStockDisplay(stock: number) {
 
 export function ProductCard({ product, slug }: ProductCardProps) {
   const { addItem } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
 
   const priceMAD = product.price / 100;
   const originalPriceMAD =
@@ -45,7 +47,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       : null;
 
   function handleAddToCart(e: React.MouseEvent) {
-    e.preventDefault(); // prevent Link navigation
+    e.preventDefault();
     if (outOfStock) return;
     addItem({
       id: product.id,
@@ -53,12 +55,14 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       price: priceMAD,
       image: product.image_url ?? '',
     });
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 400);
   }
 
   const card = (
     <motion.div
-      whileHover={!outOfStock ? { y: -2 } : {}}
-      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col shadow-sm hover:shadow-md transition-shadow duration-200 ${outOfStock ? 'pointer-events-none opacity-50' : ''}`}
+      whileHover={!outOfStock ? { y: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.10)' } : {}}
+      className={`bg-white rounded-lg overflow-hidden border border-[#E2E8F0] flex flex-col transition-all duration-200 ${outOfStock ? 'pointer-events-none opacity-50' : 'hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]'}`}
       style={{ aspectRatio: '0.75' }}
     >
       <div className="relative w-full flex-1 overflow-hidden">
@@ -85,7 +89,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
         )}
       </div>
 
-      <div className="p-3 flex flex-col justify-between">
+      <div className="p-3.5 flex flex-col justify-between">
         <h3 className="font-medium text-[14px] line-clamp-2 leading-tight mb-1">
           {product.name_fr}
         </h3>
@@ -99,17 +103,26 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           )}
         </div>
         {/* 44px tap target */}
-        <button
+        <motion.button
           onClick={handleAddToCart}
           disabled={outOfStock}
+          whileTap={{ scale: 0.95 }}
+          animate={justAdded ? { scale: [1, 1.05, 1] } : {}}
+          transition={{ duration: 0.15 }}
           className={`w-full h-11 rounded text-[13px] font-medium transition-colors ${
             outOfStock
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]'
+              : ''
           }`}
+          style={outOfStock ? {} : {
+            backgroundColor: justAdded
+              ? 'color-mix(in srgb, var(--color-primary) 75%, black)'
+              : 'var(--color-primary)',
+            color: 'white',
+          }}
         >
-          Ajouter
-        </button>
+          {justAdded ? '✓ Ajouté' : 'Ajouter'}
+        </motion.button>
       </div>
     </motion.div>
   );

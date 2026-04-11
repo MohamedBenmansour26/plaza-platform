@@ -56,13 +56,22 @@ export function StoreHomeClient({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="h-[240px] sm:h-[280px] w-full overflow-hidden"
+          className="h-[240px] sm:h-[280px] w-full overflow-hidden relative"
         >
           <img
             src={merchant.banner_url}
             alt={`${merchant.store_name} banner`}
             className="w-full h-full object-cover"
           />
+          {/* COD badge overlaid on banner */}
+          <div className="absolute bottom-3 left-3">
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-[12px] font-medium backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.20)', border: '1px solid rgba(255,255,255,0.30)' }}
+            >
+              💳 Paiement à la livraison
+            </span>
+          </div>
         </motion.div>
       )}
 
@@ -72,9 +81,15 @@ export function StoreHomeClient({
         {merchant.description && (
           <p className="text-[14px] text-[#78716C] mt-1 line-clamp-2">{merchant.description}</p>
         )}
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#EFF6FF] text-[#2563EB] text-[12px] font-medium rounded-full">Livraison 30 MAD</span>
           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F0FDF4] text-[#16A34A] text-[12px] font-medium rounded-full">Gratuite dès 500 MAD</span>
+          <span
+            className="inline-flex items-center gap-1 px-2.5 py-1 text-white text-[12px] font-medium rounded-full"
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
+            💳 Paiement à la livraison
+          </span>
         </div>
       </div>
 

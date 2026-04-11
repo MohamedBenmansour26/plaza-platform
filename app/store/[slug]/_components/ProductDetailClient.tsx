@@ -108,6 +108,19 @@ export function ProductDetailClient({
     setCartOpen(true);
   }
 
+  const handleStickyAddToCart = () => {
+    if (outOfStock) return;
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.id,
+        name: product.name_fr,
+        price: priceMAD,
+        image: product.image_url ?? '',
+      });
+    }
+    // intentionally does NOT call setCartOpen(true)
+  };
+
   function handleIncrease() {
     if (quantity >= maxQuantity) {
       setShowMaxMsg(true);
@@ -149,7 +162,7 @@ export function ProductDetailClient({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto px-4 py-6"
+        className="max-w-7xl mx-auto px-4 py-6 pb-[calc(56px+env(safe-area-inset-bottom)+80px)] lg:pb-6"
       >
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Product image */}
@@ -286,6 +299,26 @@ export function ProductDetailClient({
           </div>
         </div>
       </motion.div>
+
+      {/* Mobile sticky add-to-cart bar */}
+      <div
+        className="lg:hidden fixed left-0 right-0 bg-white border-t border-[#E2E8F0] px-4 py-3 flex items-center gap-3 z-40"
+        style={{ bottom: 'calc(56px + env(safe-area-inset-bottom))' }}
+      >
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] text-[#78716C]">Prix</p>
+          <p className="font-bold text-[18px]">{priceMAD} MAD</p>
+        </div>
+        <motion.button
+          onClick={handleStickyAddToCart}
+          disabled={outOfStock || quantity < 1}
+          whileTap={{ scale: 0.97 }}
+          className="h-12 px-6 rounded-xl text-white text-[15px] font-medium disabled:opacity-50"
+          style={{ backgroundColor: 'var(--color-primary)' }}
+        >
+          Ajouter au panier
+        </motion.button>
+      </div>
 
       <CartDrawer
         open={cartOpen}
