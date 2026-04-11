@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Copy, CheckCheck, Clock } from 'lucide-react';
+import { Copy, CheckCheck, Clock, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
@@ -82,180 +82,189 @@ export default function ConfirmationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md space-y-6"
-      >
-        <div className="text-center space-y-4">
-          <h1 className="font-bold text-[26px] text-center">Commande confirmée ! ✓</h1>
+    <div className="min-h-screen bg-[#FAFAF9] p-4">
+      <div className="max-w-md mx-auto py-8 space-y-6">
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl p-5 border-2 shadow-sm"
-            style={{ borderColor: 'var(--color-primary)' }}
-          >
-            <div className="text-[13px] text-[#78716C] mb-2 font-medium">
-              📋 Votre numéro de commande
-            </div>
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <span className="font-bold text-[28px] tracking-wide" style={{ color: 'var(--color-primary)' }}>
-                {orderNumber}
-              </span>
-              <button
-                onClick={handleCopy}
-                className="p-2 hover:bg-[#EFF6FF] rounded-lg transition-colors"
-              >
-                {copied ? (
-                  <CheckCheck className="w-5 h-5 text-[#16A34A]" />
-                ) : (
-                  <Copy className="w-5 h-5 text-[#78716C]" />
-                )}
-              </button>
-            </div>
-            <div className="bg-[#FEF3C7] border border-[#F59E0B] rounded-lg px-4 py-3">
-              <p className="text-[13px] text-[#92400E] font-medium">
-                ⚠️ Conservez ce numéro pour suivre votre commande
-              </p>
-            </div>
-          </motion.div>
+        {/* Success */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center"
+        >
+          <div className="w-20 h-20 rounded-full bg-[#16A34A] text-white flex items-center justify-center mx-auto mb-4">
+            <Check className="w-10 h-10" strokeWidth={3} />
+          </div>
+          <h1 className="text-3xl font-bold text-[#1C1917] mb-2">
+            Commande confirmée !
+          </h1>
+        </motion.div>
 
-          {order.customerPin && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
-              className="border-2 rounded-xl p-5 text-center"
-              style={{ borderColor: 'var(--color-primary)', backgroundColor: 'var(--color-primary-50, #EFF6FF)' }}
-            >
-              <p className="text-[13px] font-medium mb-3" style={{ color: 'var(--color-primary)' }}>Votre code de réception</p>
-              <div className="flex justify-center gap-3 mb-3">
-                {String(order.customerPin).padStart(4, '0').split('').map((digit, i) => (
-                  <div key={i} className="w-12 h-14 bg-white rounded-lg flex items-center justify-center text-[28px] font-bold text-[#1C1917]" style={{ border: '2px solid var(--color-primary)' }}>
-                    {digit}
-                  </div>
-                ))}
-              </div>
-              <p className="text-[12px] text-[#78716C]">Communiquez ce code au livreur pour confirmer la réception de votre commande.</p>
-            </motion.div>
-          )}
-
-          {(order.deliveryDisplayDate || order.deliverySlot) && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EFF6FF] rounded-full text-[14px] font-medium mt-3"
+        {/* Order Number */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-xl p-5 space-y-2 border-2"
+          style={{ borderColor: 'var(--color-primary)' }}
+        >
+          <p className="text-sm text-[#78716C]">📋 Votre numéro de commande</p>
+          <div className="flex items-center justify-between">
+            <span
+              className="text-3xl font-bold tracking-wide"
               style={{ color: 'var(--color-primary)' }}
             >
-              <Clock className="w-4 h-4" />
+              {orderNumber}
+            </span>
+            <button
+              onClick={handleCopy}
+              className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              {copied ? (
+                <CheckCheck className="w-5 h-5 text-[#16A34A]" />
+              ) : (
+                <Copy className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+              )}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Warning */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="bg-[#FEF3C7] border border-[#F59E0B] rounded-xl p-4 flex items-start gap-3"
+        >
+          <span className="text-xl">⚠️</span>
+          <p className="text-sm text-[#92400E] font-medium">
+            Conservez ce numéro pour suivre votre commande
+          </p>
+        </motion.div>
+
+        {/* PIN Code */}
+        {order.customerPin && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-xl p-5 space-y-3 border-2"
+            style={{ borderColor: 'var(--color-primary)' }}
+          >
+            <p className="text-sm text-[#78716C]">Votre code de réception</p>
+            <div className="flex gap-2 justify-center">
+              {String(order.customerPin).padStart(4, '0').split('').map((digit, i) => (
+                <div
+                  key={i}
+                  className="w-12 h-14 bg-white rounded-lg flex items-center justify-center text-3xl font-bold border-2"
+                  style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+                >
+                  {digit}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-[#78716C] text-center">
+              Communiquez ce code au livreur pour confirmer la réception.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Delivery Time */}
+        {(order.deliveryDisplayDate || order.deliverySlot) && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center justify-center gap-2"
+          >
+            <Clock className="w-5 h-5 text-[#2563EB]" />
+            <span className="text-sm font-semibold text-[#2563EB]">
               {order.deliveryDisplayDate && order.deliverySlot
-                ? `Livraison le ${order.deliveryDisplayDate} entre ${order.deliverySlot.replace('-', ' et ').replace(/(\d{2}):00/g, '$1h00')}`
+                ? `Livraison le ${order.deliveryDisplayDate} entre ${order.deliverySlot
+                    .replace('-', ' et ')
+                    .replace(/(\d{2}):00/g, '$1h00')}`
                 : order.deliveryDisplayDate
                   ? `Livraison le ${order.deliveryDisplayDate}`
                   : 'Livraison planifiée'}
-            </motion.div>
-          )}
-        </div>
+            </span>
+          </motion.div>
+        )}
 
+        {/* Order Summary */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-white rounded-xl p-5 border border-[#E2E8F0]"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-xl p-5 space-y-4"
         >
-          <h2 className="font-bold text-[16px] mb-4">Résumé de commande</h2>
-          <div className="space-y-3 mb-4">
+          <h2 className="font-semibold text-[#1C1917]">Récapitulatif</h2>
+          <div className="space-y-3">
             {snapshotItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 py-1">
+              <div key={item.id} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-12 h-12 rounded-lg object-cover"
+                  className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium truncate">{item.name}</p>
-                  <p className="text-[13px] text-[#78716C]">Qté {item.quantity}</p>
+                  <p className="text-sm font-medium text-[#1C1917] line-clamp-1">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-[#78716C]">Quantité: {item.quantity}</p>
                 </div>
-                <span className="text-[14px] font-medium">
+                <p className="font-semibold text-[#1C1917] text-sm">
                   {item.price * item.quantity} MAD
-                </span>
+                </p>
               </div>
             ))}
           </div>
-          <div className="border-t border-[#E2E8F0] pt-4 space-y-2">
-            <div className="flex justify-between text-[15px]">
+          <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
+            <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              <span className="font-medium">{snapshotTotal} MAD</span>
+              <span className="font-semibold text-[#1C1917]">{snapshotTotal} MAD</span>
             </div>
-            <div className="flex justify-between text-[15px]">
+            <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
               <span
-                className={deliveryFee === 0 ? 'text-[#16A34A] font-medium' : 'font-medium'}
+                className={`font-semibold ${deliveryFee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}
               >
                 {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee} MAD`}
               </span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-[#E2E8F0] text-[15px]">
-              <span className="font-bold">Total</span>
-              <span className="font-bold">{snapshotTotal + deliveryFee} MAD</span>
+            <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
+              <span className="font-bold text-[#1C1917]">Total</span>
+              <span
+                className="font-bold text-xl"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                {snapshotTotal + deliveryFee} MAD
+              </span>
             </div>
-            {order.address && (
-              <div className="flex items-start gap-2 text-[13px] text-[#78716C] pt-2 mt-2 border-t border-[#E2E8F0]">
-                <svg
-                  className="w-4 h-4 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span>
-                  {order.address}
-                  {order.city ? `, ${order.city}` : ''}
-                </span>
-              </div>
-            )}
           </div>
         </motion.div>
 
+        {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="space-y-3"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="space-y-3 pt-2"
         >
           <button
             onClick={() => router.push(`/store/${slug}/commande/${orderNumber}`)}
-            className="w-full h-12 text-white rounded-lg font-medium text-[15px] transition-colors shadow-sm"
+            className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Suivre ma commande
           </button>
-
           <button
             onClick={() => router.push(`/store/${slug}`)}
-            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg font-medium text-[15px] transition-colors"
+            className="w-full border-2 border-[#E2E8F0] text-[#78716C] font-semibold py-3.5 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Retour à la boutique
           </button>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

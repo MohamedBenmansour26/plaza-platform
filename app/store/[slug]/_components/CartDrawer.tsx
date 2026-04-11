@@ -3,7 +3,6 @@
 import { Drawer } from 'vaul';
 import { X, Trash2, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
 
 import { useCart } from './CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
@@ -14,6 +13,7 @@ interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
   slug: string;
+  freeThreshold?: number;
 }
 
 interface CartContentProps {
@@ -22,7 +22,7 @@ interface CartContentProps {
   removeItem: (id: string) => void;
   subtotal: number;
   deliveryFee: number;
-  total: number;
+  finalTotal: number;
   onClose: () => void;
   onCheckout: () => void;
 }
@@ -33,32 +33,36 @@ function CartContent({
   removeItem,
   subtotal,
   deliveryFee,
-  total,
+  finalTotal,
   onClose,
   onCheckout,
 }: CartContentProps) {
   return (
     <>
-      <div className="flex-shrink-0">
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3 lg:hidden" />
-        <div className="flex items-center justify-between px-4 pb-4 border-b border-[#E2E8F0]">
-          <div>
-            <p className="font-bold text-[18px]">Mon panier</p>
-            <p className="text-[13px] text-[#78716C]">{items.length} articles</p>
-          </div>
-          {/* 44px tap target */}
-          <button
-            onClick={onClose}
-            className="w-11 h-11 flex items-center justify-center"
-          >
-            <X className="w-5 h-5" />
-          </button>
+      {/* Drag handle — mobile only */}
+      <div className="lg:hidden mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-300 mt-4" />
+
+      {/* Header */}
+      <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0">
+        <div>
+          <h2 className="text-lg font-bold text-[#1C1917]">Mon panier</h2>
+          <p className="text-sm text-[#78716C]">
+            {items.reduce((s, i) => s + i.quantity, 0)} article
+            {items.reduce((s, i) => s + i.quantity, 0) > 1 ? 's' : ''}
+          </p>
         </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+        >
+          <X className="w-5 h-5 text-[#78716C]" />
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      {/* Items */}
+      <div className="flex-1 overflow-y-auto p-4">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-16 text-center px-4">
+          <div className="flex flex-col items-center justify-center h-full py-16 text-center">
             <div className="w-16 h-16 bg-[#F5F5F4] rounded-full flex items-center justify-center mb-4">
               <ShoppingCart className="w-8 h-8 text-[#A8A29E]" />
             </div>
@@ -70,149 +74,117 @@ function CartContent({
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {items.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                className="bg-[#FAFAF9] rounded-lg p-3 border border-[#E2E8F0]"
-              >
-                <div className="flex gap-3 mb-3">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-lg bg-[#F5F5F4] flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <h3 className="font-medium text-[14px] mb-1 line-clamp-2">
-                      {item.name}
-                    </h3>
-                    <span className="font-bold text-[16px] mt-auto"
-                      style={{ color: 'var(--color-primary)' }}>
-                      {item.price} MAD
-                    </span>
-                  </div>
-                  {/* 44px tap target */}
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="w-11 h-11 flex items-center justify-center text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-[#E2E8F0]">
-                  <div className="flex items-center gap-3">
-                    {/* 44px tap target */}
-                    <button
-                      onClick={() =>
-                        updateQuantity(item.id, item.quantity - 1)
-                      }
-                      className="w-11 h-11 flex items-center justify-center border-2 border-[#E2E8F0] rounded-lg hover:border-[#2563EB] transition-colors"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="text-[15px] font-medium w-8 text-center">
-                      {item.quantity}
-                    </span>
-                    {/* 44px tap target */}
-                    <button
-                      onClick={() =>
-                        updateQuantity(item.id, item.quantity + 1)
-                      }
-                      className="w-11 h-11 flex items-center justify-center border-2 border-[#E2E8F0] rounded-lg hover:border-[#2563EB] transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[12px] text-[#78716C]">Total</div>
-                    <div className="font-bold text-[16px]">
-                      {item.price * item.quantity} MAD
+              <div key={item.id} className="flex gap-3">
+                {item.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-[#F5F5F4] flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm text-[#1C1917] line-clamp-1">
+                    {item.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center border border-[#E2E8F0] rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                      >
+                        <Minus className="w-3.5 h-3.5 text-[#78716C]" />
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold text-[#1C1917]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-[#78716C]" />
+                      </button>
                     </div>
+                    <span className="font-bold text-sm text-[#1C1917]">
+                      {item.price * item.quantity} MAD
+                    </span>
                   </div>
                 </div>
-              </motion.div>
+                <button
+                  onClick={() => removeItem(item.id)}
+                  className="text-[#DC2626] hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      <div
-        className="flex-shrink-0 border-t border-[#E2E8F0] p-4 space-y-3"
-        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-      >
-        <div className="space-y-2">
-          <div className="flex justify-between text-[14px]">
-            <span className="text-[#78716C]">Sous-total</span>
-            <span className="font-medium">{subtotal} MAD</span>
-          </div>
-          <div className="flex justify-between text-[14px]">
-            <span className="text-[#78716C]">Livraison</span>
-            <span
-              className={
-                deliveryFee === 0
-                  ? 'text-[#16A34A] font-medium'
-                  : 'font-medium'
-              }
-            >
-              {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee} MAD`}
-            </span>
-          </div>
-          {deliveryFee === 0 && (
-            <div className="flex items-center gap-1 text-[#16A34A] text-[13px]">
-              <svg
-                className="w-4 h-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+      {/* Footer — summary + CTA */}
+      {items.length > 0 && (
+        <div
+          className="p-4 border-t border-[#E2E8F0] space-y-3 flex-shrink-0"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-[#78716C]">Sous-total</span>
+              <span className="font-semibold text-[#1C1917]">{subtotal} MAD</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[#78716C]">Livraison</span>
+              <span
+                className={`font-semibold ${deliveryFee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>Livraison gratuite atteinte !</span>
+                {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee} MAD`}
+              </span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
+              <span className="font-bold text-[#1C1917]">Total</span>
+              <span className="font-bold text-xl text-[#1C1917]">{finalTotal} MAD</span>
+            </div>
+          </div>
+
+          {deliveryFee === 0 && (
+            <div className="bg-[#16A34A]/10 text-[#16A34A] px-3 py-2 rounded-lg text-sm font-semibold text-center">
+              🎉 Livraison gratuite atteinte !
             </div>
           )}
-          <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
-            <span className="font-bold text-[20px]">Total</span>
-            <span className="font-bold text-[20px]">{total} MAD</span>
-          </div>
-        </div>
 
-        <button
-          onClick={onCheckout}
-          disabled={items.length === 0}
-          className={`w-full h-14 text-white rounded-lg font-medium transition-colors ${items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-          style={{ backgroundColor: 'var(--color-primary)' }}
-        >
-          Passer la commande
-        </button>
-        <button
-          onClick={onClose}
-          className="w-full text-[14px] text-[#78716C] py-2"
-        >
-          Continuer mes achats
-        </button>
-      </div>
+          <button
+            onClick={onCheckout}
+            disabled={items.length === 0}
+            className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
+            Passer la commande — {finalTotal} MAD
+          </button>
+
+          <button
+            onClick={onClose}
+            className="w-full text-sm font-semibold py-1"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            Continuer mes achats
+          </button>
+        </div>
+      )}
     </>
   );
 }
 
-export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
+export function CartDrawer({ open, onClose, slug, freeThreshold }: CartDrawerProps) {
   const { items, updateQuantity, removeItem, total } = useCart();
   const router = useRouter();
   const isDesktop = useIsDesktop();
 
-  const deliveryFee = getDeliveryFee(total);
+  const deliveryFee = getDeliveryFee(total, freeThreshold);
   const finalTotal = total + deliveryFee;
 
   const handleCheckout = () => {
@@ -226,7 +198,7 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
     removeItem,
     subtotal: total,
     deliveryFee,
-    total: finalTotal,
+    finalTotal,
     onClose,
     onCheckout: handleCheckout,
   };
@@ -235,9 +207,11 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
     <>
       {isDesktop ? (
         <>
-          {/* Desktop: right side panel — only mounted on desktop */}
+          {/* Desktop: fixed right side panel */}
           <div
-            className={`flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+            className={`flex fixed inset-y-0 right-0 w-[420px] flex-col bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${
+              open ? 'translate-x-0' : 'translate-x-full'
+            }`}
           >
             <CartContent {...contentProps} />
           </div>
@@ -249,11 +223,11 @@ export function CartDrawer({ open, onClose, slug }: CartDrawerProps) {
           )}
         </>
       ) : (
-        /* Mobile: vaul Drawer — only mounted on mobile */
+        /* Mobile: vaul bottom sheet */
         <Drawer.Root open={open} onOpenChange={onClose}>
           <Drawer.Portal>
             <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-            <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 flex flex-col max-h-[70vh]">
+            <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 flex flex-col max-h-[90vh]">
               <Drawer.Title className="sr-only">Mon panier</Drawer.Title>
               <Drawer.Description className="sr-only">
                 {items.length} articles

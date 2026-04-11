@@ -1,41 +1,54 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
+import { ArrowRight } from 'lucide-react';
 import { useCart } from './CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
 
 interface FloatingCartBarProps {
-  onOpenCart: () => void;
+  /** Primary prop name (matches export) */
+  onClick?: () => void;
+  /** Legacy alias — used by StoreHomeClient */
+  onOpenCart?: () => void;
   freeThreshold?: number;
 }
 
-export function FloatingCartBar({ onOpenCart, freeThreshold }: FloatingCartBarProps) {
+export function FloatingCartBar({ onClick, onOpenCart, freeThreshold }: FloatingCartBarProps) {
+  const handleClick = onClick ?? onOpenCart ?? (() => {});
   const { items, total } = useCart();
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const deliveryFee = getDeliveryFee(total, freeThreshold);
-  const grandTotal = total + deliveryFee;
 
   return (
     <AnimatePresence>
-      {cartCount > 0 && (
+      {totalItems > 0 && (
         <motion.div
-          initial={{ y: 80, opacity: 0 }}
+          initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="lg:hidden fixed left-4 right-4 z-50"
-          style={{ bottom: 'calc(56px + env(safe-area-inset-bottom) + 8px)' }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="fixed bottom-14 left-4 right-4 lg:hidden z-30"
         >
           <button
-            onClick={onOpenCart}
-            className="w-full h-14 rounded-xl text-white font-medium flex items-center justify-between px-5 shadow-lg"
-            style={{ backgroundColor: 'var(--color-primary)' }}
+            onClick={handleClick}
+            className="w-full bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 flex items-center justify-between shadow-lg"
           >
-            <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-[13px] font-bold">
-              {cartCount}
+            <div className="flex items-center gap-3 text-[#1C1917]">
+              <span className="text-sm">
+                Voir le panier ·{' '}
+                <span className="font-semibold">
+                  {totalItems} article{totalItems > 1 ? 's' : ''}
+                </span>{' '}
+                · <span className="font-semibold">{total} MAD</span>
+              </span>
             </div>
-            <span className="text-[15px] font-semibold">Voir le panier</span>
-            <span className="text-[15px] font-semibold">{grandTotal} MAD</span>
+            <div
+              className="text-white px-4 py-2 rounded-lg flex items-center gap-1.5"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            >
+              <span className="font-semibold text-sm">Commander</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </button>
         </motion.div>
       )}

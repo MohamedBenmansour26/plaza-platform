@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns/format';
 import { fr } from 'date-fns/locale/fr';
-import { ArrowLeft, CreditCard, Banknote } from 'lucide-react';
+import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import DateTimePicker from '../_components/DateTimePicker';
@@ -117,20 +117,20 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Informations de contact</h2>
           <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
+            <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
               Nom complet <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Votre nom complet"
-              className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+              placeholder="Entrez votre nom complet"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[15px]"
               required
             />
           </div>
           <div>
-            <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
+            <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
               Téléphone <span className="text-[#DC2626] ml-0.5">*</span>
             </label>
             <input
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="06XXXXXXXX"
-              className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[15px]"
               required
             />
           </div>
@@ -161,11 +161,11 @@ export default function CheckoutPage() {
               Indications supplémentaires <span className="text-[#A8A29E] font-normal">(optionnel)</span>
             </label>
             <textarea
-              placeholder="Étage, code d'entrée, point de repère..."
-              rows={2}
+              placeholder="Étage, code porte, point de repère..."
+              rows={3}
               value={addressNotes}
               onChange={(e) => setAddressNotes(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] resize-none"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
             />
           </div>
         </div>
@@ -183,55 +183,59 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Mode de paiement</h2>
 
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('cash')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
+          <label
+            className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
               paymentMethod === 'cash'
-                ? 'border-[#2563EB] bg-[#EFF6FF]'
-                : 'border-[#E2E8F0] bg-white hover:border-[#2563EB]/30'
+                ? 'border-[#2563EB] bg-blue-50'
+                : 'border-[#E2E8F0] hover:border-[#2563EB]'
             }`}
           >
-            <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'cash' ? 'border-[#2563EB]' : 'border-[#E2E8F0]'
-              }`}
-            >
-              {paymentMethod === 'cash' && (
-                <div className="w-3 h-3 rounded-full bg-[#2563EB]" />
-              )}
-            </div>
+            <input
+              type="radio"
+              name="payment"
+              value="cash"
+              checked={paymentMethod === 'cash'}
+              onChange={() => setPaymentMethod('cash')}
+              className="w-4 h-4 accent-[#2563EB]"
+            />
             <Banknote className="w-5 h-5 text-[#78716C]" />
-            <div className="flex-1 text-left">
-              <div className="font-medium text-[15px]">Paiement à la livraison</div>
-              <div className="text-[13px] text-[#78716C]">Payez en espèces au livreur</div>
-            </div>
-          </button>
+            <span className="font-medium text-[#1C1917]">Paiement à la livraison</span>
+          </label>
 
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('card-delivery')}
-            className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
+          <label
+            className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
               paymentMethod === 'card-delivery'
-                ? 'border-[#2563EB] bg-[#EFF6FF]'
-                : 'border-[#E2E8F0] bg-white hover:border-[#2563EB]/30'
+                ? 'border-[#2563EB] bg-blue-50'
+                : 'border-[#E2E8F0] hover:border-[#2563EB]'
             }`}
           >
-            <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                paymentMethod === 'card-delivery' ? 'border-[#2563EB]' : 'border-[#E2E8F0]'
-              }`}
-            >
-              {paymentMethod === 'card-delivery' && (
-                <div className="w-3 h-3 rounded-full bg-[#2563EB]" />
-              )}
-            </div>
+            <input
+              type="radio"
+              name="payment"
+              value="card-delivery"
+              checked={paymentMethod === 'card-delivery'}
+              onChange={() => setPaymentMethod('card-delivery')}
+              className="w-4 h-4 accent-[#2563EB]"
+            />
             <CreditCard className="w-5 h-5 text-[#78716C]" />
-            <div className="flex-1 text-left">
-              <div className="font-medium text-[15px]">Carte à la livraison</div>
-              <div className="text-[13px] text-[#78716C]">Payez par carte au livreur</div>
-            </div>
-          </button>
+            <span className="font-medium text-[#1C1917]">Carte à la livraison</span>
+          </label>
+
+          {/* Online payment — coming soon */}
+          <div className="flex items-center gap-3 p-3 border-2 border-[#E2E8F0] rounded-lg cursor-not-allowed opacity-60">
+            <input
+              type="radio"
+              name="payment"
+              value="online"
+              disabled
+              className="w-4 h-4 accent-[#2563EB]"
+            />
+            <Smartphone className="w-5 h-5 text-[#78716C]" />
+            <span className="font-medium text-[#1C1917] flex-1">Paiement en ligne (via CMI)</span>
+            <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+              Bientôt disponible
+            </span>
+          </div>
 
           {(paymentMethod === 'cash' || paymentMethod === 'card-delivery') && (
             <label className="flex items-start gap-3 cursor-pointer pt-2 border-t border-[#E2E8F0]">
