@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { createOrder } from '../actions';
 import type { CreateOrderPayload } from '../actions';
 import { useCart } from '../_components/CartProvider';
+import type { CartItem } from '../_components/CartProvider';
 import { getDeliveryFee } from '../_lib/deliveryUtils';
 
 interface PendingOrder {
@@ -31,7 +32,11 @@ export default function VerificationPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items, total } = useCart();
+  const { items: cartContextItems, total: cartContextTotal } = useCart();
+
+  // "Acheter maintenant" direct-buy: items may only be in sessionStorage, not CartProvider
+  const [directBuyItems, setDirectBuyItems] = useState<CartItem[]>([]);
+  const [directBuyTotal, setDirectBuyTotal] = useState<number>(0);
 
   const [pendingOrder, setPendingOrder] = useState<PendingOrder | null>(null);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -49,8 +54,27 @@ export default function VerificationPage() {
         // ignore malformed data
       }
     }
+
+    // Check for "Acheter maintenant" direct-buy cart in sessionStorage
+    const ssItems = sessionStorage.getItem('cartItems');
+    const ssSlug = sessionStorage.getItem('cartSlug');
+    if (ssItems && ssSlug === slug) {
+      try {
+        const parsed = JSON.parse(ssItems) as CartItem[];
+        setDirectBuyItems(parsed);
+        const ssSubtotal = sessionStorage.getItem('subtotal');
+        setDirectBuyTotal(
+          ssSubtotal
+            ? parseFloat(ssSubtotal)
+            : parsed.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        );
+      } catch {
+        // ignore
+      }
+    }
+
     inputRefs.current[0]?.focus();
-  }, []);
+  }, [slug]);
 
   const phone = pendingOrder?.phone ?? 'votre numéro';
 
@@ -104,6 +128,10 @@ export default function VerificationPage() {
     setError(false);
 
     try {
+      // Use sessionStorage direct-buy items if CartProvider context is empty
+      const items = cartContextItems.length > 0 ? cartContextItems : directBuyItems;
+      const total = cartContextTotal > 0 ? cartContextTotal : directBuyTotal;
+
       const payload: CreateOrderPayload = {
         orderNumber: pendingOrder.orderNumber,
         merchantId: pendingOrder.merchantId,
@@ -169,9 +197,7 @@ export default function VerificationPage() {
           snapshotTotal,
         }));
       } catch (err) {
-        // createOrder failed (likely RLS — customers table missing public INSERT policy).
-        // PLZ-040: RLS migration 20260411000001_public_order_insert_policies.sql
-        // must be approved and run by the founder to fix this permanently.
+        // createOrder failed — log and navigate to confirmation with fallback /track link
         console.error('[createOrder] DB write failed — orderId will be absent:', err);
         // MVP bypass: still navigate to confirmation so the customer sees their
         // order number. orderId absent → "Suivre ma commande" shows /track fallback.

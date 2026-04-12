@@ -45,9 +45,17 @@ export default function CheckoutPage() {
   // (cart context items/total may still be [] / 0 at first render).
   // Lazy initializer runs synchronously before the first render so the page
   // never shows "0 MAD" while waiting for a useEffect to fire.
+  // Also checks sessionStorage for "Acheter maintenant" direct-buy flow
+  // (written by ProductCard/ProductDetailClient before navigating here).
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
+      // "Acheter maintenant" direct-buy: sessionStorage takes priority
+      const ssItems = sessionStorage.getItem('cartItems');
+      const ssSlug = sessionStorage.getItem('cartSlug');
+      if (ssItems && ssSlug === slug) {
+        return JSON.parse(ssItems) as CartItem[];
+      }
       const raw = localStorage.getItem(`plaza_cart_${slug}`);
       return raw ? (JSON.parse(raw) as CartItem[]) : [];
     } catch {
@@ -57,10 +65,15 @@ export default function CheckoutPage() {
   const [cartTotal, setCartTotal] = useState<number>(() => {
     if (typeof window === 'undefined') return 0;
     try {
+      // "Acheter maintenant" direct-buy: sessionStorage takes priority
+      const ssSlug = sessionStorage.getItem('cartSlug');
+      if (ssSlug === slug) {
+        const ssSubtotal = sessionStorage.getItem('subtotal');
+        if (ssSubtotal) return parseFloat(ssSubtotal);
+      }
       const raw = localStorage.getItem(`plaza_cart_${slug}`);
       if (!raw) return 0;
       const parsed = JSON.parse(raw) as CartItem[];
-      // price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem
       return parsed.reduce((sum, item) => sum + item.price * item.quantity, 0);
     } catch {
       return 0;
@@ -72,12 +85,29 @@ export default function CheckoutPage() {
   }, [slug]);
 
   useEffect(() => {
+    // "Acheter maintenant" direct-buy: sessionStorage takes priority
+    const ssItems = sessionStorage.getItem('cartItems');
+    const ssSlug = sessionStorage.getItem('cartSlug');
+    if (ssItems && ssSlug === slug) {
+      try {
+        const parsed = JSON.parse(ssItems) as CartItem[];
+        const ssSubtotal = sessionStorage.getItem('subtotal');
+        const computedTotal = ssSubtotal
+          ? parseFloat(ssSubtotal)
+          : parsed.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        setCartItems(parsed);
+        setCartTotal(computedTotal);
+        return;
+      } catch {
+        // fall through to localStorage
+      }
+    }
+
     const cartKey = `plaza_cart_${slug}`;
     try {
       const rawCart = localStorage.getItem(cartKey);
       if (rawCart) {
         const parsed = JSON.parse(rawCart) as CartItem[];
-        // price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem
         const computedTotal = parsed.reduce(
           (sum, item) => sum + item.price * item.quantity,
           0,

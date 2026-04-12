@@ -107,22 +107,26 @@ export async function createOrder(
     } as never)
     .select('id')
     .single()) as { data: { id: string } | null; error: unknown };
-  if (custError || !customer) throw new Error('Failed to create customer');
+  if (custError || !customer) {
+    console.error('[createOrder] customer insert failed:', custError);
+    throw new Error(`Customer insert failed: ${JSON.stringify(custError)}`);
+  }
 
   // 2. Insert order (retry on order_number collision)
+  // DB stores monetary values in centimes (integer); payload values are in MAD → multiply by 100
   let orderNumber = payload.orderNumber;
   let order: { id: string } | null = null;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const { data, error } = (await supabase
+    const { data, error: orderError } = (await supabase
       .from('orders')
       .insert({
         order_number: orderNumber,
         merchant_id: payload.merchantId,
         customer_id: customer.id,
         payment_method: payload.paymentMethod,
-        subtotal: payload.subtotal,
-        delivery_fee: payload.deliveryFee,
-        total: payload.total,
+        subtotal: Math.round(payload.subtotal * 100),
+        delivery_fee: Math.round(payload.deliveryFee * 100),
+        total: Math.round(payload.total * 100),
         notes: payload.notes,
         customer_pin: customerPin,
         delivery_date: payload.deliveryDate ?? null,
@@ -130,9 +134,13 @@ export async function createOrder(
       } as never)
       .select('id')
       .single()) as { data: { id: string } | null; error: unknown };
-    if (!error && data) {
+    if (!orderError && data) {
       order = data;
       break;
+    }
+    if (attempt === 2) {
+      console.error('[createOrder] order insert failed after 3 attempts:', orderError);
+      throw new Error(`Order insert failed: ${JSON.stringify(orderError)}`);
     }
     // regenerate on collision
     orderNumber = `PLZ-${Math.floor(Math.random() * 900 + 100)}`;
@@ -140,17 +148,21 @@ export async function createOrder(
   if (!order) throw new Error('Failed to create order');
 
   // 3. Insert order_items
+  // unit_price in DB is centimes (integer); payload unitPrice is in MAD → multiply by 100
   const orderItems = payload.items.map((item) => ({
     order_id: order!.id,
     product_id: item.productId || null,
     name_fr: item.nameFr,
     quantity: item.quantity,
-    unit_price: item.unitPrice,
+    unit_price: Math.round(item.unitPrice * 100),
   }));
   const { error: itemsError } = await supabase
     .from('order_items')
     .insert(orderItems as never);
-  if (itemsError) throw new Error('Failed to create order items');
+  if (itemsError) {
+    console.error('[createOrder] order_items insert failed:', itemsError);
+    throw new Error(`Order items insert failed: ${itemsError.message}`);
+  }
 
   return { orderNumber, customerPin, orderId: order.id };
 }

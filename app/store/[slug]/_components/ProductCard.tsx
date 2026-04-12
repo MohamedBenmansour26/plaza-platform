@@ -51,12 +51,18 @@ export function ProductCard({ product, slug }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
-    addItem({
+    // Build a direct single-item cart and write to sessionStorage
+    // so commande/page.tsx reads it immediately without localStorage race
+    const directCart = [{
       id: product.id,
       name: product.name_fr,
-      price: priceMAD,
+      price: priceMAD,          // MAD (already divided by 100)
+      quantity: 1,
       image: product.image_url ?? '',
-    });
+    }];
+    sessionStorage.setItem('cartItems', JSON.stringify(directCart));
+    sessionStorage.setItem('cartSlug', slug);
+    sessionStorage.setItem('subtotal', String(priceMAD));
     router.push(`/store/${slug}/commande`);
   }
 

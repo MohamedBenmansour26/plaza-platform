@@ -102,14 +102,18 @@ export function ProductDetailClient({
 
   function handleBuyNow() {
     if (outOfStock) return;
-    for (let i = 0; i < quantity; i++) {
-      addItem({
-        id: product.id,
-        name: product.name_fr,
-        price: priceMAD,
-        image: product.image_url ?? '',
-      });
-    }
+    // Build a direct single-item cart and write to sessionStorage
+    // so commande/page.tsx reads it immediately without localStorage race
+    const directCart = [{
+      id: product.id,
+      name: product.name_fr,
+      price: priceMAD,          // MAD (already divided by 100)
+      quantity: quantity,
+      image: product.image_url ?? '',
+    }];
+    sessionStorage.setItem('cartItems', JSON.stringify(directCart));
+    sessionStorage.setItem('cartSlug', slug);
+    sessionStorage.setItem('subtotal', String(priceMAD * quantity));
     router.push(`/store/${slug}/commande`);
   }
 
