@@ -19,7 +19,7 @@ export default async function StoreLayout({ children, params }: Props) {
     notFound();
   }
 
-  const primaryColor = merchant.primary_color?.trim() || '#2563EB';
+  const primaryColor = merchant.primary_color?.trim() || '#E8632A';
 
   return (
     <CartProvider slug={slug}>
