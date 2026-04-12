@@ -19,6 +19,7 @@ interface ConfirmedOrder {
   deliveryDisplaySlot?: string;
   paymentMethod?: string;
   orderNumber?: string;
+  orderId?: string;
   merchantId?: string;
   deliveryFeeThreshold?: number | null;
   merchantSlug?: string;
@@ -221,10 +222,12 @@ export default function ConfirmationPage() {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className="font-semibold text-[#1C1917]">{snapshotTotal} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span
                 className={`font-semibold ${deliveryFee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}
               >
@@ -233,6 +236,7 @@ export default function ConfirmationPage() {
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span
                 className="font-bold text-xl"
                 style={{ color: 'var(--color-primary)' }}
@@ -251,7 +255,7 @@ export default function ConfirmationPage() {
           className="space-y-3 pt-2"
         >
           <button
-            onClick={() => router.push(`/store/${slug}/commande/${orderNumber}`)}
+            onClick={() => router.push(`/store/${slug}/commande/${order.orderId ?? orderNumber}`)}
             className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >

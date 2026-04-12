@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { getMerchantBySlug } from './actions';
 import { CartProvider } from './_components/CartProvider';
 import { BottomTabBar } from './_components/BottomTabBar';
+import { StoreFooter } from './_components/StoreFooter';
 
 type Props = {
   children: ReactNode;
@@ -27,6 +28,7 @@ export default async function StoreLayout({ children, params }: Props) {
         className="pb-[calc(56px+env(safe-area-inset-bottom))] lg:pb-0"
       >
         {children}
+        <StoreFooter />
         <BottomTabBar slug={slug} />
       </div>
     </CartProvider>
