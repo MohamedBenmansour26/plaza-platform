@@ -134,6 +134,7 @@ export default function VerificationPage() {
         sessionStorage.setItem('plaza_pending_order', JSON.stringify({
           ...existing,
           orderNumber: result.orderNumber,
+          orderId: result.orderId,
           customerPin: result.customerPin,
           deliveryDisplayDate: pendingOrder.deliveryDisplayDate,
           deliveryDisplaySlot: pendingOrder.deliveryDisplaySlot,
