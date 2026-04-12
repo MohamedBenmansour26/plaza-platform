@@ -129,12 +129,15 @@ export default function VerificationPage() {
 
       try {
         const result = await createOrder(payload);
-        // Update sessionStorage with confirmed data including PIN
+        // Update sessionStorage with confirmed data including PIN.
+        // orderId is the UUID returned by createOrder — guard against undefined
+        // so confirmation/page.tsx only shows "Suivre ma commande" when the order
+        // was actually persisted in the DB.
         const existing = JSON.parse(sessionStorage.getItem('plaza_pending_order') ?? '{}');
         sessionStorage.setItem('plaza_pending_order', JSON.stringify({
           ...existing,
           orderNumber: result.orderNumber,
-          orderId: result.orderId,
+          ...(result.orderId ? { orderId: result.orderId } : {}),
           customerPin: result.customerPin,
           deliveryDisplayDate: pendingOrder.deliveryDisplayDate,
           deliveryDisplaySlot: pendingOrder.deliveryDisplaySlot,
@@ -142,7 +145,9 @@ export default function VerificationPage() {
         }));
       } catch (err) {
         console.error('createOrder failed, bypassing to confirmation:', err);
-        // MVP bypass: navigate to confirmation even if DB write failed
+        // MVP bypass: navigate to confirmation even if DB write failed.
+        // orderId will be absent from sessionStorage; confirmation page will
+        // hide "Suivre ma commande" rather than showing a broken link.
       }
 
       router.push(`/store/${slug}/confirmation`);

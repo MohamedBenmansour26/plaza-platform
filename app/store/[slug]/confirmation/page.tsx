@@ -77,7 +77,11 @@ export default function ConfirmationPage() {
   }, []);
 
   const orderNumber = order.orderNumber ?? 'PLZ-???';
-  const deliveryFee = getDeliveryFee(snapshotTotal, order.deliveryFeeThreshold ?? undefined);
+  // delivery_free_threshold is stored in centimes in the DB and propagated as-is
+  // through plaza_pending_order; divide by 100 to compare against MAD subtotal.
+  const thresholdMAD =
+    order.deliveryFeeThreshold != null ? order.deliveryFeeThreshold / 100 : undefined;
+  const deliveryFee = getDeliveryFee(snapshotTotal, thresholdMAD);
 
   const handleCopy = async () => {
     try {
@@ -281,7 +285,10 @@ export default function ConfirmationPage() {
           transition={{ delay: 0.6 }}
           className="space-y-3 pt-2"
         >
-          {order.orderId ? (
+          {/* orderId is the UUID written by verification/page.tsx after createOrder succeeds.
+              Always use orderId (UUID) — never fall back to orderNumber (PLZ-XXX) which
+              causes a 404 when the order was bypassed and never persisted in the DB. */}
+          {order.orderId && (
             <button
               onClick={() => router.push(`/store/${slug}/commande/${order.orderId}`)}
               className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
@@ -289,15 +296,7 @@ export default function ConfirmationPage() {
             >
               Suivre ma commande
             </button>
-          ) : order.orderNumber ? (
-            <button
-              onClick={() => router.push(`/store/${slug}/commande/${order.orderNumber}`)}
-              className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            >
-              Suivre ma commande
-            </button>
-          ) : null}
+          )}
           <button
             onClick={() => router.push(`/store/${slug}`)}
             className="w-full border-2 border-[#E2E8F0] text-[#78716C] font-semibold py-3.5 rounded-lg hover:bg-gray-50 transition-colors"
