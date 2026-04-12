@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Copy, CheckCheck, Clock, Check } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -38,39 +39,62 @@ export default function ConfirmationPage() {
   const [snapshotTotal, setSnapshotTotal] = useState(0);
 
   useEffect(() => {
-    // Read cart directly from localStorage to avoid CSR hydration timing issues
-    // (cart context items/total may still be [] / 0 at mount time)
+    // Read order metadata from sessionStorage (written by verification/page.tsx)
     const stored = sessionStorage.getItem('plaza_pending_order');
-    let parsedOrder: ConfirmedOrder = {};
+    let parsedOrder: ConfirmedOrder & {
+      cartSnapshot?: CartItem[];
+      snapshotSubtotal?: number;
+    } = {};
     if (stored) {
       try {
-        parsedOrder = JSON.parse(stored) as ConfirmedOrder;
+        parsedOrder = JSON.parse(stored) as typeof parsedOrder;
         setOrder(parsedOrder);
       } catch {
         // ignore
       }
     }
-    const cartKey = `plaza_cart_${slug}`;
-    try {
-      const rawCart = localStorage.getItem(cartKey);
-      if (rawCart) {
-        const cartItems = JSON.parse(rawCart) as CartItem[];
-        // Price from deliveryUtils — do not recalculate
-        const cartTotal = cartItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        );
-        setSnapshotItems(cartItems);
-        setSnapshotTotal(cartTotal);
-      } else {
-        // Fallback to context values if localStorage is already cleared
+
+    // ── Cart snapshot resolution (priority order) ──────────────
+    // 1. sessionStorage cart snapshot — written by verification/page.tsx
+    //    before navigating. This is immune to the CartProvider race
+    //    condition where the persist effect overwrites localStorage with []
+    //    before confirmation mounts.
+    // 2. localStorage direct read — fallback if snapshot is absent.
+    // 3. Cart context — last resort if localStorage is already cleared.
+    // subtotal/deliveryFee/total are all in MAD.
+
+    if (parsedOrder.cartSnapshot && parsedOrder.cartSnapshot.length > 0) {
+      // Preferred path: use the snapshot written by verification/page.tsx
+      const cartItems = parsedOrder.cartSnapshot;
+      const cartTotal = parsedOrder.snapshotSubtotal ??
+        cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      setSnapshotItems(cartItems);
+      setSnapshotTotal(cartTotal);
+    } else {
+      // Fallback: read localStorage directly (may be empty due to race)
+      const cartKey = `plaza_cart_${slug}`;
+      try {
+        const rawCart = localStorage.getItem(cartKey);
+        if (rawCart) {
+          const cartItems = JSON.parse(rawCart) as CartItem[];
+          // price in MAD (divided by 100 at cart entry in ProductCard)
+          const cartTotal = cartItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0,
+          );
+          setSnapshotItems(cartItems);
+          setSnapshotTotal(cartTotal);
+        } else {
+          // Last resort: context values (may be [] / 0 if already cleared)
+          setSnapshotItems([...items]);
+          setSnapshotTotal(total);
+        }
+      } catch {
         setSnapshotItems([...items]);
         setSnapshotTotal(total);
       }
-    } catch {
-      setSnapshotItems([...items]);
-      setSnapshotTotal(total);
     }
+
     clearCart();
     sessionStorage.removeItem('plaza_pending_order');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -286,23 +310,32 @@ export default function ConfirmationPage() {
           className="space-y-3 pt-2"
         >
           {/* orderId is the UUID written by verification/page.tsx after createOrder succeeds.
-              Always use orderId (UUID) — never fall back to orderNumber (PLZ-XXX) which
-              causes a 404 when the order was bypassed and never persisted in the DB. */}
-          {order.orderId && (
-            <button
-              onClick={() => router.push(`/store/${slug}/commande/${order.orderId}`)}
-              className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
+              When orderId is present → deep-link to the order detail page.
+              When orderId is absent (DB write failed / MVP bypass) → fallback to /track
+              so the customer can still look up their order by number + phone. */}
+          {order.orderId ? (
+            <Link
+              href={`/store/${slug}/commande/${order.orderId}`}
+              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
               Suivre ma commande
-            </button>
+            </Link>
+          ) : (
+            <Link
+              href="/track"
+              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            >
+              Suivre ma commande
+            </Link>
           )}
-          <button
-            onClick={() => router.push(`/store/${slug}`)}
-            className="w-full border-2 border-[#E2E8F0] text-[#78716C] font-semibold py-3.5 rounded-lg hover:bg-gray-50 transition-colors"
+          <Link
+            href={`/store/${slug}`}
+            className="w-full h-12 rounded-xl border-2 border-[#E2E8F0] text-[#78716C] font-semibold text-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
           >
             Retour à la boutique
-          </button>
+          </Link>
         </motion.div>
       </div>
     </div>

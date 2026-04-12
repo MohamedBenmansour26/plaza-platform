@@ -127,6 +127,25 @@ export default function VerificationPage() {
         total: total + getDeliveryFee(total, pendingOrder.deliveryFeeThreshold ?? undefined),
       };
 
+      // ── Snapshot cart into sessionStorage BEFORE navigating ──
+      // This prevents the race condition where CartProvider's persist
+      // effect writes [] to localStorage before confirmation/page.tsx
+      // can read the cart items. We snapshot here while items are
+      // guaranteed to be populated (we just built the payload above).
+      // subtotal in MAD (prices already divided by 100 at cart entry)
+      const snapshotSubtotal = total;
+      const snapshotDeliveryFee = getDeliveryFee(total, pendingOrder.deliveryFeeThreshold ?? undefined);
+      const snapshotTotal = snapshotSubtotal + snapshotDeliveryFee;
+      // Cart items snapshot — written so confirmation can display the
+      // order summary even after clearCart() wipes localStorage.
+      const cartSnapshot = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price, // MAD
+        quantity: item.quantity,
+        image: item.image,
+      }));
+
       try {
         const result = await createOrder(payload);
         // Update sessionStorage with confirmed data including PIN.
@@ -142,12 +161,33 @@ export default function VerificationPage() {
           deliveryDisplayDate: pendingOrder.deliveryDisplayDate,
           deliveryDisplaySlot: pendingOrder.deliveryDisplaySlot,
           deliverySlot: pendingOrder.deliverySlot,
+          // Cart snapshot for confirmation page (avoids localStorage race)
+          // subtotal/deliveryFee/total in MAD
+          cartSnapshot,
+          snapshotSubtotal,
+          snapshotDeliveryFee,
+          snapshotTotal,
         }));
       } catch (err) {
-        console.error('createOrder failed, bypassing to confirmation:', err);
-        // MVP bypass: navigate to confirmation even if DB write failed.
-        // orderId will be absent from sessionStorage; confirmation page will
-        // hide "Suivre ma commande" rather than showing a broken link.
+        // createOrder failed (likely RLS — customers table missing public INSERT policy).
+        // PLZ-040: RLS migration 20260411000001_public_order_insert_policies.sql
+        // must be approved and run by the founder to fix this permanently.
+        console.error('[createOrder] DB write failed — orderId will be absent:', err);
+        // MVP bypass: still navigate to confirmation so the customer sees their
+        // order number. orderId absent → "Suivre ma commande" shows /track fallback.
+        // Write cart snapshot so confirmation shows correct prices even without DB.
+        const existing = JSON.parse(sessionStorage.getItem('plaza_pending_order') ?? '{}');
+        sessionStorage.setItem('plaza_pending_order', JSON.stringify({
+          ...existing,
+          deliveryDisplayDate: pendingOrder.deliveryDisplayDate,
+          deliveryDisplaySlot: pendingOrder.deliveryDisplaySlot,
+          deliverySlot: pendingOrder.deliverySlot,
+          // Cart snapshot for confirmation page (avoids localStorage race)
+          cartSnapshot,
+          snapshotSubtotal,
+          snapshotDeliveryFee,
+          snapshotTotal,
+        }));
       }
 
       router.push(`/store/${slug}/confirmation`);
