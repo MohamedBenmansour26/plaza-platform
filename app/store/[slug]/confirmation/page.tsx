@@ -1,5 +1,10 @@
 'use client';
 
+// PRICE RULE: all DB prices are in centimes
+// Always divide by 100 before displaying
+// Display: (value / 100).toFixed(0) + " MAD"
+// NOTE: cart prices and snapshotSubtotal/snapshotTotal are already in MAD (divided at addItem time)
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -59,9 +64,11 @@ export default function ConfirmationPage() {
     //    before navigating. This is immune to the CartProvider race
     //    condition where the persist effect overwrites localStorage with []
     //    before confirmation mounts.
-    // 2. localStorage direct read — fallback if snapshot is absent.
-    // 3. Cart context — last resort if localStorage is already cleared.
-    // subtotal/deliveryFee/total are all in MAD.
+    // 2. snapshotSubtotal alone — written by verification even when cartSnapshot
+    //    is empty (e.g. direct-buy race where items state hadn't populated yet).
+    // 3. localStorage direct read — fallback if snapshot is absent.
+    // 4. Cart context — last resort if localStorage is already cleared.
+    // All subtotal/deliveryFee/total values are in MAD (divided at addItem time).
 
     if (parsedOrder.cartSnapshot && parsedOrder.cartSnapshot.length > 0) {
       // Preferred path: use the snapshot written by verification/page.tsx
@@ -70,6 +77,10 @@ export default function ConfirmationPage() {
         cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
       setSnapshotItems(cartItems);
       setSnapshotTotal(cartTotal);
+    } else if (parsedOrder.snapshotSubtotal != null && parsedOrder.snapshotSubtotal > 0) {
+      // cartSnapshot was empty but snapshotSubtotal was written — use it directly.
+      // This covers the "Acheter maintenant" path when cartSnapshot is [].
+      setSnapshotTotal(parsedOrder.snapshotSubtotal);
     } else {
       // Fallback: read localStorage directly (may be empty due to race)
       const cartKey = `plaza_cart_${slug}`;

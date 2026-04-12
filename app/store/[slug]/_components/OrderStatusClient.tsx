@@ -1,5 +1,9 @@
 'use client';
 
+// PRICE RULE: all DB prices are in centimes
+// Always divide by 100 before displaying
+// Display: (value / 100).toFixed(0) + " MAD"
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, Check, RefreshCw, Clock } from 'lucide-react';
@@ -257,13 +261,13 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                     {item.products?.name_fr ?? item.name_fr}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {/* price in centimes from DB, divide by 100 for MAD display — unit_price stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
-                    {item.quantity} × {(item.unit_price).toFixed(0)} MAD
+                    {/* unit_price is in centimes in DB — divide by 100 to display in MAD */}
+                    {item.quantity} × {(item.unit_price / 100).toFixed(0)} MAD
                   </p>
                 </div>
                 <p className="font-semibold text-[#1C1917] text-sm">
-                  {/* price in centimes from DB, divide by 100 for MAD display — unit_price stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
-                  {(item.unit_price * item.quantity).toFixed(0)} MAD
+                  {/* unit_price is in centimes in DB — divide by 100 to display in MAD */}
+                  {(item.unit_price / 100 * item.quantity).toFixed(0)} MAD
                 </p>
               </div>
             ))}
@@ -271,20 +275,20 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — subtotal stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
-              <span className="font-semibold text-[#1C1917]">{order.subtotal.toFixed(0)} MAD</span>
+              {/* subtotal is in centimes in DB — divide by 100 to display in MAD */}
+              <span className="font-semibold text-[#1C1917]">{(order.subtotal / 100).toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — delivery_fee stored in MAD */}
+              {/* delivery_fee is in centimes in DB — divide by 100 to display in MAD */}
               <span className={`font-semibold ${order.delivery_fee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}>
-                {order.delivery_fee === 0 ? 'Gratuite' : `${order.delivery_fee} MAD`}
+                {order.delivery_fee === 0 ? 'Gratuite' : `${(order.delivery_fee / 100).toFixed(0)} MAD`}
               </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — total stored in MAD */}
-              <span className="font-bold text-xl text-[#1C1917]">{order.total.toFixed(0)} MAD</span>
+              {/* total is in centimes in DB — divide by 100 to display in MAD */}
+              <span className="font-bold text-xl text-[#1C1917]">{(order.total / 100).toFixed(0)} MAD</span>
             </div>
           </div>
         </motion.div>

@@ -1,5 +1,10 @@
 'use client';
 
+// PRICE RULE: all DB prices are in centimes
+// Always divide by 100 before displaying
+// Display: (value / 100).toFixed(0) + " MAD"
+// NOTE: cart prices (item.price, total, subtotal) are in MAD — divided by 100 at addItem time in CartProvider
+
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
