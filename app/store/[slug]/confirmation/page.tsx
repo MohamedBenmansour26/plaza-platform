@@ -323,7 +323,7 @@ export default function ConfirmationPage() {
             </Link>
           ) : (
             <Link
-              href="/track"
+              href={`/track?order=${orderNumber}`}
               className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >

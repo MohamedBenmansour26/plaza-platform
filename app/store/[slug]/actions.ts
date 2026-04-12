@@ -96,33 +96,44 @@ export async function createOrder(
 
   const customerPin = Math.floor(1000 + Math.random() * 9000);
 
+  // Pre-generate UUIDs server-side so we can avoid .select() after insert.
+  // Anon users cannot SELECT from customers/orders (merchant-only SELECT policy),
+  // so .insert().select('id').single() always fails with an RLS violation even
+  // though the INSERT itself is permitted. By supplying the id up-front we skip
+  // the post-insert SELECT entirely.
+  const customerId = crypto.randomUUID();
+  const orderId = crypto.randomUUID();
+
   // 1. Insert customer
-  const { data: customer, error: custError } = (await supabase
+  const { error: custError } = await supabase
     .from('customers')
     .insert({
+      id: customerId,
       full_name: payload.customerName,
       phone: payload.customerPhone,
       address: payload.customerAddress,
       city: payload.customerCity,
-    } as never)
-    .select('id')
-    .single()) as { data: { id: string } | null; error: unknown };
-  if (custError || !customer) {
+    } as never);
+  if (custError) {
     console.error('[createOrder] customer insert failed:', custError);
     throw new Error(`Customer insert failed: ${JSON.stringify(custError)}`);
   }
 
   // 2. Insert order (retry on order_number collision)
   // DB stores monetary values in centimes (integer); payload values are in MAD → multiply by 100
+  // Each attempt pre-generates its own UUID so we never need .select() after insert.
   let orderNumber = payload.orderNumber;
-  let order: { id: string } | null = null;
+  let finalOrderId = orderId;
+  let orderInserted = false;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const { data, error: orderError } = (await supabase
+    finalOrderId = attempt === 0 ? orderId : crypto.randomUUID();
+    const { error: orderError } = await supabase
       .from('orders')
       .insert({
+        id: finalOrderId,
         order_number: orderNumber,
         merchant_id: payload.merchantId,
-        customer_id: customer.id,
+        customer_id: customerId,
         payment_method: payload.paymentMethod,
         subtotal: Math.round(payload.subtotal * 100),
         delivery_fee: Math.round(payload.deliveryFee * 100),
@@ -131,11 +142,9 @@ export async function createOrder(
         customer_pin: customerPin,
         delivery_date: payload.deliveryDate ?? null,
         delivery_slot: payload.deliverySlot ?? null,
-      } as never)
-      .select('id')
-      .single()) as { data: { id: string } | null; error: unknown };
-    if (!orderError && data) {
-      order = data;
+      } as never);
+    if (!orderError) {
+      orderInserted = true;
       break;
     }
     if (attempt === 2) {
@@ -145,12 +154,12 @@ export async function createOrder(
     // regenerate on collision
     orderNumber = `PLZ-${Math.floor(Math.random() * 900 + 100)}`;
   }
-  if (!order) throw new Error('Failed to create order');
+  if (!orderInserted) throw new Error('Failed to create order');
 
   // 3. Insert order_items
   // unit_price in DB is centimes (integer); payload unitPrice is in MAD → multiply by 100
   const orderItems = payload.items.map((item) => ({
-    order_id: order!.id,
+    order_id: finalOrderId,
     product_id: item.productId || null,
     name_fr: item.nameFr,
     quantity: item.quantity,
@@ -164,7 +173,7 @@ export async function createOrder(
     throw new Error(`Order items insert failed: ${itemsError.message}`);
   }
 
-  return { orderNumber, customerPin, orderId: order.id };
+  return { orderNumber, customerPin, orderId: finalOrderId };
 }
 
 export async function getOrderByNumber(
