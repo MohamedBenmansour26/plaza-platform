@@ -64,12 +64,12 @@ export function ProductCard({ product, slug }: ProductCardProps) {
     <Link href={`/store/${slug}/produit/${product.id}`}>
       <motion.div
         whileHover={!outOfStock ? { y: -4 } : {}}
-        className={`bg-white rounded-xl overflow-hidden transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] ${
+        className={`w-full flex flex-col bg-white rounded-xl overflow-hidden transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] ${
           outOfStock ? 'opacity-60' : ''
         }`}
       >
         {/* Image container */}
-        <div className="relative aspect-[3/4]">
+        <div className="relative w-full aspect-[3/4] overflow-hidden">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -105,16 +105,16 @@ export function ProductCard({ product, slug }: ProductCardProps) {
         </div>
 
         {/* Body */}
-        <div className="p-3">
+        <div className="flex flex-col flex-1 p-3">
           <p className="text-[10px] text-[#78716C] uppercase mb-1">
             {product.category_l1 ?? ''}
           </p>
-          <h3 className="font-medium text-[13px] text-[#1C1917] line-clamp-2 mb-1.5 leading-tight">
+          <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem] text-[#1C1917] leading-tight">
             {product.name_fr}
           </h3>
 
           {/* Price row */}
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mt-auto flex items-center gap-2 mb-2">
             {originalPriceMAD != null && showDiscount && (
               <span className="text-[11px] text-[#A8A29E] line-through">
                 {originalPriceMAD} MAD
@@ -126,11 +126,11 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-1.5">
+          <div className="mt-2 flex gap-1.5">
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`flex-1 h-8 text-[12px] font-medium rounded-lg transition-colors ${
+              className={`flex-1 h-8 text-xs font-medium rounded-lg transition-colors ${
                 outOfStock
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : isAdded
@@ -155,7 +155,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             <button
               onClick={handleBuyNow}
               disabled={outOfStock}
-              className={`flex-1 h-8 text-[12px] font-semibold rounded-lg transition-colors text-white ${
+              className={`flex-1 h-8 text-xs font-semibold rounded-lg transition-colors text-white ${
                 outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
               }`}
               style={!outOfStock ? { backgroundColor: 'var(--color-primary)' } : {}}

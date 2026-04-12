@@ -6,9 +6,13 @@ import { ArrowLeft, Phone, Check, RefreshCw, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Order, OrderItem, Customer, OrderStatus } from '@/types/supabase';
 
+type OrderItemWithProduct = OrderItem & {
+  products: { name_fr: string; image_url: string | null; price: number } | null;
+};
+
 type OrderWithRelations = Order & {
   customer: Customer;
-  order_items: OrderItem[];
+  order_items: OrderItemWithProduct[];
 };
 
 interface Step {
@@ -235,13 +239,26 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <h2 className="font-semibold text-[#1C1917]">Résumé de commande</h2>
           <div className="space-y-3">
             {order.order_items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 text-sm">
-                <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0" />
+              <div key={item.id} className="flex items-center gap-3">
+                {item.products?.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.products.image_url}
+                    alt={item.products.name_fr}
+                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[#1C1917] truncate">{item.name_fr}</p>
-                  <p className="text-[#78716C]">Quantité: {item.quantity}</p>
+                  <p className="text-sm font-medium text-[#1C1917] truncate">
+                    {item.products?.name_fr ?? item.name_fr}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item.quantity} × {(item.unit_price).toFixed(0)} MAD
+                  </p>
                 </div>
-                <p className="font-semibold text-[#1C1917]">
+                <p className="font-semibold text-[#1C1917] text-sm">
                   {item.unit_price * item.quantity} MAD
                 </p>
               </div>
@@ -250,16 +267,19 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className="font-semibold text-[#1C1917]">{order.subtotal} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className={`font-semibold ${order.delivery_fee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}>
                 {order.delivery_fee === 0 ? 'Gratuite' : `${order.delivery_fee} MAD`}
               </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className="font-bold text-xl text-[#1C1917]">{order.total} MAD</span>
             </div>
           </div>

@@ -279,10 +279,12 @@ export default function CheckoutPage() {
           <div className="border-t border-[#E2E8F0] pt-4 space-y-2">
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Sous-total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className="font-medium">{total} MAD</span>
             </div>
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Livraison</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span
                 className={deliveryFee === 0 ? 'text-[#16A34A] font-medium' : 'font-medium'}
               >
@@ -303,6 +305,7 @@ export default function CheckoutPage() {
             )}
             <div className="flex justify-between pt-3 border-t border-[#E2E8F0]">
               <span className="font-bold text-[19px]">Total</span>
+              {/* Price from deliveryUtils — do not recalculate */}
               <span className="font-bold text-[19px]" style={{ color: 'var(--color-primary)' }}>{finalTotal} MAD</span>
             </div>
           </div>
@@ -325,6 +328,7 @@ export default function CheckoutPage() {
                 Traitement...
               </>
             ) : (
+              /* Price from deliveryUtils — do not recalculate */
               `Confirmer la commande • ${finalTotal} MAD`
             )}
           </motion.button>
