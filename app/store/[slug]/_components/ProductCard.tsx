@@ -61,23 +61,23 @@ export function ProductCard({ product, slug }: ProductCardProps) {
   }
 
   return (
-    <Link href={`/store/${slug}/produit/${product.id}`}>
+    <Link href={`/store/${slug}/produit/${product.id}`} className="flex flex-col h-full">
       <motion.div
         whileHover={!outOfStock ? { y: -4 } : {}}
-        className={`w-full flex flex-col bg-white rounded-xl overflow-hidden transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] ${
+        className={`w-full flex flex-col h-full bg-white rounded-xl overflow-hidden transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] ${
           outOfStock ? 'opacity-60' : ''
         }`}
       >
         {/* Image container */}
-        <div className="relative w-full aspect-[3/4] overflow-hidden">
+        <div className="relative w-full h-48 overflow-hidden rounded-t-xl">
           {product.image_url ? (
             <img
               src={product.image_url}
               alt={product.name_fr}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-[#F5F5F4] flex items-center justify-center">
+            <div className="absolute inset-0 w-full h-full bg-[#F5F5F4] flex items-center justify-center">
               <span className="text-3xl text-[#D6D3D1]">🛍️</span>
             </div>
           )}
@@ -109,12 +109,12 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           <p className="text-[10px] text-[#78716C] uppercase mb-1">
             {product.category_l1 ?? ''}
           </p>
-          <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem] text-[#1C1917] leading-tight">
+          <h3 className="text-sm font-medium line-clamp-2 h-10 overflow-hidden text-[#1C1917] leading-tight">
             {product.name_fr}
           </h3>
 
           {/* Price row */}
-          <div className="mt-auto flex items-center gap-2 mb-2">
+          <div className="mt-2 flex items-center gap-2 mb-2">
             {originalPriceMAD != null && showDiscount && (
               <span className="text-[11px] text-[#A8A29E] line-through">
                 {originalPriceMAD} MAD
@@ -126,7 +126,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           </div>
 
           {/* Action buttons */}
-          <div className="mt-2 flex gap-1.5">
+          <div className="mt-auto pt-2 flex gap-1.5">
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}

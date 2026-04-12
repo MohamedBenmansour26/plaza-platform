@@ -40,8 +40,6 @@ export default function CheckoutPage() {
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
 
-  const [codConfirmed, setCodConfirmed] = useState(false);
-  useEffect(() => setCodConfirmed(false), [paymentMethod]);
 
   useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
@@ -57,7 +55,6 @@ export default function CheckoutPage() {
     if (!deliveryDateTime.date) return false;
     if (!deliveryDateTime.time) return false;
     if (locationLat === null || locationLng === null) return false;
-    if (!codConfirmed) return false;
     return true;
   };
 
@@ -237,21 +234,6 @@ export default function CheckoutPage() {
             </span>
           </div>
 
-          {(paymentMethod === 'cash' || paymentMethod === 'card-delivery') && (
-            <label className="flex items-start gap-3 cursor-pointer pt-2 border-t border-[#E2E8F0]">
-              <input
-                type="checkbox"
-                checked={codConfirmed}
-                onChange={(e) => setCodConfirmed(e.target.checked)}
-                className="mt-0.5 w-5 h-5 accent-[#2563EB] flex-shrink-0 cursor-pointer"
-              />
-              <span className="text-[14px] text-[#78716C] leading-snug">
-                Je comprends que je paierai en{' '}
-                {paymentMethod === 'cash' ? 'espèces' : 'carte bancaire'} au moment de la
-                livraison. Aucun prépaiement n&apos;est requis.
-              </span>
-            </label>
-          )}
         </div>
 
         {/* Order Summary */}

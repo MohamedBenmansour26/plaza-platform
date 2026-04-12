@@ -38,15 +38,38 @@ export default function ConfirmationPage() {
   const [snapshotTotal, setSnapshotTotal] = useState(0);
 
   useEffect(() => {
-    setSnapshotItems([...items]);
-    setSnapshotTotal(total);
+    // Read cart directly from localStorage to avoid CSR hydration timing issues
+    // (cart context items/total may still be [] / 0 at mount time)
     const stored = sessionStorage.getItem('plaza_pending_order');
+    let parsedOrder: ConfirmedOrder = {};
     if (stored) {
       try {
-        setOrder(JSON.parse(stored) as ConfirmedOrder);
+        parsedOrder = JSON.parse(stored) as ConfirmedOrder;
+        setOrder(parsedOrder);
       } catch {
         // ignore
       }
+    }
+    const cartKey = `plaza_cart_${slug}`;
+    try {
+      const rawCart = localStorage.getItem(cartKey);
+      if (rawCart) {
+        const cartItems = JSON.parse(rawCart) as CartItem[];
+        // Price from deliveryUtils — do not recalculate
+        const cartTotal = cartItems.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0,
+        );
+        setSnapshotItems(cartItems);
+        setSnapshotTotal(cartTotal);
+      } else {
+        // Fallback to context values if localStorage is already cleared
+        setSnapshotItems([...items]);
+        setSnapshotTotal(total);
+      }
+    } catch {
+      setSnapshotItems([...items]);
+      setSnapshotTotal(total);
     }
     clearCart();
     sessionStorage.removeItem('plaza_pending_order');
@@ -180,9 +203,11 @@ export default function ConfirmationPage() {
             <Clock className="w-5 h-5 text-[#2563EB]" />
             <span className="text-sm font-semibold text-[#2563EB]">
               {order.deliveryDisplayDate && order.deliverySlot
-                ? `Livraison le ${order.deliveryDisplayDate} entre ${order.deliverySlot
-                    .replace('-', ' et ')
-                    .replace(/(\d{2}):00/g, '$1h00')}`
+                ? (() => {
+                    const [start, end] = order.deliverySlot.split('-');
+                    const fmt = (t: string) => t.replace(':', 'h');
+                    return `Livraison le ${order.deliveryDisplayDate} entre ${fmt(start)} et ${fmt(end)}`;
+                  })()
                 : order.deliveryDisplayDate
                   ? `Livraison le ${order.deliveryDisplayDate}`
                   : 'Livraison planifiée'}

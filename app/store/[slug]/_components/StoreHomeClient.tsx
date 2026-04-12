@@ -127,7 +127,7 @@ export function StoreHomeClient({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="px-4 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-2 max-w-[1280px] mx-auto"
+          className="px-4 grid grid-cols-2 lg:grid-cols-4 gap-3 items-stretch max-w-[1280px] mx-auto pb-24 lg:pb-16 mb-8"
         >
           {filtered.map((product, index) => (
             <motion.div
@@ -135,6 +135,7 @@ export function StoreHomeClient({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + index * 0.05 }}
+              className="flex flex-col"
             >
               <ProductCard product={product} slug={slug} />
             </motion.div>
