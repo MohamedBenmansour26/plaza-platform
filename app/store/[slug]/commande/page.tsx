@@ -7,6 +7,7 @@ import { fr } from 'date-fns/locale/fr';
 import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
+import type { CartItem } from '../_components/CartProvider';
 import DateTimePicker from '../_components/DateTimePicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
@@ -26,7 +27,7 @@ export default function CheckoutPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items, total } = useCart();
+  const { items: contextItems, total: contextTotal } = useCart();
 
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,10 +41,42 @@ export default function CheckoutPage() {
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
 
+  // Read cart directly from localStorage to avoid CSR hydration timing issues
+  // (cart context items/total may still be [] / 0 at first render)
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartTotal, setCartTotal] = useState(0);
 
   useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
   }, [slug]);
+
+  useEffect(() => {
+    const cartKey = `plaza_cart_${slug}`;
+    try {
+      const rawCart = localStorage.getItem(cartKey);
+      if (rawCart) {
+        const parsed = JSON.parse(rawCart) as CartItem[];
+        const computedTotal = parsed.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0,
+        );
+        setCartItems(parsed);
+        setCartTotal(computedTotal);
+      } else {
+        // Fallback to context if localStorage has nothing
+        setCartItems([...contextItems]);
+        setCartTotal(contextTotal);
+      }
+    } catch {
+      setCartItems([...contextItems]);
+      setCartTotal(contextTotal);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  // Use snapshot values for display; context values are still used by CartProvider for writes
+  const items = cartItems.length > 0 ? cartItems : contextItems;
+  const total = cartTotal > 0 ? cartTotal : contextTotal;
 
   const threshold = merchant?.delivery_free_threshold ?? undefined;
   const deliveryFee = getDeliveryFee(total, threshold);
@@ -65,6 +98,16 @@ export default function CheckoutPage() {
 
     const orderNumber = generateOrderNumber();
 
+    // Build slot range "HH:MM-HH:MM" (start + 1 hour) so confirmation can split('-')
+    const startTime = deliveryDateTime.time ?? '';
+    const slotRange = (() => {
+      if (!startTime) return '';
+      const [hStr, mStr] = startTime.split(':');
+      const endHour = (parseInt(hStr, 10) + 1) % 24;
+      const endTime = `${String(endHour).padStart(2, '0')}:${mStr}`;
+      return `${startTime}-${endTime}`;
+    })();
+
     sessionStorage.setItem(
       'plaza_pending_order',
       JSON.stringify({
@@ -75,11 +118,11 @@ export default function CheckoutPage() {
         locationLat,
         locationLng,
         deliveryDate: deliveryDateTime.date?.toISOString().split('T')[0] ?? null,
-        deliverySlot: deliveryDateTime.time ?? '',
+        deliverySlot: slotRange,
         deliveryDisplayDate: deliveryDateTime.date
           ? format(deliveryDateTime.date, "d MMMM yyyy", { locale: fr })
           : null,
-        deliveryDisplaySlot: deliveryDateTime.time ?? '',
+        deliveryDisplaySlot: startTime,
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
         orderNumber,
