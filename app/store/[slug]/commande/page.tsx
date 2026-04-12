@@ -42,9 +42,30 @@ export default function CheckoutPage() {
   const [locationLng, setLocationLng] = useState<number | null>(null);
 
   // Read cart directly from localStorage to avoid CSR hydration timing issues
-  // (cart context items/total may still be [] / 0 at first render)
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [cartTotal, setCartTotal] = useState(0);
+  // (cart context items/total may still be [] / 0 at first render).
+  // Lazy initializer runs synchronously before the first render so the page
+  // never shows "0 MAD" while waiting for a useEffect to fire.
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(`plaza_cart_${slug}`);
+      return raw ? (JSON.parse(raw) as CartItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [cartTotal, setCartTotal] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    try {
+      const raw = localStorage.getItem(`plaza_cart_${slug}`);
+      if (!raw) return 0;
+      const parsed = JSON.parse(raw) as CartItem[];
+      // price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem
+      return parsed.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    } catch {
+      return 0;
+    }
+  });
 
   useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
@@ -56,6 +77,7 @@ export default function CheckoutPage() {
       const rawCart = localStorage.getItem(cartKey);
       if (rawCart) {
         const parsed = JSON.parse(rawCart) as CartItem[];
+        // price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem
         const computedTotal = parsed.reduce(
           (sum, item) => sum + item.price * item.quantity,
           0,
@@ -301,7 +323,8 @@ export default function CheckoutPage() {
                   <p className="text-[13px] text-[#78716C]">Qté {item.quantity}</p>
                 </div>
                 <span className="text-[15px] font-medium">
-                  {item.price * item.quantity} MAD
+                  {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+                  {(item.price * item.quantity).toFixed(0)} MAD
                 </span>
               </div>
             ))}
@@ -309,12 +332,12 @@ export default function CheckoutPage() {
           <div className="border-t border-[#E2E8F0] pt-4 space-y-2">
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Sous-total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
-              <span className="font-medium">{total} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              <span className="font-medium">{total.toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-[15px]">
               <span className="text-[#78716C]">Livraison</span>
-              {/* Price from deliveryUtils — do not recalculate */}
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
               <span
                 className={deliveryFee === 0 ? 'text-[#16A34A] font-medium' : 'font-medium'}
               >
@@ -335,8 +358,8 @@ export default function CheckoutPage() {
             )}
             <div className="flex justify-between pt-3 border-t border-[#E2E8F0]">
               <span className="font-bold text-[19px]">Total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
-              <span className="font-bold text-[19px]" style={{ color: 'var(--color-primary)' }}>{finalTotal} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              <span className="font-bold text-[19px]" style={{ color: 'var(--color-primary)' }}>{finalTotal.toFixed(0)} MAD</span>
             </div>
           </div>
         </div>
@@ -358,8 +381,8 @@ export default function CheckoutPage() {
                 Traitement...
               </>
             ) : (
-              /* Price from deliveryUtils — do not recalculate */
-              `Confirmer la commande • ${finalTotal} MAD`
+              /* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */
+              `Confirmer la commande • ${finalTotal.toFixed(0)} MAD`
             )}
           </motion.button>
         </div>

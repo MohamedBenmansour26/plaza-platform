@@ -257,11 +257,13 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                     {item.products?.name_fr ?? item.name_fr}
                   </p>
                   <p className="text-xs text-gray-500">
+                    {/* price in centimes from DB, divide by 100 for MAD display — unit_price stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
                     {item.quantity} × {(item.unit_price).toFixed(0)} MAD
                   </p>
                 </div>
                 <p className="font-semibold text-[#1C1917] text-sm">
-                  {item.unit_price * item.quantity} MAD
+                  {/* price in centimes from DB, divide by 100 for MAD display — unit_price stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
+                  {(item.unit_price * item.quantity).toFixed(0)} MAD
                 </p>
               </div>
             ))}
@@ -269,20 +271,20 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
-              <span className="font-semibold text-[#1C1917]">{order.subtotal} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — subtotal stored in MAD (divided at cart entry in ProductCard/ProductDetailClient) */}
+              <span className="font-semibold text-[#1C1917]">{order.subtotal.toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
-              {/* Price from deliveryUtils — do not recalculate */}
+              {/* price in centimes from DB, divide by 100 for MAD display — delivery_fee stored in MAD */}
               <span className={`font-semibold ${order.delivery_fee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}>
                 {order.delivery_fee === 0 ? 'Gratuite' : `${order.delivery_fee} MAD`}
               </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
-              <span className="font-bold text-xl text-[#1C1917]">{order.total} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — total stored in MAD */}
+              <span className="font-bold text-xl text-[#1C1917]">{order.total.toFixed(0)} MAD</span>
             </div>
           </div>
         </motion.div>

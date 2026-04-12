@@ -110,7 +110,8 @@ function CartContent({
                       </button>
                     </div>
                     <span className="font-bold text-sm text-[#1C1917]">
-                      {item.price * item.quantity} MAD
+                      {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+                      {(item.price * item.quantity).toFixed(0)} MAD
                     </span>
                   </div>
                 </div>
@@ -135,7 +136,8 @@ function CartContent({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              <span className="font-semibold text-[#1C1917]">{subtotal} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+            <span className="font-semibold text-[#1C1917]">{subtotal.toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
@@ -147,7 +149,8 @@ function CartContent({
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
-              <span className="font-bold text-xl text-[#1C1917]">{finalTotal} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              <span className="font-bold text-xl text-[#1C1917]">{finalTotal.toFixed(0)} MAD</span>
             </div>
           </div>
 
@@ -163,7 +166,7 @@ function CartContent({
             className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
-            Passer la commande — {finalTotal} MAD
+            Passer la commande — {finalTotal.toFixed(0)} MAD
           </button>
 
           <button

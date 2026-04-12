@@ -240,7 +240,8 @@ export default function ConfirmationPage() {
                   <p className="text-xs text-[#78716C]">Quantité: {item.quantity}</p>
                 </div>
                 <p className="font-semibold text-[#1C1917] text-sm">
-                  {item.price * item.quantity} MAD
+                  {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+                  {(item.price * item.quantity).toFixed(0)} MAD
                 </p>
               </div>
             ))}
@@ -248,12 +249,12 @@ export default function ConfirmationPage() {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
-              <span className="font-semibold text-[#1C1917]">{snapshotTotal} MAD</span>
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              <span className="font-semibold text-[#1C1917]">{snapshotTotal.toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
-              {/* Price from deliveryUtils — do not recalculate */}
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
               <span
                 className={`font-semibold ${deliveryFee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}
               >
@@ -262,12 +263,12 @@ export default function ConfirmationPage() {
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
-              {/* Price from deliveryUtils — do not recalculate */}
+              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
               <span
                 className="font-bold text-xl"
                 style={{ color: 'var(--color-primary)' }}
               >
-                {snapshotTotal + deliveryFee} MAD
+                {(snapshotTotal + deliveryFee).toFixed(0)} MAD
               </span>
             </div>
           </div>

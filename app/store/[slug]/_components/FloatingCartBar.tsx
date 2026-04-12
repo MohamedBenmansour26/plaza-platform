@@ -39,7 +39,8 @@ export function FloatingCartBar({ onClick, onOpenCart, freeThreshold }: Floating
                 <span className="font-semibold">
                   {totalItems} article{totalItems > 1 ? 's' : ''}
                 </span>{' '}
-                · <span className="font-semibold">{total} MAD</span>
+                {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+                · <span className="font-semibold">{total.toFixed(0)} MAD</span>
               </span>
             </div>
             <div

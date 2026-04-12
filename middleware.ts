@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // Skip intl rewriting for root — app/page.tsx
   // handles its own redirect to /dashboard or /auth/login
   // Skip intl rewriting for routes that do not use locale-prefixed folder structure
-  const SKIP_INTL = ["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver"];
+  const SKIP_INTL = ["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track"];
   if (SKIP_INTL.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();
   }
