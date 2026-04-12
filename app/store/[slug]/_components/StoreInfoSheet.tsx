@@ -80,7 +80,7 @@ export function StoreInfoSheet({
                   />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-full bg-[#2563EB] flex items-center justify-center text-white font-bold text-[18px] mb-3">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-[18px] mb-3" style={{ backgroundColor: 'var(--color-primary)' }}>
                   {initials}
                 </div>
               )}
@@ -109,10 +109,9 @@ export function StoreInfoSheet({
                   <div
                     key={item.day}
                     className={`flex justify-between text-[14px] py-1.5 px-3 rounded ${
-                      item.day === today
-                        ? 'bg-[#EFF6FF] text-[#2563EB] font-medium'
-                        : ''
+                      item.day === today ? 'font-medium' : ''
                     }`}
+                    style={item.day === today ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)' } : {}}
                   >
                     <span>{item.day}</span>
                     <span>{item.hours}</span>
@@ -145,8 +144,8 @@ export function StoreInfoSheet({
             {/* Delivery */}
             <div className="mb-6">
               <h3 className="font-bold text-[15px] mb-3">Livraison</h3>
-              <div className="bg-[#EFF6FF] border border-[#2563EB] rounded-lg px-4 py-3">
-                <p className="text-[14px] text-[#2563EB]">
+              <div className="rounded-lg border px-4 py-3" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
+                <p className="text-[14px]">
                   Livraison {BASE_DELIVERY_FEE} MAD · Gratuite dès{' '}
                   {freeThresholdMAD} MAD d&apos;achat
                 </p>
@@ -157,7 +156,8 @@ export function StoreInfoSheet({
             {merchant.phone != null && (
               <a
                 href={`tel:${merchant.phone}`}
-                className="w-full h-12 border-2 border-[#2563EB] text-[#2563EB] rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#EFF6FF] transition-colors"
+                className="w-full h-12 border-2 rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
               >
                 <Phone className="w-4 h-4" />
                 Appeler la boutique

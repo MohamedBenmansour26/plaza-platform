@@ -49,7 +49,7 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] flex items-center justify-between hover:border-[#2563EB] transition-colors"
+        className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] flex items-center justify-between hover:border-[var(--color-primary)] transition-colors"
       >
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-[#78716C]" />
@@ -74,7 +74,7 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
               {/* Calendar Section */}
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[#E2E8F0]">
-                  <CalendarIcon className="w-4 h-4 text-[#2563EB]" />
+                  <CalendarIcon className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
                   <h3 className="font-medium text-[15px]">Sélectionner la date</h3>
                 </div>
                 <Calendar
@@ -93,7 +93,7 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
               {/* Time Slots Section */}
               <div className="p-4 flex flex-col">
                 <div className="flex items-center gap-2 mb-3 pb-3 border-b border-[#E2E8F0]">
-                  <Clock className="w-4 h-4 text-[#2563EB]" />
+                  <Clock className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
                   <h3 className="font-medium text-[15px]">
                     Sélectionner l&apos;heure
                     {!selectedDate && (
@@ -112,11 +112,12 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
                       disabled={!selectedDate}
                       className={`h-11 rounded-lg text-[14px] font-medium transition-all ${
                         selectedTime === time
-                          ? 'bg-[#2563EB] text-white'
+                          ? 'text-white'
                           : selectedDate
-                            ? 'bg-[#FAFAF9] hover:bg-[#EFF6FF] hover:border-[#2563EB] border border-[#E2E8F0]'
+                            ? 'bg-[#FAFAF9] hover:border-[var(--color-primary)] border border-[#E2E8F0]'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
+                      style={selectedTime === time ? { backgroundColor: 'var(--color-primary)' } : {}}
                     >
                       {time}
                     </button>
@@ -126,18 +127,19 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
             </div>
 
             {selectedDate && selectedTime && (
-              <div className="p-4 bg-[#EFF6FF] border-t border-[#2563EB]/20">
+              <div className="p-4 border-t" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
                 <div className="flex items-center justify-between">
                   <div className="text-[14px]">
                     <span className="text-[#78716C]">Livraison prévue :</span>
-                    <span className="ml-2 font-medium text-[#2563EB]">
+                    <span className="ml-2 font-medium" style={{ color: 'var(--color-primary)' }}>
                       {format(selectedDate, 'EEEE d MMMM', { locale: fr })} à {selectedTime}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 bg-[#2563EB] text-white rounded-lg text-[14px] font-medium hover:bg-[#1d4ed8] transition-colors"
+                    className="px-4 py-2 text-white rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     Confirmer
                   </button>

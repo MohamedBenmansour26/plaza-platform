@@ -141,7 +141,7 @@ export default function ConfirmationPage() {
             </span>
             <button
               onClick={handleCopy}
-              className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 rounded-lg transition-colors hover:opacity-80"
             >
               {copied ? (
                 <CheckCheck className="w-5 h-5 text-[#16A34A]" />
@@ -198,10 +198,11 @@ export default function ConfirmationPage() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center justify-center gap-2"
+            className="rounded-xl border px-4 py-3 flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 40%, transparent)' }}
           >
-            <Clock className="w-5 h-5 text-[#2563EB]" />
-            <span className="text-sm font-semibold text-[#2563EB]">
+            <Clock className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
               {order.deliveryDisplayDate && order.deliverySlot
                 ? (() => {
                     const [start, end] = order.deliverySlot.split('-');
@@ -279,13 +280,23 @@ export default function ConfirmationPage() {
           transition={{ delay: 0.6 }}
           className="space-y-3 pt-2"
         >
-          <button
-            onClick={() => router.push(`/store/${slug}/commande/${order.orderId ?? orderNumber}`)}
-            className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
-            style={{ backgroundColor: 'var(--color-primary)' }}
-          >
-            Suivre ma commande
-          </button>
+          {order.orderId ? (
+            <button
+              onClick={() => router.push(`/store/${slug}/commande/${order.orderId}`)}
+              className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            >
+              Suivre ma commande
+            </button>
+          ) : order.orderNumber ? (
+            <button
+              onClick={() => router.push(`/store/${slug}/commande/${order.orderNumber}`)}
+              className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            >
+              Suivre ma commande
+            </button>
+          ) : null}
           <button
             onClick={() => router.push(`/store/${slug}`)}
             className="w-full border-2 border-[#E2E8F0] text-[#78716C] font-semibold py-3.5 rounded-lg hover:bg-gray-50 transition-colors"

@@ -122,7 +122,7 @@ export default function CheckoutPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Entrez votre nom complet"
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[15px]"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
               required
             />
           </div>
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="06XXXXXXXX"
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[15px]"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
               required
             />
           </div>
@@ -162,7 +162,7 @@ export default function CheckoutPage() {
               rows={3}
               value={addressNotes}
               onChange={(e) => setAddressNotes(e.target.value)}
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
+              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
             />
           </div>
         </div>
@@ -183,9 +183,10 @@ export default function CheckoutPage() {
           <label
             className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
               paymentMethod === 'cash'
-                ? 'border-[#2563EB] bg-blue-50'
-                : 'border-[#E2E8F0] hover:border-[#2563EB]'
+                ? ''
+                : 'border-[#E2E8F0] hover:border-[var(--color-primary)]'
             }`}
+            style={paymentMethod === 'cash' ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
           >
             <input
               type="radio"
@@ -193,7 +194,8 @@ export default function CheckoutPage() {
               value="cash"
               checked={paymentMethod === 'cash'}
               onChange={() => setPaymentMethod('cash')}
-              className="w-4 h-4 accent-[#2563EB]"
+              className="w-4 h-4"
+              style={{ accentColor: 'var(--color-primary)' }}
             />
             <Banknote className="w-5 h-5 text-[#78716C]" />
             <span className="font-medium text-[#1C1917]">Paiement à la livraison</span>
@@ -202,9 +204,10 @@ export default function CheckoutPage() {
           <label
             className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
               paymentMethod === 'card-delivery'
-                ? 'border-[#2563EB] bg-blue-50'
-                : 'border-[#E2E8F0] hover:border-[#2563EB]'
+                ? ''
+                : 'border-[#E2E8F0] hover:border-[var(--color-primary)]'
             }`}
+            style={paymentMethod === 'card-delivery' ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
           >
             <input
               type="radio"
@@ -212,7 +215,8 @@ export default function CheckoutPage() {
               value="card-delivery"
               checked={paymentMethod === 'card-delivery'}
               onChange={() => setPaymentMethod('card-delivery')}
-              className="w-4 h-4 accent-[#2563EB]"
+              className="w-4 h-4"
+              style={{ accentColor: 'var(--color-primary)' }}
             />
             <CreditCard className="w-5 h-5 text-[#78716C]" />
             <span className="font-medium text-[#1C1917]">Carte à la livraison</span>
@@ -225,7 +229,8 @@ export default function CheckoutPage() {
               name="payment"
               value="online"
               disabled
-              className="w-4 h-4 accent-[#2563EB]"
+              className="w-4 h-4"
+              style={{ accentColor: 'var(--color-primary)' }}
             />
             <Smartphone className="w-5 h-5 text-[#78716C]" />
             <span className="font-medium text-[#1C1917] flex-1">Paiement en ligne (via CMI)</span>

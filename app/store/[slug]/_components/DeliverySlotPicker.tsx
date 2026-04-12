@@ -111,7 +111,7 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
           <select
             value={selectedSlot}
             onChange={(e) => onSlotChange(e.target.value)}
-            className="w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-lg text-[15px] text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+            className="w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-lg text-[15px] text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
           >
             {availableSlots.map((slot) => (
               <option key={slot} value={slot}>

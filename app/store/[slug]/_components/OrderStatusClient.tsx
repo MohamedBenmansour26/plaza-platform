@@ -162,9 +162,10 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                         step.completed
                           ? 'bg-[#16A34A] text-white'
                           : step.current
-                            ? 'bg-[#2563EB] text-white animate-pulse'
+                            ? 'text-white animate-pulse'
                             : 'bg-gray-200 text-gray-400'
                       }`}
+                      style={step.current && !step.completed ? { backgroundColor: 'var(--color-primary)' } : {}}
                     >
                       {step.completed ? (
                         <Check className="w-5 h-5" strokeWidth={2.5} />
@@ -186,9 +187,10 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                         step.completed
                           ? 'text-[#16A34A]'
                           : step.current
-                            ? 'text-[#2563EB]'
+                            ? ''
                             : 'text-gray-400'
                       }`}
+                      style={step.current && !step.completed ? { color: 'var(--color-primary)' } : {}}
                     >
                       {step.label}
                     </h3>
@@ -291,9 +293,10 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="bg-blue-50 border border-blue-200 rounded-xl p-4"
+            className="rounded-xl p-4"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', border: '1px solid', borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)' }}
           >
-            <p className="text-sm text-[#2563EB] font-semibold text-center">
+            <p className="text-sm font-semibold text-center" style={{ color: 'var(--color-primary)' }}>
               Code de réception :{' '}
               <span className="text-lg mx-1">
                 {String(order.customer_pin).padStart(4, '0').split('').join(' ')}
@@ -309,9 +312,10 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.45 }}
-            className="bg-[#EFF6FF] rounded-xl p-4 flex items-start gap-3"
+            className="rounded-xl p-4 flex items-start gap-3"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' }}
           >
-            <Clock className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+            <Clock className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
             <div>
               <p className="text-[13px] font-medium text-[#1C1917]">Créneau de livraison</p>
               <p className="text-[13px] text-[#78716C]">{formatDeliverySlot(order.delivery_slot)}</p>
@@ -330,7 +334,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3.5 border-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors"
+              className="w-full py-3.5 border-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
               style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
             >
               <Phone className="w-4 h-4" />

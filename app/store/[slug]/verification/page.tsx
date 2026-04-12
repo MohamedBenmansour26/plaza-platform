@@ -178,9 +178,10 @@ export default function VerificationPage() {
         className="max-w-md mx-auto px-4 py-12"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)' }}>
             <svg
-              className="w-8 h-8 text-[#2563EB]"
+              className="w-8 h-8"
+              style={{ color: 'var(--color-primary)' }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -216,13 +217,14 @@ export default function VerificationPage() {
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={index === 0 ? handlePaste : undefined}
-                  className={`w-12 h-14 text-center text-[20px] font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-colors ${
+                  className={`w-12 h-14 text-center text-[20px] font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-colors ${
                     error
                       ? 'border-[#DC2626] bg-red-50'
                       : digit
-                        ? 'border-[#2563EB] bg-[#EFF6FF]'
+                        ? ''
                         : 'border-[#E2E8F0] bg-white'
                   }`}
+                  style={!error && digit ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
                 />
               ))}
             </div>
@@ -259,14 +261,15 @@ export default function VerificationPage() {
             </p>
             <button
               onClick={handleResend}
-              className="text-[14px] text-[#2563EB] font-medium hover:underline"
+              className="text-[14px] font-medium hover:underline"
+              style={{ color: 'var(--color-primary)' }}
             >
               Renvoyer le code
             </button>
           </div>
         </div>
 
-        <div className="mt-8 p-4 bg-[#EFF6FF] rounded-lg border border-[#2563EB]/20">
+        <div className="mt-8 p-4 rounded-lg border" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
           <p className="text-[13px] text-[#78716C] text-center">
             Pour ce MVP, tout code à 6 chiffres est accepté.
           </p>

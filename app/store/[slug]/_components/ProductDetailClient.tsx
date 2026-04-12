@@ -299,11 +299,11 @@ export function ProductDetailClient({
                 <p className="text-xs text-[#16A34A]/80">À votre convenance</p>
               </div>
             </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
-              <Shield className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-3 flex items-start gap-2">
+              <Shield className="w-5 h-5 text-[#16A34A] flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm text-[#2563EB]">Paiement sécurisé</p>
-                <p className="text-xs text-[#2563EB]/80">100% protégé</p>
+                <p className="font-semibold text-sm text-[#16A34A]">Paiement sécurisé</p>
+                <p className="text-xs text-[#16A34A]/80">100% protégé</p>
               </div>
             </div>
           </div>
