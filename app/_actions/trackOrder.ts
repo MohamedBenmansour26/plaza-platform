@@ -4,15 +4,15 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function getSlugByOrderNumber(
   orderNumber: string,
-): Promise<string | null> {
+): Promise<{ slug: string; orderId: string } | null> {
   const supabase = await createClient();
   const orderResult = await supabase
     .from('orders')
-    .select('merchant_id')
+    .select('id, merchant_id')
     .eq('order_number', orderNumber)
-    .returns<{ merchant_id: string }[]>()
+    .returns<{ id: string; merchant_id: string }[]>()
     .single();
-  const orderData = orderResult.data as { merchant_id: string } | null;
+  const orderData = orderResult.data as { id: string; merchant_id: string } | null;
   if (!orderData) return null;
   const merchantResult = await supabase
     .from('merchants')
@@ -21,5 +21,6 @@ export async function getSlugByOrderNumber(
     .returns<{ store_slug: string }[]>()
     .single();
   const merchant = merchantResult.data as { store_slug: string } | null;
-  return merchant?.store_slug ?? null;
+  if (!merchant?.store_slug) return null;
+  return { slug: merchant.store_slug, orderId: orderData.id };
 }

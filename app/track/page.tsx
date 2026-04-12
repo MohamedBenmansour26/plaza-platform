@@ -30,14 +30,14 @@ export default function TrackOrderPage() {
     setLoading(true);
 
     try {
-      const slug = await getSlugByOrderNumber(trimmed);
-      if (!slug) {
+      const result = await getSlugByOrderNumber(trimmed);
+      if (!result) {
         setError(true);
         setErrorMessage('Commande introuvable. Vérifiez le numéro et réessayez.');
         setLoading(false);
         return;
       }
-      router.push(`/store/${slug}/commande/${trimmed}`);
+      router.push(`/store/${result.slug}/commande/${result.orderId}`);
     } catch {
       setError(true);
       setErrorMessage('Une erreur est survenue. Veuillez réessayer.');

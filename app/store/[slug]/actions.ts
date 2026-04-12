@@ -91,7 +91,7 @@ export async function getProductById(
 
 export async function createOrder(
   payload: CreateOrderPayload,
-): Promise<{ orderNumber: string; customerPin: number }> {
+): Promise<{ orderNumber: string; customerPin: number; orderId: string }> {
   const supabase = await createClient();
 
   const customerPin = Math.floor(1000 + Math.random() * 9000);
@@ -152,12 +152,12 @@ export async function createOrder(
     .insert(orderItems as never);
   if (itemsError) throw new Error('Failed to create order items');
 
-  return { orderNumber, customerPin };
+  return { orderNumber, customerPin, orderId: order.id };
 }
 
 export async function getOrderByNumber(
   orderNumber: string,
-): Promise<(Order & { customer: Customer; order_items: OrderItem[] }) | null> {
+): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('orders')
@@ -165,13 +165,32 @@ export async function getOrderByNumber(
       `
       *,
       customer:customers(*),
-      order_items(*)
+      order_items(*, products(name_fr, image_url, price))
     `,
     )
     .eq('order_number', orderNumber)
     .single();
   if (error || !data) return null;
-  return data as Order & { customer: Customer; order_items: OrderItem[] };
+  return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
+}
+
+export async function getOrderById(
+  id: string,
+): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      `
+      *,
+      customer:customers(*),
+      order_items(*, products(name_fr, image_url, price))
+    `,
+    )
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
 }
 
 // getSlugByOrderNumber lives in app/_actions/trackOrder.ts — import from there
