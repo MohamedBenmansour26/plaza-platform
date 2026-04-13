@@ -16,9 +16,11 @@ export interface CartItem {
   image: string;
 }
 
+export type AddItemResult = { blocked: true; reason: 'stock' } | { blocked: false };
+
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'quantity'> & { stock?: number | null }, quantity?: number) => AddItemResult;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -53,18 +55,37 @@ export function CartProvider({
     localStorage.setItem(`plaza_cart_${slug}`, JSON.stringify(items));
   }, [items, slug]);
 
-  const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
+  const addItem = (
+    newItem: Omit<CartItem, 'quantity'> & { stock?: number | null },
+    quantity: number = 1,
+  ): AddItemResult => {
+    // Destructure stock out so CartItem shape stays clean
+    const { stock, ...itemData } = newItem;
+    const maxQty = stock ?? Infinity; // null/undefined stock = unlimited
+
+    let result: AddItemResult = { blocked: false };
+
     setItems((current) => {
       const existing = current.find((item) => item.id === newItem.id);
+      const currentQty = existing?.quantity ?? 0;
+      const allowedQty = Math.min(quantity, maxQty - currentQty);
+
+      if (allowedQty <= 0) {
+        result = { blocked: true, reason: 'stock' };
+        return current; // no change
+      }
+
       if (existing) {
         return current.map((item) =>
           item.id === newItem.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + allowedQty }
             : item,
         );
       }
-      return [...current, { ...newItem, quantity: 1 }];
+      return [...current, { ...itemData, quantity: allowedQty }];
     });
+
+    return result;
   };
 
   const removeItem = (id: string) => {

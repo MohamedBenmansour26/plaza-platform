@@ -117,3 +117,40 @@ export async function updateBoutique(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/boutique');
   revalidatePath('/dashboard');
 }
+
+// ─── Working Hours Action ──────────────────────────────────────────────────────
+
+export type DaySchedule = { open: boolean; from: string; to: string }
+export type WorkingHours = Record<string, DaySchedule>
+
+export async function updateWorkingHours(
+  workingHours: WorkingHours,
+): Promise<{ schemaPending?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
+
+  const { data: merchant } = await supabase
+    .from('merchants')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle<Pick<Merchant, 'id'>>();
+
+  if (!merchant) redirect('/onboarding');
+
+  const { error } = await supabase
+    .from('merchants')
+    .update({ working_hours: workingHours } as never)
+    .eq('id', merchant.id);
+
+  if (error) {
+    // Column doesn't exist yet — migration is pending approval
+    console.warn('[updateWorkingHours] Schema change pending:', error.message);
+    return { schemaPending: true };
+  }
+
+  revalidatePath('/dashboard/boutique');
+  return {};
+}

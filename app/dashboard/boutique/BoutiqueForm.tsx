@@ -17,6 +17,8 @@ import type { Merchant, DeliveryZone } from '@/types/supabase';
 import { createClient } from '@/lib/supabase/client';
 import { updateBoutique } from './actions';
 import { DeliveryZones } from './DeliveryZones';
+import { WorkingHoursSection } from './WorkingHoursSection';
+import type { WorkingHours } from './actions';
 
 const MapboxLocationPicker = dynamic(
   () => import('@/components/MapboxMap'),
@@ -76,6 +78,23 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
 
   // Status
   const [isOnline, setIsOnline] = useState(merchant.is_online ?? true);
+
+  // Working hours — column is DRAFT (not yet in DB)
+  const DEFAULT_WORKING_HOURS: WorkingHours = {
+    lundi:    { open: true,  from: '09:00', to: '18:00' },
+    mardi:    { open: true,  from: '09:00', to: '18:00' },
+    mercredi: { open: true,  from: '09:00', to: '18:00' },
+    jeudi:    { open: true,  from: '09:00', to: '18:00' },
+    vendredi: { open: true,  from: '09:00', to: '18:00' },
+    samedi:   { open: false, from: '',      to: '' },
+    dimanche: { open: false, from: '',      to: '' },
+  };
+  const initialWorkingHours =
+    (merchant as unknown as { working_hours?: WorkingHours }).working_hours ??
+    DEFAULT_WORKING_HOURS;
+  const workingHoursSection = (
+    <WorkingHoursSection initialHours={initialWorkingHours} />
+  );
 
   // Checklist gate modal
   const [showIncompleteModal, setShowIncompleteModal] = useState(false);
@@ -666,6 +685,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
         {deliverySection}
         <DeliveryZones initialZones={deliveryZones} />
         {statusSection}
+        {workingHoursSection}
       </div>
 
       <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
@@ -706,6 +726,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             {deliverySection}
             <DeliveryZones initialZones={deliveryZones} />
             {statusSection}
+            {workingHoursSection}
 
             <div className="pt-2">
               <button

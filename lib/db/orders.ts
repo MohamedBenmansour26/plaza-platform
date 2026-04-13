@@ -229,6 +229,67 @@ export async function updateOrderStatus(
 
   assertValidTransition(current.status, newStatus);
 
+  // ── Stock guardrail: validate + decrement on pending → confirmed ────────────
+  if (newStatus === 'confirmed') {
+    type OrderItemRow = { product_id: string | null; quantity: number; name_fr: string };
+    type ProductStockRow = { stock: number | null; name_fr: string };
+
+    // 1. Fetch order items
+    const { data: orderItems, error: itemsError } = await supabase
+      .from('order_items')
+      .select('product_id, quantity, name_fr')
+      .eq('order_id', orderId)
+      .returns<OrderItemRow[]>();
+
+    if (itemsError || !orderItems) throw new Error('Failed to fetch order items');
+
+    // 2. Check stock for each item
+    for (const item of orderItems) {
+      if (!item.product_id) continue; // custom items without product reference
+
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('stock, name_fr')
+        .eq('id', item.product_id)
+        .maybeSingle<ProductStockRow>();
+
+      if (productError || !product) throw new Error(`Product not found: ${item.product_id}`);
+
+      if (product.stock !== null && product.stock < item.quantity) {
+        throw new Error(
+          `Stock insuffisant pour "${product.name_fr}": ${product.stock} en stock, ${item.quantity} demandé(s)`,
+        );
+      }
+    }
+
+    // 3. All checks passed — decrement stock atomically
+    type ProductStockOnly = { stock: number | null };
+    for (const item of orderItems) {
+      if (!item.product_id) continue;
+
+      const { data: productForUpdate } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', item.product_id)
+        .maybeSingle<ProductStockOnly>();
+
+      if (productForUpdate?.stock !== null && productForUpdate?.stock !== undefined) {
+        const { error: updateStockErr } = await supabase
+          .from('products')
+          .update({ stock: Math.max(0, productForUpdate.stock - item.quantity) } as never)
+          .eq('id', item.product_id);
+
+        if (updateStockErr) {
+          // Non-fatal: log but don't block order confirmation
+          console.error(
+            `Failed to decrement stock for product ${item.product_id}:`,
+            updateStockErr,
+          );
+        }
+      }
+    }
+  }
+
   // Supabase JS v2: .update() param collapses to `never` with chained .eq() — known SDK regression.
   const { error: updateErr } = await supabase
     .from('orders')

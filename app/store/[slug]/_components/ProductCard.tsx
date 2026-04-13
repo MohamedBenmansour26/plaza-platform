@@ -31,18 +31,20 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       ? Math.round(((originalPriceMAD - priceMAD) / originalPriceMAD) * 100)
       : null;
 
-  const lowStock = product.stock > 0 && product.stock < 5;
+  const lowStock = product.stock !== null && product.stock > 0 && product.stock <= 5;
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
-    addItem({
+    const result = addItem({
       id: product.id,
       name: product.name_fr,
       price: priceMAD,
       image: product.image_url ?? '',
+      stock: product.stock ?? null,
     });
+    if (result.blocked) return;
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   }

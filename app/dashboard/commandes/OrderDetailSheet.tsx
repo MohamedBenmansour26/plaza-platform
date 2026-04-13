@@ -113,11 +113,21 @@ function ActionBar({
 }) {
   const [isPending, startTransition] = useTransition();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const run = (action: (id: string) => Promise<void>) => {
+    setActionError(null);
     startTransition(async () => {
-      await action(order.id);
-      onClose();
+      try {
+        await action(order.id);
+        onClose();
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('Stock insuffisant')) {
+          setActionError(err.message);
+        } else {
+          setActionError('Erreur lors de la confirmation');
+        }
+      }
     });
   };
 
@@ -151,6 +161,12 @@ function ActionBar({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="w-full mb-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-3 text-sm text-[#DC2626]">
+          {actionError}
         </div>
       )}
 
