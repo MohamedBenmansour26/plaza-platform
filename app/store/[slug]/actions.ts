@@ -94,6 +94,21 @@ export async function createOrder(
 ): Promise<{ orderNumber: string; customerPin: number; orderId: string }> {
   const supabase = await createClient();
 
+  // Stock pre-flight check — throws so the caller's existing catch block handles it
+  for (const item of payload.items) {
+    const { data: product } = await supabase
+      .from('products')
+      .select('stock, name_fr')
+      .eq('id', item.productId)
+      .maybeSingle<{ stock: number | null; name_fr: string }>();
+
+    if (product && product.stock !== null && product.stock < item.quantity) {
+      throw new Error(
+        `Stock insuffisant: ${product.name_fr} (${product.stock} disponible, ${item.quantity} demandé)`,
+      );
+    }
+  }
+
   const customerPin = Math.floor(1000 + Math.random() * 9000);
 
   // Pre-generate UUIDs server-side so we can avoid .select() after insert.

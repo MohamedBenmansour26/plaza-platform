@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { updateWorkingHours } from './actions';
 import type { WorkingHours, DaySchedule } from './actions';
 
@@ -39,6 +39,13 @@ export function WorkingHoursSection({ initialHours }: Props) {
   const [sameForAll, setSameForAll] = useState(false);
   const [schemaPending, setSchemaPending] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   function save(next: WorkingHours) {
     startTransition(async () => {
@@ -49,11 +56,18 @@ export function WorkingHoursSection({ initialHours }: Props) {
     });
   }
 
+  function scheduleSave(next: WorkingHours) {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      save(next);
+    }, 500);
+  }
+
   function updateDay(key: string, patch: Partial<DaySchedule>) {
     setHours((prev) => {
       const current = prev[key] ?? DEFAULT_HOURS[key] ?? { open: false, from: '', to: '' };
       const next = { ...prev, [key]: { ...current, ...patch } };
-      save(next);
+      scheduleSave(next);
       return next;
     });
   }
@@ -67,7 +81,7 @@ export function WorkingHoursSection({ initialHours }: Props) {
         next[key] = { ...monHours };
       }
       setHours(next);
-      save(next);
+      scheduleSave(next);
     }
   }
 
