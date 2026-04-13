@@ -32,3 +32,4 @@ Thumbs.db
 # Testing
 playwright-report/
 test-results/
+.qa-screenshots/
