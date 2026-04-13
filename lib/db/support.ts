@@ -55,9 +55,11 @@ export type CreateTicketData = {
  */
 async function generateTicketNumber(): Promise<string> {
   const supabase = await createClient();
-  const { count } = await supabase
+  // PLZ-048: head:true returns no rows — 'id' is the minimal valid column selector.
+  const { count, error } = await supabase
     .from('support_tickets')
-    .select('*', { count: 'exact', head: true });
+    .select('id', { count: 'exact', head: true });
+  if (error) throw new Error(`generateTicketNumber: ${error.message}`);
   const next = (count ?? 0) + 1;
   return `PLZ-T${String(next).padStart(3, '0')}`;
 }
