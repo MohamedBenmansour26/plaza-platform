@@ -202,20 +202,34 @@ export async function createOrder(
   return { orderNumber, customerPin, orderId: finalOrderId };
 }
 
+// ---------------------------------------------------------------------------
+// Storefront order select — explicitly lists columns to prevent data leaks.
+// Both functions gate on merchant_id to ensure cross-merchant isolation.
+// ---------------------------------------------------------------------------
+
+const STOREFRONT_ORDER_SELECT = `
+  id, order_number, merchant_id, status, payment_method,
+  subtotal, delivery_fee, total, notes, customer_pin,
+  created_at, updated_at, delivery_date, delivery_slot,
+  customer:customers(
+    id, full_name, phone, address, city
+  ),
+  order_items(
+    id, product_id, name_fr, quantity, unit_price,
+    products(name_fr, image_url, price)
+  )
+` as const;
+
 export async function getOrderByNumber(
   orderNumber: string,
+  merchantId: string,
 ): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      customer:customers(*),
-      order_items(*, products(name_fr, image_url, price))
-    `,
-    )
+    .select(STOREFRONT_ORDER_SELECT)
     .eq('order_number', orderNumber)
+    .eq('merchant_id', merchantId)
     .single();
   if (error || !data) return null;
   return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
@@ -223,18 +237,14 @@ export async function getOrderByNumber(
 
 export async function getOrderById(
   id: string,
+  merchantId: string,
 ): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('orders')
-    .select(
-      `
-      *,
-      customer:customers(*),
-      order_items(*, products(name_fr, image_url, price))
-    `,
-    )
+    .select(STOREFRONT_ORDER_SELECT)
     .eq('id', id)
+    .eq('merchant_id', merchantId)
     .single();
   if (error || !data) return null;
   return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
