@@ -155,6 +155,13 @@ export default function ConfirmationPage() {
       }
     }
 
+    // Guard: redirect to store if there is no order number — user landed here directly
+    const resolvedOrderNumber = ssOrderNumber || parsedOrder.orderNumber || '';
+    if (!resolvedOrderNumber) {
+      router.replace(`/store/${slug}`);
+      return;
+    }
+
     clearCart();
     sessionStorage.removeItem('plaza_pending_order');
     // Clean up confirm* keys
