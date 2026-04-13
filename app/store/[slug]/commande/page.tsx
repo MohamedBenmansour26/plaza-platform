@@ -8,6 +8,7 @@ import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import type { CartItem } from '../_components/CartProvider';
+import { createClient } from '@/lib/supabase/client';
 import DateTimePicker from '../_components/DateTimePicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
@@ -15,6 +16,8 @@ import { getMerchantBySlug } from '../actions';
 import type { Merchant } from '@/types/supabase';
 import type { PaymentMethod } from '@/types/supabase';
 
+
+const DELIVERY_CITIES = ['Casablanca', 'Rabat', 'Marrakech', 'Agadir', 'Fès', 'Tanger']
 
 type UIPaymentMethod = 'cash' | 'card-delivery' | 'online';
 
@@ -28,7 +31,7 @@ export default function CheckoutPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items: contextItems, total: contextTotal } = useCart();
+  const { items: contextItems, total: contextTotal, removeItem, updateQuantity } = useCart();
 
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,6 +44,8 @@ export default function CheckoutPage() {
   const [city, setCity] = useState('');
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [stockWarnings, setStockWarnings] = useState<string[]>([]);
+  const [outOfZone, setOutOfZone] = useState(false);
 
   // Read cart directly from localStorage to avoid CSR hydration timing issues
   // (cart context items/total may still be [] / 0 at first render).
@@ -90,6 +95,56 @@ export default function CheckoutPage() {
     if (cartItems.length === 0) {
       router.replace(`/store/${slug}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Stock re-validation on mount — single bulk query to detect stale stock
+  useEffect(() => {
+    type ProductStockRow = { id: string; name_fr: string; stock: number | null };
+
+    const validateStock = async () => {
+      const supabase = createClient();
+      const productIds = cartItems.map((i) => i.id);
+
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name_fr, stock')
+        .in('id', productIds)
+        .returns<ProductStockRow[]>();
+
+      const productMap = new Map((products ?? []).map((p) => [p.id, p]));
+      const warnings: string[] = [];
+      const adjustedItems: CartItem[] = [];
+
+      for (const item of cartItems) {
+        const product = productMap.get(item.id);
+        if (!product) {
+          removeItem(item.id);
+          warnings.push(`${item.name} n'est plus disponible`);
+          continue;
+        }
+        if (item.quantity > (product.stock ?? Infinity)) {
+          if ((product.stock ?? 0) === 0) {
+            removeItem(item.id);
+            warnings.push(`${product.name_fr} n'est plus disponible`);
+          } else {
+            updateQuantity(item.id, product.stock!, product.stock!);
+            warnings.push(`La quantité de ${product.name_fr} a été ajustée car le stock disponible a changé.`);
+            adjustedItems.push({ ...item, quantity: product.stock! });
+          }
+        } else {
+          adjustedItems.push(item);
+        }
+      }
+
+      if (warnings.length > 0) {
+        setStockWarnings(warnings);
+        setCartItems(adjustedItems);
+        setCartTotal(adjustedItems.reduce((sum, i) => sum + i.price * i.quantity, 0));
+      }
+    };
+
+    if (cartItems.length > 0) { void validateStock(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -214,6 +269,16 @@ export default function CheckoutPage() {
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto px-4 py-6 space-y-6"
       >
+        {/* Stock warnings — shown when cart was adjusted on mount */}
+        {stockWarnings.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1">
+            <p className="text-sm font-semibold text-amber-800">Votre panier a été mis à jour</p>
+            {stockWarnings.map((msg) => (
+              <p key={msg} className="text-sm text-amber-700">• {msg}</p>
+            ))}
+          </div>
+        )}
+
         {/* Contact Information */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Informations de contact</h2>
@@ -253,9 +318,39 @@ export default function CheckoutPage() {
             onLocationSelect={(lat, lng, cityGuess) => {
               setLocationLat(lat);
               setLocationLng(lng);
-              if (cityGuess) setCity(cityGuess);
+              if (cityGuess) {
+                setCity(cityGuess);
+                // Soft zone check — case-insensitive, partial match
+                const inZone = DELIVERY_CITIES.some(c =>
+                  cityGuess.toLowerCase().includes(c.toLowerCase()) ||
+                  c.toLowerCase().includes(cityGuess.toLowerCase())
+                )
+                setOutOfZone(!inZone)
+              }
             }}
           />
+
+          {/* Delivery zone info chip */}
+          <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+            <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <p className="text-xs text-blue-700">
+              Plaza livre actuellement à : <span className="font-medium">{DELIVERY_CITIES.join(', ')}</span>
+            </p>
+          </div>
+
+          {/* Soft out-of-zone warning — only shown when pin is outside known cities */}
+          {outOfZone && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <svg className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <p className="text-xs text-amber-700">
+                Votre adresse semble être hors de nos zones de livraison actuelles. Nous vous contacterons pour confirmer la disponibilité.
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
@@ -277,6 +372,7 @@ export default function CheckoutPage() {
           <DateTimePicker
             value={deliveryDateTime}
             onChange={setDeliveryDateTime}
+            workingHours={merchant?.working_hours ?? null}
           />
         </div>
 

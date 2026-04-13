@@ -15,7 +15,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, slug }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
 
@@ -32,6 +32,10 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       : null;
 
   const lowStock = product.stock !== null && product.stock > 0 && product.stock <= 5;
+
+  const cartItem = items.find((i) => i.id === product.id);
+  const atMaxStock =
+    product.stock != null && cartItem != null && cartItem.quantity >= product.stock;
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
@@ -61,6 +65,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       price: priceMAD,          // MAD (already divided by 100)
       quantity: 1,
       image: product.image_url ?? '',
+      stock: product.stock ?? null,
     }];
     sessionStorage.setItem('cartItems', JSON.stringify(directCart));
     sessionStorage.setItem('cartSlug', slug);
@@ -144,21 +149,25 @@ export function ProductCard({ product, slug }: ProductCardProps) {
           <div className="mt-auto pt-2 flex gap-1.5">
             <button
               onClick={handleAddToCart}
-              disabled={outOfStock}
+              disabled={outOfStock || atMaxStock}
               className={`flex-1 h-8 text-xs font-medium rounded-lg transition-colors ${
-                outOfStock
+                outOfStock || atMaxStock
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : isAdded
                   ? 'bg-[#16A34A] text-white'
                   : 'text-white'
               }`}
               style={
-                !outOfStock && !isAdded
+                !outOfStock && !atMaxStock && !isAdded
                   ? { backgroundColor: 'var(--color-primary)' }
                   : {}
               }
             >
-              {isAdded ? (
+              {outOfStock ? (
+                'Rupture de stock'
+              ) : atMaxStock ? (
+                'Maximum atteint'
+              ) : isAdded ? (
                 <span className="flex items-center justify-center gap-1">
                   <Check className="w-3 h-3" />
                   Ajouté

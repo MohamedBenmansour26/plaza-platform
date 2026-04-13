@@ -60,7 +60,7 @@ export default function ConfirmationPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items, total, clearCart } = useCart();
+  const { items, clearCart } = useCart();
 
   const [order, setOrder] = useState<ConfirmedOrder>({});
   const [copied, setCopied] = useState(false);
@@ -74,108 +74,114 @@ export default function ConfirmationPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // ── Read confirm* keys (written by verification/page.tsx before createOrder) ──
-    // These are written BEFORE any clearCart() call, so they are always accurate.
-    // All values are in MAD — do NOT divide by 100.
-    const ssSubtotal = sessionStorage.getItem('confirmSubtotal');
-    const ssDelivery = sessionStorage.getItem('confirmDelivery');
-    const ssTotal = sessionStorage.getItem('confirmTotal');
-    const ssOrderId = sessionStorage.getItem('confirmOrderId');
-    const ssOrderNumber = sessionStorage.getItem('confirmOrderNumber');
-    const ssPin = sessionStorage.getItem('confirmPin');
-    const ssDate =
-      sessionStorage.getItem('confirmDate') ||
-      sessionStorage.getItem('deliveryDate') ||
-      '';
-    const ssSlot =
-      sessionStorage.getItem('confirmSlot') ||
-      sessionStorage.getItem('deliverySlot') ||
-      '';
+    // Defer reading sessionStorage by 100 ms — prevents redirect firing before
+    // the browser has made the keys written by verification/page.tsx available.
+    const timer = setTimeout(() => {
+      // ── Read confirm* keys (written by verification/page.tsx before createOrder) ──
+      // These are written BEFORE any clearCart() call, so they are always accurate.
+      // All values are in MAD — do NOT divide by 100.
+      const ssSubtotal = sessionStorage.getItem('confirmSubtotal');
+      const ssDelivery = sessionStorage.getItem('confirmDelivery');
+      const ssTotal = sessionStorage.getItem('confirmTotal');
+      const ssOrderId = sessionStorage.getItem('confirmOrderId');
+      const ssOrderNumber = sessionStorage.getItem('confirmOrderNumber');
+      const ssPin = sessionStorage.getItem('confirmPin');
+      const ssDate =
+        sessionStorage.getItem('confirmDate') ||
+        sessionStorage.getItem('deliveryDate') ||
+        '';
+      const ssSlot =
+        sessionStorage.getItem('confirmSlot') ||
+        sessionStorage.getItem('deliverySlot') ||
+        '';
 
-    if (ssSubtotal) setConfirmSubtotal(parseFloat(ssSubtotal));
-    if (ssDelivery) setConfirmDelivery(parseFloat(ssDelivery));
-    if (ssTotal) setConfirmTotal(parseFloat(ssTotal));
-    if (ssDate) setConfirmDate(ssDate);
-    if (ssSlot) setConfirmSlot(ssSlot);
+      if (ssSubtotal) setConfirmSubtotal(parseFloat(ssSubtotal));
+      if (ssDelivery) setConfirmDelivery(parseFloat(ssDelivery));
+      if (ssTotal) setConfirmTotal(parseFloat(ssTotal));
+      if (ssDate) setConfirmDate(ssDate);
+      if (ssSlot) setConfirmSlot(ssSlot);
 
-    // ── Read order metadata from plaza_pending_order ──
-    // Used for order number, orderId, customerPin, delivery date/slot display.
-    // Fall back to confirm* keys for identity fields if plaza_pending_order is absent.
-    const stored = sessionStorage.getItem('plaza_pending_order');
-    let parsedOrder: ConfirmedOrder & {
-      cartSnapshot?: CartItem[];
-      snapshotSubtotal?: number;
-    } = {};
-    if (stored) {
-      try {
-        parsedOrder = JSON.parse(stored) as typeof parsedOrder;
-        setOrder({
-          ...parsedOrder,
-          // Prefer confirm* identity keys as they are written after createOrder resolves
-          orderId: ssOrderId || parsedOrder.orderId || undefined,
-          orderNumber: ssOrderNumber || parsedOrder.orderNumber || undefined,
-          customerPin:
-            parsedOrder.customerPin ??
-            (ssPin ? parseInt(ssPin, 10) : undefined),
-        });
-      } catch {
-        // Fallback to confirm* keys only
+      // ── Read order metadata from plaza_pending_order ──
+      // Used for order number, orderId, customerPin, delivery date/slot display.
+      // Fall back to confirm* keys for identity fields if plaza_pending_order is absent.
+      const stored = sessionStorage.getItem('plaza_pending_order');
+      let parsedOrder: ConfirmedOrder & {
+        cartSnapshot?: CartItem[];
+        snapshotSubtotal?: number;
+      } = {};
+      if (stored) {
+        try {
+          parsedOrder = JSON.parse(stored) as typeof parsedOrder;
+          setOrder({
+            ...parsedOrder,
+            // Prefer confirm* identity keys as they are written after createOrder resolves
+            orderId: ssOrderId || parsedOrder.orderId || undefined,
+            orderNumber: ssOrderNumber || parsedOrder.orderNumber || undefined,
+            customerPin:
+              parsedOrder.customerPin ??
+              (ssPin ? parseInt(ssPin, 10) : undefined),
+          });
+        } catch {
+          // Fallback to confirm* keys only
+          setOrder({
+            orderId: ssOrderId ?? undefined,
+            orderNumber: ssOrderNumber ?? undefined,
+            customerPin: ssPin ? parseInt(ssPin, 10) : undefined,
+          });
+        }
+      } else {
+        // No plaza_pending_order — use confirm* keys for identity
         setOrder({
           orderId: ssOrderId ?? undefined,
           orderNumber: ssOrderNumber ?? undefined,
           customerPin: ssPin ? parseInt(ssPin, 10) : undefined,
         });
       }
-    } else {
-      // No plaza_pending_order — use confirm* keys for identity
-      setOrder({
-        orderId: ssOrderId ?? undefined,
-        orderNumber: ssOrderNumber ?? undefined,
-        customerPin: ssPin ? parseInt(ssPin, 10) : undefined,
-      });
-    }
 
-    // ── Cart items snapshot for the item list display ──
-    // Read from cartSnapshot in plaza_pending_order (written by verification/page.tsx).
-    // Falls back to localStorage then context — only used for the item list, not prices.
-    if (parsedOrder.cartSnapshot && parsedOrder.cartSnapshot.length > 0) {
-      setSnapshotItems(parsedOrder.cartSnapshot);
-    } else {
-      const cartKey = `plaza_cart_${slug}`;
-      try {
-        const rawCart = localStorage.getItem(cartKey);
-        if (rawCart) {
-          const cartItems = JSON.parse(rawCart) as CartItem[];
-          setSnapshotItems(cartItems);
-        } else {
+      // ── Cart items snapshot for the item list display ──
+      // Read from cartSnapshot in plaza_pending_order (written by verification/page.tsx).
+      // Falls back to localStorage then context — only used for the item list, not prices.
+      if (parsedOrder.cartSnapshot && parsedOrder.cartSnapshot.length > 0) {
+        setSnapshotItems(parsedOrder.cartSnapshot);
+      } else {
+        const cartKey = `plaza_cart_${slug}`;
+        try {
+          const rawCart = localStorage.getItem(cartKey);
+          if (rawCart) {
+            const cartItems = JSON.parse(rawCart) as CartItem[];
+            setSnapshotItems(cartItems);
+          } else {
+            setSnapshotItems([...items]);
+          }
+        } catch {
           setSnapshotItems([...items]);
         }
-      } catch {
-        setSnapshotItems([...items]);
       }
-    }
 
-    // Guard: redirect to store if there is no order number — user landed here directly
-    const resolvedOrderNumber = ssOrderNumber || parsedOrder.orderNumber || '';
-    if (!resolvedOrderNumber) {
-      router.replace(`/store/${slug}`);
-      return;
-    }
+      // Guard: redirect to store if there is no order number — user landed here directly
+      const resolvedOrderNumber = ssOrderNumber || parsedOrder.orderNumber || '';
+      if (!resolvedOrderNumber) {
+        router.replace(`/store/${slug}`);
+        return;
+      }
 
-    clearCart();
-    sessionStorage.removeItem('plaza_pending_order');
-    // Clean up confirm* keys
-    sessionStorage.removeItem('confirmSubtotal');
-    sessionStorage.removeItem('confirmDelivery');
-    sessionStorage.removeItem('confirmTotal');
-    sessionStorage.removeItem('confirmOrderId');
-    sessionStorage.removeItem('confirmOrderNumber');
-    sessionStorage.removeItem('confirmPin');
-    sessionStorage.removeItem('confirmDate');
-    sessionStorage.removeItem('confirmSlot');
+      clearCart();
+      sessionStorage.removeItem('plaza_pending_order');
+      // Clean up confirm* keys
+      sessionStorage.removeItem('confirmSubtotal');
+      sessionStorage.removeItem('confirmDelivery');
+      sessionStorage.removeItem('confirmTotal');
+      sessionStorage.removeItem('confirmOrderId');
+      sessionStorage.removeItem('confirmOrderNumber');
+      sessionStorage.removeItem('confirmPin');
+      sessionStorage.removeItem('confirmDate');
+      sessionStorage.removeItem('confirmSlot');
 
-    // Mark ready — all state is now populated from sessionStorage
-    setReady(true);
+      // Mark ready — all state is now populated from sessionStorage
+      setReady(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -212,7 +218,7 @@ export default function ConfirmationPage() {
   if (!ready)
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)' }} />
       </div>
     );
 

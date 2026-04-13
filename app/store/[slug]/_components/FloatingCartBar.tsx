@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useCart } from './CartProvider';
-import { getDeliveryFee } from '../_lib/deliveryUtils';
 
 interface FloatingCartBarProps {
   /** Primary prop name (matches export) */
@@ -13,11 +12,11 @@ interface FloatingCartBarProps {
   freeThreshold?: number;
 }
 
-export function FloatingCartBar({ onClick, onOpenCart, freeThreshold }: FloatingCartBarProps) {
+export function FloatingCartBar({ onClick, onOpenCart }: FloatingCartBarProps) {
   const handleClick = onClick ?? onOpenCart ?? (() => {});
   const { items, total } = useCart();
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
-  const deliveryFee = getDeliveryFee(total, freeThreshold);
+
 
   return (
     <AnimatePresence>

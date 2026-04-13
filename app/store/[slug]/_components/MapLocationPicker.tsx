@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { applyMoroccoMapStyle } from '@/lib/mapbox-utils';
 
 interface Props {
   onLocationSelect: (lat: number, lng: number, cityGuess: string) => void;
@@ -13,7 +14,6 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const onLocationSelectRef = useRef(onLocationSelect);
-  const initializedRef = useRef(false);
   const [picked, setPicked] = useState(false);
   const [locating, setLocating] = useState(false);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
@@ -21,35 +21,45 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   // Keep ref up-to-date without triggering effect
   onLocationSelectRef.current = onLocationSelect;
 
-  const handleLocate = () => {
+  const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        mapRef.current!.flyTo({ center: [lng, lat], zoom: 14 });
-        if (markerRef.current) {
-          markerRef.current.setLngLat([lng, lat]);
-        } else {
-          markerRef.current = new mapboxgl.Marker({ color: '#E8632A' })
-            .setLngLat([lng, lat])
-            .addTo(mapRef.current!);
-        }
-        setPicked(true);
-        try {
-          const res = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place&language=fr&access_token=${token}`
-          );
-          const data = await res.json() as { features?: Array<{ text?: string }> };
-          onLocationSelectRef.current(lat, lng, data.features?.[0]?.text ?? '');
-        } catch {
-          onLocationSelectRef.current(lat, lng, '');
-        }
-        setLocating(false);
-      },
-      () => setLocating(false),
-      { timeout: 8000 },
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          mapRef.current?.flyTo({ center: [lng, lat], zoom: 15, duration: 1000 });
+          if (markerRef.current) {
+            markerRef.current.setLngLat([lng, lat]);
+          } else {
+            markerRef.current = new mapboxgl.Marker({ color: '#E8632A' })
+              .setLngLat([lng, lat])
+              .addTo(mapRef.current!);
+          }
+          setPicked(true);
+          try {
+            const res = await fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place&language=fr&access_token=${token}`
+            );
+            const data = await res.json() as { features?: Array<{ text?: string }> };
+            onLocationSelectRef.current(lat, lng, data.features?.[0]?.text ?? '');
+          } catch {
+            onLocationSelectRef.current(lat, lng, '');
+          }
+          setLocating(false);
+        },
+        (err) => {
+          console.warn('Geolocation denied:', err);
+          setLocating(false);
+          // Do NOT navigate anywhere on error
+        },
+        { timeout: 10000 },
+      );
+    } catch {
+      setLocating(false);
+    }
   };
 
   useEffect(() => {
@@ -57,19 +67,17 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     mapboxgl.accessToken = token;
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center: [-6.8, 31.5] as [number, number],
-      zoom: 4.5,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [-6.0, 31.5] as [number, number],
+      zoom: 5,
     });
     mapRef.current = map;
 
-    if (!initializedRef.current) {
-      initializedRef.current = true;
-      map.fitBounds(
-        [[-17.5, 20.0], [-1.0, 35.92]] as [[number, number], [number, number]],
-        { padding: 20, duration: 0 },
-      );
-    }
+    map.on('load', () => {
+      map.jumpTo({ center: [-6.0, 31.5], zoom: 5 });
+      applyMoroccoMapStyle(map);
+    });
+
     map.getCanvas().style.cursor = 'crosshair';
 
     map.on('click', async (e) => {

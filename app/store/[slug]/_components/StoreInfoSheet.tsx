@@ -12,32 +12,25 @@ interface StoreInfoSheetProps {
   onClose: () => void;
 }
 
-const SCHEDULE = [
-  { day: 'Lundi', hours: '9h–20h' },
-  { day: 'Mardi', hours: '9h–20h' },
-  { day: 'Mercredi', hours: '9h–20h' },
-  { day: 'Jeudi', hours: '9h–20h' },
-  { day: 'Vendredi', hours: '9h–20h' },
-  { day: 'Samedi', hours: '9h–20h' },
-  { day: 'Dimanche', hours: '10h–18h' },
-];
+const DAY_ORDER = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+const DAY_LABELS: Record<string, string> = {
+  lundi: 'Lundi',
+  mardi: 'Mardi',
+  mercredi: 'Mercredi',
+  jeudi: 'Jeudi',
+  vendredi: 'Vendredi',
+  samedi: 'Samedi',
+  dimanche: 'Dimanche',
+};
+const DAY_NAMES_FR = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
 export function StoreInfoSheet({
   merchant,
   isOpen,
   onClose,
 }: StoreInfoSheetProps) {
-  // Dynamic day highlight
-  const dayNames = [
-    'Dimanche',
-    'Lundi',
-    'Mardi',
-    'Mercredi',
-    'Jeudi',
-    'Vendredi',
-    'Samedi',
-  ];
-  const today = dayNames[new Date().getDay()];
+  // Today's French day name for row highlight
+  const todayName = DAY_NAMES_FR[new Date().getDay()];
 
   // Free-delivery threshold in MAD
   const freeThresholdMAD =
@@ -105,18 +98,32 @@ export function StoreInfoSheet({
             <div className="mb-6">
               <h3 className="font-bold text-[15px] mb-3">Horaires</h3>
               <div className="space-y-2">
-                {SCHEDULE.map((item) => (
-                  <div
-                    key={item.day}
-                    className={`flex justify-between text-[14px] py-1.5 px-3 rounded ${
-                      item.day === today ? 'font-medium' : ''
-                    }`}
-                    style={item.day === today ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)' } : {}}
-                  >
-                    <span>{item.day}</span>
-                    <span>{item.hours}</span>
-                  </div>
-                ))}
+                {DAY_ORDER.map((dayKey) => {
+                  const isToday = dayKey === todayName;
+                  const dayConfig = merchant.working_hours?.[dayKey];
+                  let hoursLabel: string;
+                  if (!merchant.working_hours) {
+                    hoursLabel = '9h–20h';
+                  } else if (!dayConfig || dayConfig.open === false) {
+                    hoursLabel = 'Fermé';
+                  } else if (dayConfig.from && dayConfig.to) {
+                    hoursLabel = `${dayConfig.from.replace(':00', 'h')}–${dayConfig.to.replace(':00', 'h')}`;
+                  } else {
+                    hoursLabel = '9h–20h';
+                  }
+                  return (
+                    <div
+                      key={dayKey}
+                      className={`flex justify-between text-[14px] py-1.5 px-3 rounded ${
+                        isToday ? 'font-bold' : ''
+                      }`}
+                      style={isToday ? { backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', color: 'var(--color-primary)' } : {}}
+                    >
+                      <span>{DAY_LABELS[dayKey]}</span>
+                      <span>{hoursLabel}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

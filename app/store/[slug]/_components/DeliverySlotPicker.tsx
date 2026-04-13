@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
-import { format } from 'date-fns/format';
 import { addDays } from 'date-fns/addDays';
 import { isToday } from 'date-fns/isToday';
 import { isTomorrow } from 'date-fns/isTomorrow';
+import { format } from 'date-fns/format';
 import { fr } from 'date-fns/locale/fr';
 
 // All possible hourly slots 09:00–20:00
@@ -14,17 +14,17 @@ const ALL_SLOTS = [
   '17:00-18:00','18:00-19:00','19:00-20:00',
 ];
 
-interface WorkingHours {
-  [day: string]: { open: string; close: string } | null;
-}
+type DayConfig = { open: boolean; from?: string; to?: string };
 
 interface Props {
   selectedDate: Date | null;
   selectedSlot: string;
   onDateChange: (date: Date) => void;
   onSlotChange: (slot: string) => void;
-  workingHours?: WorkingHours | null;
+  workingHours?: Record<string, DayConfig> | null;
 }
+
+const DAY_NAMES_FR = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
 export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, onSlotChange, workingHours }: Props) {
   // Generate date options: today + next 7 days
@@ -33,31 +33,40 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
   }, []);
 
   // Filter slots for the selected date based on merchant working hours
-  const availableSlots = useMemo(() => {
-    if (!selectedDate) return ALL_SLOTS;
+  const { availableSlots, isClosed } = useMemo(() => {
+    if (!selectedDate) return { availableSlots: ALL_SLOTS, isClosed: false };
 
-    // Filter by merchant working hours if provided
     if (workingHours) {
-      const dayName = format(selectedDate, 'EEEE', { locale: fr }).toLowerCase();
-      const hours = workingHours[dayName];
-      if (hours) {
-        return ALL_SLOTS.filter((slot) => {
-          const [start] = slot.split('-');
-          return start >= hours.open && start < hours.close;
-        });
+      const dayName = DAY_NAMES_FR[selectedDate.getDay()];
+      const dayConfig = workingHours[dayName];
+
+      if (dayConfig !== undefined) {
+        if (dayConfig.open === false) {
+          return { availableSlots: [], isClosed: true };
+        }
+        if (dayConfig.open === true && dayConfig.from && dayConfig.to) {
+          const filtered = ALL_SLOTS.filter((slot) => {
+            const [start] = slot.split('-');
+            return start >= dayConfig.from! && start < dayConfig.to!;
+          });
+          return { availableSlots: filtered, isClosed: false };
+        }
       }
     }
 
     // If today, filter out past slots
     if (isToday(selectedDate)) {
       const nowHour = new Date().getHours();
-      return ALL_SLOTS.filter((slot) => {
-        const startHour = parseInt(slot.split(':')[0], 10);
-        return startHour > nowHour;
-      });
+      return {
+        availableSlots: ALL_SLOTS.filter((slot) => {
+          const startHour = parseInt(slot.split(':')[0], 10);
+          return startHour > nowHour;
+        }),
+        isClosed: false,
+      };
     }
 
-    return ALL_SLOTS;
+    return { availableSlots: ALL_SLOTS, isClosed: false };
   }, [selectedDate, workingHours]);
 
   function formatDateLabel(date: Date) {
@@ -105,7 +114,9 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
         <label className="block text-[14px] font-medium text-[#1C1917] mb-2">
           Heure de livraison <span className="text-[#DC2626]">*</span>
         </label>
-        {availableSlots.length === 0 ? (
+        {isClosed ? (
+          <p className="text-[13px] font-medium text-amber-600">La boutique est fermée ce jour</p>
+        ) : availableSlots.length === 0 ? (
           <p className="text-[13px] text-[#78716C]">Aucun créneau disponible pour cette date.</p>
         ) : (
           <select

@@ -75,54 +75,61 @@ function CartContent({
           </div>
         ) : (
           <div className="space-y-4">
-            {items.map((item) => (
-              <div key={item.id} className="flex gap-3">
-                {item.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-lg bg-[#F5F5F4] flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-[#1C1917] line-clamp-1">
-                    {item.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <div className="flex items-center border border-[#E2E8F0] rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1, item.stock ?? null)}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
-                      >
-                        <Minus className="w-3.5 h-3.5 text-[#78716C]" />
-                      </button>
-                      <span className="w-8 text-center text-sm font-semibold text-[#1C1917]">
-                        {item.quantity}
+            {items.map((item) => {
+              const atMax = item.stock != null && item.quantity >= item.stock;
+              return (
+                <div key={item.id} className="flex gap-3">
+                  {item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-[#F5F5F4] flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm text-[#1C1917] line-clamp-1">
+                      {item.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex items-center border border-[#E2E8F0] rounded-lg overflow-hidden">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1, item.stock ?? null)}
+                          className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                        >
+                          <Minus className="w-3.5 h-3.5 text-[#78716C]" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-semibold text-[#1C1917]">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1, item.stock ?? null)}
+                          disabled={atMax}
+                          className="w-7 h-7 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-[#78716C]" />
+                        </button>
+                      </div>
+                      {atMax && (
+                        <span className="text-xs text-gray-400">(max)</span>
+                      )}
+                      <span className="font-bold text-sm text-[#1C1917]">
+                        {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+                        {(item.price * item.quantity).toFixed(0)} MAD
                       </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.stock ?? null)}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
-                      >
-                        <Plus className="w-3.5 h-3.5 text-[#78716C]" />
-                      </button>
                     </div>
-                    <span className="font-bold text-sm text-[#1C1917]">
-                      {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
-                      {(item.price * item.quantity).toFixed(0)} MAD
-                    </span>
                   </div>
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-[#DC2626] hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="text-[#DC2626] hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

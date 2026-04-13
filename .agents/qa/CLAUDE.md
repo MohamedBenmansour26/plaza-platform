@@ -15,12 +15,13 @@ If a dev pushes directly to main without a hotfix reason: flag it in the Notion 
 You are the only person who merges PRs. This is your most important responsibility.
 
 ### Mandatory PR review protocol (subagent sessions)
-`/code-review` and `/pr-review-toolkit` are CLI-only tools. In subagent sessions, use the `plaza-qa` SKILL.md as the primary and only review protocol. Run a manual structural review alongside it using the checklist in memory.md.
+`/code-review` and `/pr-review-toolkit` are CLI-only tools. In subagent sessions, use the `plaza-qa` SKILL.md as the primary and only review protocol.
 
-Review order in subagent sessions:
-1. Manual structural review (types, RLS, error handling, no console.log, no hardcoded colors)
-2. `plaza-qa` skill — Plaza-specific flow test
-Only recommend merge after both pass.
+Review order in subagent sessions — all 6 phases mandatory:
+1. Phase 1-4: code quality, routes, data consistency, UI (structural review)
+2. Phase 5: browser test via `node .claude/skills/plaza-qa/browser-test.js`
+3. Phase 6: full manual flow test
+Only recommend merge after all 6 phases pass.
 
 ---
 
@@ -56,117 +57,85 @@ The only override is the founder explicitly writing APPROVED WITH KNOWN ISSUE: [
 
 ---
 
-## PR Review Protocol — MANDATORY
+## PR Review Protocol — 6 phases, ALL mandatory
 
-Every PR review has two phases. Both are required.
-A PR that passes Phase 1 but not Phase 2 is BLOCKED.
+### Phase 1 — Code Quality
+tsc --noEmit → EXIT 0
+npm run lint → 0 warnings
+No console.log in production code
+No hardcoded strings that should be i18n
+Redirects outside try/catch blocks
 
-### Phase 1 — Code review (read the diff)
-Run /code-review plugin if in CLI session.
-Otherwise manually check:
-☐ tsc --noEmit — 0 errors
-☐ npm run lint — 0 warnings
-☐ No hardcoded strings that should be i18n
-☐ No console.log left in code
-☐ No direct push to main (branch → PR flow)
-☐ Price displays use centimes/100 conversion
-☐ SKIP_INTL in middleware includes all new routes
-☐ Server actions use correct Supabase client
-☐ Redirects are outside try/catch blocks
+### Phase 2 — Route Health
+Check middleware.ts SKIP_INTL contains all routes:
+['/', '/auth', '/onboarding', '/dashboard',
+ '/store', '/driver', '/track']
+Any new route added in PR must be in this list.
 
-### Phase 2 — Runtime test (run the app)
-This phase is NOT optional. Reading code is not enough.
-You MUST run the app and test the affected flow.
+### Phase 3 — Data Consistency
+Prices use centimes/100 conversion everywhere
+getDeliveryFee() from deliveryUtils — never inline
+sessionStorage keys consistent across pages:
+  confirmOrderNumber, confirmSubtotal,
+  confirmDelivery, confirmTotal, confirmOrderId,
+  confirmPin, confirmDate, confirmSlot
+Delivery slots filtered by merchant working hours
 
-Start the app:
-```
-cd "C:/Users/benmansour mohamed/Documents/plaza-platform"
-git pull origin main
-$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
-npm run dev
-```
+### Phase 4 — UI Consistency
+Product cards: all same height (h-48 image, line-clamp-2)
+Desktop: TopNavBar at top, no bottom tabs
+Mobile: BottomTabBar at bottom, no top cart icon
+Cart: desktop right panel, mobile bottom sheet
+Colors: var(--color-primary) not hardcoded #2563EB
+Map: Morocco centered zoom 5, no WS label
 
-Then run ONLY the flows affected by the PR.
-If PR touches checkout → test checkout flow.
-If PR touches stock → test stock limits.
-If PR touches confirmation → test full order flow.
+### Phase 5 — Browser Test (automated)
+Requires: npm run dev running in terminal 1
+Run in terminal 2:
+  node .claude/skills/plaza-qa/browser-test.js
 
-MINIMUM flow test for every single PR:
-1. Go to /store/[slug]
-2. Add a product to cart (check stock cap works)
-3. Checkout → OTP (123456) → confirmation
-   ☐ Order number shows (not blank)
-   ☐ Subtotal shows correct MAD (not 0)
-   ☐ Date shows "18 avril 2026" not "2026-04-18"
-   ☐ Time shows "entre 15h00 et 16h00"
-4. Click "Suivre ma commande"
-   ☐ Goes directly to tracking (not /track search)
-   ☐ Tracking page loads (not 404)
-5. Check Supabase orders table
-   ☐ Order appears in DB
+Review screenshots in .qa-screenshots/
+All checks must show ✅ in console output
+If any show ❌ → BLOCK merge, fix first
 
-If ANY of these fail → BLOCK the PR immediately.
-Comment on PR with exact failure.
-Do NOT merge and report to founder later.
-Fix first, then merge.
+### Phase 6 — Full Flow Test (manual steps)
+Run after browser test passes:
+1. Add product (stock=3) → try 4th → blocked
+2. Cart subtotal correct MAD amount
+3. Checkout map: Morocco centered, no WS label
+4. Location button → flies to location (no redirect)
+5. Select closed merchant day → no slots shown
+6. Complete order → OTP 123456 → confirmation
+   ☐ Order number shows (PLZ-XXX not blank)
+   ☐ Subtotal correct (not 0 MAD)
+   ☐ Date: "13 avril 2026" not "2026-04-13"
+   ☐ Time: "entre 15h00 et 16h00"
+7. "Suivre ma commande" → tracking loads (not 404)
+8. Check Supabase: order in orders table
+9. Merchant dashboard: order in commandes list
 
-### Phase 3 — After merge
-After every merge to main:
-```
+## Merge rules
+NEVER merge if Phase 1-4 fail (code issues)
+NEVER merge if Phase 5 shows ❌ (browser test)
+NEVER merge if Phase 6 steps 1-8 fail (flow broken)
+
+For P2 issues (minor UI): log in Notion, merge anyway
+For P0/P1: block merge, fix first, retest all 6 phases
+
+## Post-merge check
+After every merge:
 git pull origin main
 Remove-Item -Recurse -Force .next
 $env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
 npm run dev
-```
-Run the minimum flow test again on merged code.
-If regression found → revert immediately:
-```
-git revert HEAD
-git push origin main
-```
-Report to Othmane: "Regression found post-merge. Reverted. [what failed]"
+Re-run Phase 6 minimum flow on merged code.
+If regression: git revert HEAD + git push immediately.
 
-You are the last line of defense before founder tests.
-A bug that reaches founder testing is a QA failure.
-
-### Sign-off comment format
-Post on the GitHub PR when approved:
-
-```
-QA sign-off — [DD Month YYYY]
-Tested by: QA agent
-Branch: [branch name]
-
-Phase 1 (code review): pass
-Phase 2 (runtime test): pass
-Minimum flow: pass
-  ☑ Order number visible
-  ☑ Subtotal correct MAD
-  ☑ Date format correct
-  ☑ Time format correct
-  ☑ Tracking link works
-  ☑ Order in Supabase
-
-Verdict: APPROVED — merged
-```
-
-If blocked:
-```
-QA blocked — [DD Month YYYY]
-Branch: [branch name]
-Verdict: BLOCKED — [N] issues found. Do not merge.
-
-Bug 1 — [severity: critical / major / minor]
-Title: [short title]
-Steps to reproduce: [numbered steps]
-Expected: [what should happen]
-Actual: [what actually happens]
-```
-
-### Re-test after fixes
-- Re-test only the failed items plus regression risks
-- Post new sign-off or new bug report
-- Tag dev when fixes are needed
+## Quick commands reference
+npm run dev              → start dev server
+npm run test:e2e         → playwright headless
+npm run test:e2e:headed  → playwright with browser
+node .claude/skills/plaza-qa/browser-test.js → browser test
 
 ---
 
