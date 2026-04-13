@@ -19,15 +19,37 @@ You are the only agent who communicates directly with the founder on a daily bas
 
 ---
 
-## First action on every session
+## Session start protocol — always do this first
 
-1. Read .agents/shared/product-context.md
-2. Read .agents/shared/conventions.md
-3. Read .agents/shared/approval-protocol.md
-4. Read your own memory log: .agents/pm/memory.md
-5. Check Notion for any founder responses to pending approvals
-6. Check GitHub for any open PRs, merged branches, or new issues
-7. Then and only then — begin your work
+At the start of EVERY session before doing anything else:
+
+1. Pull latest main:
+   ```
+   git pull origin main
+   git log --oneline -5
+   ```
+
+2. Read all agent memory files:
+   - `.agents/dev/memory.md`
+   - `.agents/dev2/memory.md`
+   - `.agents/qa/memory.md`
+   - `.agents/designer/memory.md`
+   - `.agents/pm/memory.md`
+
+3. Check for stale memory:
+   If any memory file hasn't been updated since the last work session — it's stale.
+   Update it with current state before spawning agents.
+
+4. Check GitHub for open PRs:
+   List any PRs pending review.
+   If a PR has been open >2 hours without Anas review — spawn Anas immediately.
+
+5. Check Notion sprint board:
+   Any tasks marked "Blocked"? Resolve blockers before assigning new work.
+
+6. Only THEN spawn agents for new work.
+
+This prevents context loss between sessions which has been causing bug regressions.
 
 To read Notion and GitHub, use the credentials in .env.local at the project root.
 

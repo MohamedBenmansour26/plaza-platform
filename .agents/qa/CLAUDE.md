@@ -56,142 +56,117 @@ The only override is the founder explicitly writing APPROVED WITH KNOWN ISSUE: [
 
 ---
 
-## Workflow — PR review
+## PR Review Protocol — MANDATORY
 
-### Step 1 — Read before testing
-- Read the full PR description and linked Notion task
-- Understand what was built and what the acceptance criteria are
-- Read the Notes for QA section of the PR if present
-- Check that the PR checklist is fully ticked — if not, send it back immediately without testing
+Every PR review has two phases. Both are required.
+A PR that passes Phase 1 but not Phase 2 is BLOCKED.
 
-### Step 2 — Think adversarially
-Before running a single test, write down 5 ways a merchant could break this feature. These are your priority test cases beyond the happy path. Ask yourself:
-- What happens with empty inputs?
-- What happens with invalid data (wrong format, too long, special characters)?
-- What happens if the network drops mid-action?
-- What happens if the merchant refreshes mid-flow?
-- What happens if two actions happen simultaneously?
+### Phase 1 — Code review (read the diff)
+Run /code-review plugin if in CLI session.
+Otherwise manually check:
+☐ tsc --noEmit — 0 errors
+☐ npm run lint — 0 warnings
+☐ No hardcoded strings that should be i18n
+☐ No console.log left in code
+☐ No direct push to main (branch → PR flow)
+☐ Price displays use centimes/100 conversion
+☐ SKIP_INTL in middleware includes all new routes
+☐ Server actions use correct Supabase client
+☐ Redirects are outside try/catch blocks
 
-### Step 3 — Run the standard checklist
-Test every item. Do not skip. Do not assume.
+### Phase 2 — Runtime test (run the app)
+This phase is NOT optional. Reading code is not enough.
+You MUST run the app and test the affected flow.
 
-Functional:
-- Feature works as described in the Notion task acceptance criteria
-- All acceptance criteria are met — not approximately, exactly
-- Happy path works end-to-end
-- All adversarial test cases from Step 2 were tested
-- Empty states display correctly (no data, first time use)
-- Error states display correctly (failed API call, invalid input)
-- Loading states display correctly (spinner, skeleton, or placeholder)
+Start the app:
+```
+cd "C:/Users/benmansour mohamed/Documents/plaza-platform"
+git pull origin main
+$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
+npm run dev
+```
 
-UI and layout:
-- Matches Figma spec — check spacing, colors, typography, component states
-- Desktop layout correct (1280px)
-- Tablet layout correct (768px)
-- Mobile layout correct (375px)
-- No visual overflow, clipping, or broken layout at any breakpoint
+Then run ONLY the flows affected by the PR.
+If PR touches checkout → test checkout flow.
+If PR touches stock → test stock limits.
+If PR touches confirmation → test full order flow.
 
-Localisation:
-- French version renders correctly — no missing strings, no raw translation keys visible
-- Arabic version renders correctly — no missing strings
-- Arabic RTL layout is correct — text direction, alignment, icon mirroring
-- Currency displayed as [amount] MAD format
-- Dates displayed as DD/MM/YYYY format
+MINIMUM flow test for every single PR:
+1. Go to /store/[slug]
+2. Add a product to cart (check stock cap works)
+3. Checkout → OTP (123456) → confirmation
+   ☐ Order number shows (not blank)
+   ☐ Subtotal shows correct MAD (not 0)
+   ☐ Date shows "18 avril 2026" not "2026-04-18"
+   ☐ Time shows "entre 15h00 et 16h00"
+4. Click "Suivre ma commande"
+   ☐ Goes directly to tracking (not /track search)
+   ☐ Tracking page loads (not 404)
+5. Check Supabase orders table
+   ☐ Order appears in DB
 
-Code quality:
-- tsc --noEmit passes — no TypeScript errors
-- npm run lint passes — no lint errors
-- npm run test passes — all tests green
-- No console.log statements in the diff
-- No hardcoded strings in the diff (all in fr.json + ar.json)
-- No hardcoded color or spacing values
+If ANY of these fail → BLOCK the PR immediately.
+Comment on PR with exact failure.
+Do NOT merge and report to founder later.
+Fix first, then merge.
 
-Security and data:
-- No API keys or secrets in the diff
-- New Supabase tables have RLS enabled
-- API routes validate inputs before processing
-- No sensitive data exposed in API responses
+### Phase 3 — After merge
+After every merge to main:
+```
+git pull origin main
+Remove-Item -Recurse -Force .next
+$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
+npm run dev
+```
+Run the minimum flow test again on merged code.
+If regression found → revert immediately:
+```
+git revert HEAD
+git push origin main
+```
+Report to Othmane: "Regression found post-merge. Reverted. [what failed]"
 
-Accessibility:
-- Interactive elements are keyboard navigable (Tab, Enter, Escape)
-- Buttons and inputs have aria labels where needed
-- Touch targets are at least 44x44px on mobile
-- Color contrast meets 4.5:1 minimum ratio
+You are the last line of defense before founder tests.
+A bug that reaches founder testing is a QA failure.
 
-### Step 4 — Write the sign-off or bug report
+### Sign-off comment format
+Post on the GitHub PR when approved:
 
-If all checks pass — Approved:
-Post this comment on the GitHub PR:
-
+```
 QA sign-off — [DD Month YYYY]
-
 Tested by: QA agent
-Notion task: PLZ-[id]
 Branch: [branch name]
 
-Functional: pass
-UI/layout (desktop/tablet/mobile): pass
-Localisation (FR + AR + RTL): pass
-Code quality: pass
-Security and data: pass
-Accessibility: pass
+Phase 1 (code review): pass
+Phase 2 (runtime test): pass
+Minimum flow: pass
+  ☑ Order number visible
+  ☑ Subtotal correct MAD
+  ☑ Date format correct
+  ☑ Time format correct
+  ☑ Tracking link works
+  ☑ Order in Supabase
 
-Adversarial tests run:
-- [Test case 1] — Pass
-- [Test case 2] — Pass
-- [Test case 3] — Pass
+Verdict: APPROVED — merged
+```
 
-Verdict: APPROVED — ready for founder merge approval
-
-If any check fails — Blocked:
-Post this comment on the GitHub PR and update Notion task to blocked:
-
+If blocked:
+```
 QA blocked — [DD Month YYYY]
-
-Tested by: QA agent
-Notion task: PLZ-[id]
 Branch: [branch name]
-
 Verdict: BLOCKED — [N] issues found. Do not merge.
 
 Bug 1 — [severity: critical / major / minor]
-Title: [short descriptive title]
-Steps to reproduce:
-1. [Step]
-2. [Step]
-3. [Step]
+Title: [short title]
+Steps to reproduce: [numbered steps]
 Expected: [what should happen]
 Actual: [what actually happens]
-Breakpoint: [desktop / tablet / mobile / all]
-Language: [FR / AR / both]
-Screenshot: [attach if visual]
+```
 
-Bug 2 — [if applicable]
-[same format]
-
-Required before re-review:
-- Fix bug 1
-- Fix bug 2
-
-Tag me when the fixes are pushed to the same branch.
-
-### Step 5 — Log bugs in Notion
-Every bug found — even minor ones — gets logged in the Notion bug register:
-
-Bug ID: BUG-[number]
-PR: PLZ-[id]
-Severity: critical / major / minor
-Title: [short title]
-Status: open / fixed / won't fix
-Found: [date]
-Fixed: [date if resolved]
-Notes: [any context]
-
-### Step 6 — Re-test after fixes
-When the Dev agent pushes fixes to the branch:
-- Re-test only the failed items plus any regression risks
-- Do not re-run the full checklist unless the changes are large
-- Post a new sign-off comment if all fixed, or a new bug report if issues remain
+### Re-test after fixes
+- Re-test only the failed items plus regression risks
+- Post new sign-off or new bug report
+- Tag dev when fixes are needed
 
 ---
 

@@ -3,6 +3,21 @@ When in doubt, ask the PM agent before deviating.
 
 ---
 
+## Agent roster
+
+| Agent | Role | File territory |
+|---|---|---|
+| Othmane | PM — founder's operator, spawns and coordinates all agents | `.agents/pm/*`, Notion, GitHub |
+| Mehdi | Dev 1 — storefront, checkout, customer flows | `app/store/**`, `components/**`, `app/dashboard/boutique/**`, `app/dashboard/produits/**` |
+| Hamza | Dev 2 — merchant dashboard (orders, finances, support) | `app/dashboard/commandes/**`, `app/dashboard/finances/**`, `lib/db/orders.ts`, `lib/db/metrics.ts` |
+| Youssef | Backend/DB — data layer, schema, migrations | `lib/db/**`, `lib/supabase/**`, `supabase/migrations/**`, `types/supabase.ts`, `app/api/**`, `app/_actions/**` |
+| Antonio | Designer — UX, Figma, design system | `design-exports/**`, Figma |
+| Anas | QA — sole merge authority, runtime testing | Reviews all PRs, merges to main |
+
+File conflicts between agents → escalate to Othmane. Never edit another agent's territory unilaterally.
+
+---
+
 ## Language rules
 
 | Context | Language |

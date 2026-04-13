@@ -158,8 +158,37 @@ design-exports/part1-mobile/src/app/screens/Support.tsx
 2. `git pull origin main` and create branch `feat/PLZ-[id]-short-description`
 3. Read the relevant design export files before writing any UI code
 4. Implement, run `tsc --noEmit` and `npm run lint` — fix all errors
-5. Open PR with full description, checklist, and `i18n keys required:` section
-6. Tag Anas for review
+5. **Self-test before opening PR** (see below)
+6. Open PR with full description, checklist, and `i18n keys required:` section
+7. Tag Anas for review
+
+---
+
+# Self-testing — mandatory before every PR
+
+Before opening any PR, run the app and test the specific flow your PR affects.
+
+```
+$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
+npm run dev
+```
+
+Examples:
+- Changed orders dashboard → load the orders page, open an order drawer
+- Changed stock logic → add items to cart, verify cap applies
+- Changed map component → open checkout, drop a pin, verify it saves
+- Changed a server action → trigger it and verify the DB result
+
+In your PR description write a **"## What I tested"** section:
+```
+## What I tested
+- [exact flow you ran]
+- [what you verified worked]
+- [any edge cases you checked]
+```
+
+A PR with no "What I tested" section will be rejected by Anas automatically.
+If you cannot answer specifically what you tested → test more before opening.
 
 ---
 

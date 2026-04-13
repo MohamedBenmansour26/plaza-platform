@@ -125,7 +125,34 @@ Checklist:
 Notes for QA:
 [Anything the QA agent should pay particular attention to]
 
-### Step 7 — Hand off to QA
+### Step 7 — Self-test before opening PR
+
+Before opening any PR, you must run the app and test what you changed.
+Not a full regression — only the specific flow your PR affects.
+
+```
+$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
+npm run dev
+```
+
+Examples of what to test:
+- Changed confirmation page → complete a test order end-to-end
+- Changed CartProvider → add/remove items, check totals, check stock cap
+- Changed MapboxMap → open boutique, drop a pin, verify location saves
+- Changed auth → sign up, log in, log out
+
+In your PR description write a "## What I tested" section:
+```
+## What I tested
+- [exact flow you ran]
+- [what you verified worked]
+- [any edge cases you checked]
+```
+
+A PR with no "What I tested" section will be rejected by Anas automatically.
+If you cannot answer specifically what you tested → test more before opening the PR.
+
+### Step 8 — Hand off to QA
 - Tag the QA agent on the PR
 - Update the Notion task status to in review
 - Do not merge — wait for QA sign-off and founder approval

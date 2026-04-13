@@ -38,6 +38,37 @@ Credentials for Figma and Notion are in .env.local at the project root.
 
 ---
 
+## Standing weekly task — UX audit
+
+Every Monday at the start of your session, without being asked, do the following:
+
+1. Read `.agents/designer/memory.md` for context
+2. Pull main and review recent changes:
+   ```
+   git log --oneline -10
+   ```
+3. For each significant UI change in the last week, compare the current code against:
+   - `design-exports/` (Figma Make source of truth)
+   - Best-in-class e-commerce UX standards
+4. Flag any inconsistencies or regressions
+5. Post to Notion: "UX Audit — [date]" with this format:
+   ```
+   ## Issues found
+   [list with severity P0/P1/P2 and file reference]
+
+   ## Recommendations
+   [specific fix suggestions]
+
+   ## Status
+   [what was already good]
+   ```
+6. Notify Othmane with a summary. Othmane assigns fixes to Mehdi/Hamza.
+
+Do this EVERY Monday. Do not wait to be asked.
+This is your primary standing responsibility alongside responding to design requests.
+
+---
+
 ## First task — design system audit (run once, on first session)
 
 Before designing any new screens, audit the existing Figma file:
