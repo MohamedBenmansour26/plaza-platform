@@ -60,7 +60,7 @@ export default function ConfirmationPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items, total, clearCart } = useCart();
+  const { items, clearCart } = useCart();
 
   const [order, setOrder] = useState<ConfirmedOrder>({});
   const [copied, setCopied] = useState(false);
@@ -218,7 +218,7 @@ export default function ConfirmationPage() {
   if (!ready)
     return (
       <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)' }} />
       </div>
     );
 

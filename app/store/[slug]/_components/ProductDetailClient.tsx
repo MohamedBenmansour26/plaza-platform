@@ -59,7 +59,7 @@ export function ProductDetailClient({
   const { items, addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [cartOpen, setCartOpen] = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [_infoOpen, setInfoOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setCartOpen(true);
