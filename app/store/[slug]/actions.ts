@@ -7,9 +7,6 @@ import type {
   Order,
   OrderItem,
   Customer,
-  CustomerInsert,
-  OrderInsert,
-  OrderItemInsert,
   PaymentMethod,
 } from '@/types/supabase';
 

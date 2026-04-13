@@ -65,6 +65,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
       price: priceMAD,          // MAD (already divided by 100)
       quantity: 1,
       image: product.image_url ?? '',
+      stock: product.stock ?? null,
     }];
     sessionStorage.setItem('cartItems', JSON.stringify(directCart));
     sessionStorage.setItem('cartSlug', slug);
