@@ -7,22 +7,41 @@ export const MOROCCO_DEFAULT_VIEW = {
 } satisfies mapboxgl.CameraOptions;
 
 /**
- * Hides disputed-territory labels and sub-national boundary layers on a
- * Mapbox satellite-streets style. Call inside a map `load` handler.
+ * Hides disputed-territory labels and all admin boundary layers on a
+ * Mapbox streets style. Call inside a map `load` handler.
  */
 export function applyMoroccoMapStyle(map: mapboxgl.Map): void {
-  // Suppress politically disputed labels (e.g. Western Sahara)
-  if (map.getLayer('country-label')) {
-    map.setFilter('country-label', [
-      '!in', 'name_en',
-      'Western Sahara',
-      'Sahrawi Arab Democratic Republic',
-    ]);
-  }
+  // Hide all admin boundary layers — including disputed variants (e.g. WS dotted line)
+  const layersToHide = [
+    // Admin boundaries (all variants)
+    'admin-0-boundary',
+    'admin-0-boundary-bg',
+    'admin-1-boundary',
+    'admin-1-boundary-bg',
+    'admin-2-boundary',
+    'admin-2-boundary-bg',
+    'admin-0-boundary-disputed',
+    'admin-1-boundary-disputed',
+    // Country/territory labels
+    'country-label',
+    'state-label',
+  ];
 
-  for (const layer of ['admin-1-boundary', 'admin-1-boundary-bg', 'admin-2-boundary']) {
+  layersToHide.forEach(layer => {
     if (map.getLayer(layer)) {
       map.setLayoutProperty(layer, 'visibility', 'none');
     }
+  });
+
+  // Backup filter: explicitly exclude WS from country-label
+  if (map.getLayer('country-label')) {
+    map.setFilter('country-label', [
+      'all',
+      ['!in', 'name_en',
+        'Western Sahara',
+        'Sahrawi Arab Democratic Republic',
+        'SADR',
+      ],
+    ]);
   }
 }

@@ -51,7 +51,7 @@ export default function MapboxMap({ lat, lng, onLocationChange }: Props) {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [lng ?? -6.8, lat ?? 31.5] as [number, number],
       zoom: lat && lng ? 13 : 4.5,
     });
