@@ -11,7 +11,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Copy, CheckCheck, Clock, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
-import { getDeliveryFee } from '../_lib/deliveryUtils';
 import type { CartItem } from '../_components/CartProvider';
 
 interface ConfirmedOrder {
@@ -41,10 +40,28 @@ export default function ConfirmationPage() {
   const [order, setOrder] = useState<ConfirmedOrder>({});
   const [copied, setCopied] = useState(false);
   const [snapshotItems, setSnapshotItems] = useState<CartItem[]>([]);
-  const [snapshotTotal, setSnapshotTotal] = useState(0);
+  const [confirmSubtotal, setConfirmSubtotal] = useState(0);
+  const [confirmDelivery, setConfirmDelivery] = useState(30);
+  const [confirmTotal, setConfirmTotal] = useState(0);
 
   useEffect(() => {
-    // Read order metadata from sessionStorage (written by verification/page.tsx)
+    // ── Read confirm* keys (written by verification/page.tsx before createOrder) ──
+    // These are written BEFORE any clearCart() call, so they are always accurate.
+    // All values are in MAD — do NOT divide by 100.
+    const ssSubtotal = sessionStorage.getItem('confirmSubtotal');
+    const ssDelivery = sessionStorage.getItem('confirmDelivery');
+    const ssTotal = sessionStorage.getItem('confirmTotal');
+    const ssOrderId = sessionStorage.getItem('confirmOrderId');
+    const ssOrderNumber = sessionStorage.getItem('confirmOrderNumber');
+    const ssPin = sessionStorage.getItem('confirmPin');
+
+    if (ssSubtotal) setConfirmSubtotal(parseFloat(ssSubtotal));
+    if (ssDelivery) setConfirmDelivery(parseFloat(ssDelivery));
+    if (ssTotal) setConfirmTotal(parseFloat(ssTotal));
+
+    // ── Read order metadata from plaza_pending_order ──
+    // Used for order number, orderId, customerPin, delivery date/slot display.
+    // Fall back to confirm* keys for identity fields if plaza_pending_order is absent.
     const stored = sessionStorage.getItem('plaza_pending_order');
     let parsedOrder: ConfirmedOrder & {
       cartSnapshot?: CartItem[];
@@ -53,70 +70,66 @@ export default function ConfirmationPage() {
     if (stored) {
       try {
         parsedOrder = JSON.parse(stored) as typeof parsedOrder;
-        setOrder(parsedOrder);
+        setOrder({
+          ...parsedOrder,
+          // Prefer confirm* identity keys as they are written after createOrder resolves
+          orderId: parsedOrder.orderId ?? ssOrderId ?? undefined,
+          orderNumber: parsedOrder.orderNumber ?? ssOrderNumber ?? undefined,
+          customerPin: parsedOrder.customerPin ?? (ssPin ? parseInt(ssPin, 10) : undefined),
+        });
       } catch {
-        // ignore
+        // Fallback to confirm* keys only
+        setOrder({
+          orderId: ssOrderId ?? undefined,
+          orderNumber: ssOrderNumber ?? undefined,
+          customerPin: ssPin ? parseInt(ssPin, 10) : undefined,
+        });
       }
+    } else {
+      // No plaza_pending_order — use confirm* keys for identity
+      setOrder({
+        orderId: ssOrderId ?? undefined,
+        orderNumber: ssOrderNumber ?? undefined,
+        customerPin: ssPin ? parseInt(ssPin, 10) : undefined,
+      });
     }
 
-    // ── Cart snapshot resolution (priority order) ──────────────
-    // 1. sessionStorage cart snapshot — written by verification/page.tsx
-    //    before navigating. This is immune to the CartProvider race
-    //    condition where the persist effect overwrites localStorage with []
-    //    before confirmation mounts.
-    // 2. snapshotSubtotal alone — written by verification even when cartSnapshot
-    //    is empty (e.g. direct-buy race where items state hadn't populated yet).
-    // 3. localStorage direct read — fallback if snapshot is absent.
-    // 4. Cart context — last resort if localStorage is already cleared.
-    // All subtotal/deliveryFee/total values are in MAD (divided at addItem time).
-
+    // ── Cart items snapshot for the item list display ──
+    // Read from cartSnapshot in plaza_pending_order (written by verification/page.tsx).
+    // Falls back to localStorage then context — only used for the item list, not prices.
     if (parsedOrder.cartSnapshot && parsedOrder.cartSnapshot.length > 0) {
-      // Preferred path: use the snapshot written by verification/page.tsx
-      const cartItems = parsedOrder.cartSnapshot;
-      const cartTotal = parsedOrder.snapshotSubtotal ??
-        cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      setSnapshotItems(cartItems);
-      setSnapshotTotal(cartTotal);
-    } else if (parsedOrder.snapshotSubtotal != null && parsedOrder.snapshotSubtotal > 0) {
-      // cartSnapshot was empty but snapshotSubtotal was written — use it directly.
-      // This covers the "Acheter maintenant" path when cartSnapshot is [].
-      setSnapshotTotal(parsedOrder.snapshotSubtotal);
+      setSnapshotItems(parsedOrder.cartSnapshot);
     } else {
-      // Fallback: read localStorage directly (may be empty due to race)
       const cartKey = `plaza_cart_${slug}`;
       try {
         const rawCart = localStorage.getItem(cartKey);
         if (rawCart) {
           const cartItems = JSON.parse(rawCart) as CartItem[];
-          // price in MAD (divided by 100 at cart entry in ProductCard)
-          const cartTotal = cartItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0,
-          );
           setSnapshotItems(cartItems);
-          setSnapshotTotal(cartTotal);
         } else {
-          // Last resort: context values (may be [] / 0 if already cleared)
           setSnapshotItems([...items]);
-          setSnapshotTotal(total);
         }
       } catch {
         setSnapshotItems([...items]);
-        setSnapshotTotal(total);
       }
     }
 
     clearCart();
     sessionStorage.removeItem('plaza_pending_order');
+    // Clean up confirm* keys
+    sessionStorage.removeItem('confirmSubtotal');
+    sessionStorage.removeItem('confirmDelivery');
+    sessionStorage.removeItem('confirmTotal');
+    sessionStorage.removeItem('confirmOrderId');
+    sessionStorage.removeItem('confirmOrderNumber');
+    sessionStorage.removeItem('confirmPin');
+    sessionStorage.removeItem('confirmDate');
+    sessionStorage.removeItem('confirmSlot');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const orderNumber = order.orderNumber ?? 'PLZ-???';
-  // delivery_free_threshold is stored in centimes in the DB and propagated as-is
-  // through plaza_pending_order; divide by 100 to compare against MAD subtotal.
-  const thresholdMAD =
-    order.deliveryFeeThreshold != null ? order.deliveryFeeThreshold / 100 : undefined;
-  const deliveryFee = getDeliveryFee(snapshotTotal, thresholdMAD);
+  const deliveryFee = confirmDelivery;
 
   const handleCopy = async () => {
     try {
@@ -288,12 +301,12 @@ export default function ConfirmationPage() {
           <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Sous-total</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
-              <span className="font-semibold text-[#1C1917]">{snapshotTotal.toFixed(0)} MAD</span>
+              {/* confirmSubtotal is in MAD — written by verification/page.tsx before clearCart */}
+              <span className="font-semibold text-[#1C1917]">{confirmSubtotal.toFixed(0)} MAD</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#78716C]">Livraison</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              {/* confirmDelivery is in MAD — written by verification/page.tsx before clearCart */}
               <span
                 className={`font-semibold ${deliveryFee === 0 ? 'text-[#16A34A]' : 'text-[#1C1917]'}`}
               >
@@ -302,12 +315,12 @@ export default function ConfirmationPage() {
             </div>
             <div className="flex justify-between pt-2 border-t border-[#E2E8F0]">
               <span className="font-bold text-[#1C1917]">Total</span>
-              {/* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */}
+              {/* confirmTotal is in MAD — written by verification/page.tsx before clearCart */}
               <span
                 className="font-bold text-xl"
                 style={{ color: 'var(--color-primary)' }}
               >
-                {(snapshotTotal + deliveryFee).toFixed(0)} MAD
+                {confirmTotal.toFixed(0)} MAD
               </span>
             </div>
           </div>

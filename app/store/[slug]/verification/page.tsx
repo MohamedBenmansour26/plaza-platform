@@ -48,6 +48,7 @@ export default function VerificationPage() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export default function VerificationPage() {
       return;
     }
 
+    setIsProcessing(true);
     setLoading(true);
     setError(false);
 
@@ -205,6 +207,16 @@ export default function VerificationPage() {
         image: item.image,
       }));
 
+      // Write confirm* keys BEFORE clearCart() runs anywhere.
+      // These prefixed keys are the authoritative source for confirmation/page.tsx
+      // and are immune to CartProvider context being wiped by clearCart().
+      // All values are in MAD (prices divided by 100 at cart entry time).
+      sessionStorage.setItem('confirmSubtotal', total.toString());
+      sessionStorage.setItem('confirmDelivery', snapshotDeliveryFee.toString());
+      sessionStorage.setItem('confirmTotal', snapshotTotal.toString());
+      sessionStorage.setItem('confirmDate', pendingOrder.deliveryDate ?? '');
+      sessionStorage.setItem('confirmSlot', pendingOrder.deliverySlot ?? '');
+
       try {
         const result = await createOrder(payload);
         // Update sessionStorage with confirmed data including PIN.
@@ -227,6 +239,11 @@ export default function VerificationPage() {
           snapshotDeliveryFee,
           snapshotTotal,
         }));
+
+        // Also write order identity to confirm* keys (available after createOrder)
+        sessionStorage.setItem('confirmOrderId', result.orderId ?? '');
+        sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? pendingOrder.orderNumber);
+        sessionStorage.setItem('confirmPin', String(result.customerPin ?? ''));
       } catch (err) {
         // createOrder failed — log and navigate to confirmation with fallback /track link
         console.error('[createOrder] DB write failed — orderId will be absent:', err);
@@ -245,6 +262,11 @@ export default function VerificationPage() {
           snapshotDeliveryFee,
           snapshotTotal,
         }));
+
+        // Fallback confirm* identity keys (no orderId on DB failure)
+        sessionStorage.setItem('confirmOrderId', '');
+        sessionStorage.setItem('confirmOrderNumber', pendingOrder.orderNumber);
+        sessionStorage.setItem('confirmPin', '');
       }
 
       router.push(`/store/${slug}/confirmation`);
@@ -264,6 +286,14 @@ export default function VerificationPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
+      {isProcessing && (
+        <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-stone-500 text-sm">Confirmation de votre commande...</p>
+          </div>
+        </div>
+      )}
       <div className="sticky top-0 z-50 bg-white border-b border-[#E2E8F0] h-14 flex items-center px-4">
         <button
           onClick={() => router.back()}

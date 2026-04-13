@@ -406,10 +406,10 @@ export default function CheckoutPage() {
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
             {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Traitement...
-              </>
+              <span className="flex items-center gap-2">
+                <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                Traitement en cours...
+              </span>
             ) : (
               /* price in centimes from DB, divide by 100 for MAD display — division already done in ProductCard/ProductDetailClient before addItem */
               `Confirmer la commande • ${finalTotal.toFixed(0)} MAD`
