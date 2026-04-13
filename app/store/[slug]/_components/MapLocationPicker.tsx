@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { applyMoroccoMapStyle, MOROCCO_DEFAULT_VIEW } from '@/lib/mapbox-utils';
 
 interface Props {
   onLocationSelect: (lat: number, lng: number, cityGuess: string) => void;
@@ -21,7 +22,9 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   // Keep ref up-to-date without triggering effect
   onLocationSelectRef.current = onLocationSelect;
 
-  const handleLocate = () => {
+  const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -63,12 +66,11 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     });
     mapRef.current = map;
 
+    map.on('load', () => applyMoroccoMapStyle(map));
+
     if (!initializedRef.current) {
       initializedRef.current = true;
-      map.fitBounds(
-        [[-17.5, 20.0], [-1.0, 35.92]] as [[number, number], [number, number]],
-        { padding: 20, duration: 0 },
-      );
+      map.jumpTo(MOROCCO_DEFAULT_VIEW);
     }
     map.getCanvas().style.cursor = 'crosshair';
 
