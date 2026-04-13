@@ -241,8 +241,8 @@ export default function VerificationPage() {
         }));
 
         // Also write order identity to confirm* keys (available after createOrder)
+        sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? '');
         sessionStorage.setItem('confirmOrderId', result.orderId ?? '');
-        sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? pendingOrder.orderNumber);
         sessionStorage.setItem('confirmPin', String(result.customerPin ?? ''));
       } catch (err) {
         // createOrder failed — log and navigate to confirmation with fallback /track link
