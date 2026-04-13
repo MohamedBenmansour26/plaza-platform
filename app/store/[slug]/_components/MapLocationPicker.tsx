@@ -57,7 +57,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     mapboxgl.accessToken = token;
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [-6.8, 31.5] as [number, number],
       zoom: 4.5,
     });
@@ -66,8 +66,8 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     if (!initializedRef.current) {
       initializedRef.current = true;
       map.fitBounds(
-        [[-17.5, 20.77], [-1.0, 35.92]] as [[number, number], [number, number]],
-        { padding: 40, duration: 0 },
+        [[-17.5, 20.0], [-1.0, 35.92]] as [[number, number], [number, number]],
+        { padding: 20, duration: 0 },
       );
     }
     map.getCanvas().style.cursor = 'crosshair';
