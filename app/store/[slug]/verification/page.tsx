@@ -49,6 +49,7 @@ export default function VerificationPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -245,8 +246,15 @@ export default function VerificationPage() {
         sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? pendingOrder.orderNumber);
         sessionStorage.setItem('confirmPin', String(result.customerPin ?? ''));
       } catch (err) {
-        // createOrder failed — log and navigate to confirmation with fallback /track link
-        console.error('[createOrder] DB write failed — orderId will be absent:', err);
+        const message = err instanceof Error ? err.message : 'Erreur inconnue';
+        if (message.includes('Stock insuffisant')) {
+          setStockError(message);
+          setIsProcessing(false);
+          setLoading(false);
+          return; // do NOT navigate to confirmation
+        }
+
+        // createOrder failed — navigate to confirmation with fallback /track link
         // MVP bypass: still navigate to confirmation so the customer sees their
         // order number. orderId absent → "Suivre ma commande" shows /track fallback.
         // Write cart snapshot so confirmation shows correct prices even without DB.
@@ -370,6 +378,18 @@ export default function VerificationPage() {
               >
                 {errorMessage}
               </motion.p>
+            )}
+            {stockError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm mt-4">
+                <p className="font-medium">Rupture de stock</p>
+                <p className="mt-1">{stockError}</p>
+                <a
+                  href={`/store/${slug}`}
+                  className="underline mt-2 block text-red-600"
+                >
+                  Retour à la boutique
+                </a>
+              </div>
             )}
           </div>
 

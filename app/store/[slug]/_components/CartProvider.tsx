@@ -22,7 +22,7 @@ interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'quantity'> & { stock?: number | null }, quantity?: number) => AddItemResult;
   removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, quantity: number, maxQty?: number | null) => void;
   clearCart: () => void;
   total: number;
 }
@@ -92,13 +92,11 @@ export function CartProvider({
     setItems((current) => current.filter((item) => item.id !== id));
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(id);
-      return;
-    }
+  const updateQuantity = (id: string, quantity: number, maxQty?: number | null) => {
+    if (quantity <= 0) { removeItem(id); return; }
+    const capped = maxQty != null ? Math.min(quantity, maxQty) : quantity;
     setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, quantity } : item)),
+      current.map((item) => (item.id === id ? { ...item, quantity: capped } : item)),
     );
   };
 
