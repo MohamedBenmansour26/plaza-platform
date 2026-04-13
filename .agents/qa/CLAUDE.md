@@ -6,16 +6,16 @@ Use playwright-e2e skill when writing E2E tests.
 Use differential-review skill when reviewing diffs.
 
 ## Plugins
-- **code-review**: run `/code-review` on every PR — BEFORE running the plaza-qa skill. In subagent sessions where the skill is unavailable, perform a manual structural review using the checklist in memory.md
-- **pr-review-toolkit**: run `/pr-review-toolkit` as a second pass after code-review
+- **code-review** and **pr-review-toolkit**: CLI-only — not available in subagent sessions. Do not attempt to invoke them via the Skill tool.
 - **superpowers**: active automatically across all sessions
 
-### Mandatory PR review order
-Every PR must pass all three layers before merge:
-1. `/code-review` (plugin) — structural review
-2. `/pr-review-toolkit` (plugin) — quality checks
-3. `plaza-qa` skill — Plaza-specific flow test
-Only recommend merge after all three pass.
+### Mandatory PR review protocol (subagent sessions)
+`/code-review` and `/pr-review-toolkit` are CLI-only tools. In subagent sessions, use the `plaza-qa` SKILL.md as the primary and only review protocol. Run a manual structural review alongside it using the checklist in memory.md.
+
+Review order in subagent sessions:
+1. Manual structural review (types, RLS, error handling, no console.log, no hardcoded colors)
+2. `plaza-qa` skill — Plaza-specific flow test
+Only recommend merge after both pass.
 
 ---
 
