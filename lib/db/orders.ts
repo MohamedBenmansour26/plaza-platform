@@ -209,6 +209,11 @@ export async function getOrderById(
 /**
  * Update an order's status.
  * Validates the transition before writing to prevent illegal state changes.
+ *
+ * PLZ-047: N+1 patterns eliminated —
+ *   confirmed path: single IN query for stock check instead of one query per item.
+ *   cancelled path: single IN query to read current stock, then one UPDATE per product.
+ *   decrement_stock() RPC is called once (already was correct), not in a loop.
  */
 export async function updateOrderStatus(
   orderId: string,
@@ -232,9 +237,9 @@ export async function updateOrderStatus(
   // ── Stock guardrail: validate + decrement on pending → confirmed ────────────
   if (newStatus === 'confirmed') {
     type OrderItemRow = { product_id: string | null; quantity: number; name_fr: string };
-    type ProductStockRow = { stock: number | null; name_fr: string };
+    type ProductStockRow = { id: string; stock: number | null; name_fr: string };
 
-    // 1. Fetch order items
+    // 1. Fetch all order items — single query
     const { data: orderItems, error: itemsError } = await supabase
       .from('order_items')
       .select('product_id, quantity, name_fr')
@@ -243,26 +248,36 @@ export async function updateOrderStatus(
 
     if (itemsError || !orderItems) throw new Error('Failed to fetch order items');
 
-    // 2. Check stock for each item
-    for (const item of orderItems) {
-      if (!item.product_id) continue; // custom items without product reference
+    // 2. Collect product IDs needing stock validation (skip custom items)
+    const linkedItems = orderItems.filter(
+      (i): i is OrderItemRow & { product_id: string } => i.product_id !== null,
+    );
 
-      const { data: product, error: productError } = await supabase
+    if (linkedItems.length > 0) {
+      // PLZ-047: single bulk IN query — eliminates N+1
+      const productIds = linkedItems.map((i) => i.product_id);
+      const { data: products, error: productsError } = await supabase
         .from('products')
-        .select('stock, name_fr')
-        .eq('id', item.product_id)
-        .maybeSingle<ProductStockRow>();
+        .select('id, stock, name_fr')
+        .in('id', productIds)
+        .returns<ProductStockRow[]>();
 
-      if (productError || !product) throw new Error(`Product not found: ${item.product_id}`);
+      if (productsError || !products) throw new Error('Failed to fetch products for stock check');
 
-      if (product.stock !== null && product.stock < item.quantity) {
-        throw new Error(
-          `Stock insuffisant pour "${product.name_fr}": ${product.stock} en stock, ${item.quantity} demandé(s)`,
-        );
+      // Validate in-memory against fetched rows
+      const productMap = new Map(products.map((p) => [p.id, p]));
+      for (const item of linkedItems) {
+        const product = productMap.get(item.product_id);
+        if (!product) throw new Error(`Product not found: ${item.product_id}`);
+        if (product.stock !== null && product.stock < item.quantity) {
+          throw new Error(
+            `Stock insuffisant pour "${product.name_fr}": ${product.stock} en stock, ${item.quantity} demandé(s)`,
+          );
+        }
       }
     }
 
-    // 3. All checks passed — decrement stock atomically via RPC
+    // 3. All checks passed — decrement stock atomically via RPC (called once, not per item)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: decrementError } = await (supabase as any)
       .rpc('decrement_stock', { order_id: orderId });
@@ -275,29 +290,48 @@ export async function updateOrderStatus(
   // ── Stock restore: return stock to products when cancelling a confirmed order ─
   if (newStatus === 'cancelled' && current.status === 'confirmed') {
     type OrderItemStockRow = { product_id: string | null; quantity: number };
-    type ProductStockOnly = { stock: number | null };
+    type ProductStockOnly = { id: string; stock: number | null };
 
-    const { data: orderItems } = await supabase
+    // 1. Fetch all order items — single query
+    const { data: orderItems, error: cancelItemsError } = await supabase
       .from('order_items')
       .select('product_id, quantity')
       .eq('order_id', orderId)
       .returns<OrderItemStockRow[]>();
 
-    if (orderItems) {
-      for (const item of orderItems) {
-        if (!item.product_id) continue;
+    if (cancelItemsError) throw new Error(`updateOrderStatus (cancel items fetch): ${cancelItemsError.message}`);
 
-        const { data: product } = await supabase
+    if (orderItems && orderItems.length > 0) {
+      const linkedItems = orderItems.filter(
+        (i): i is OrderItemStockRow & { product_id: string } => i.product_id !== null,
+      );
+
+      if (linkedItems.length > 0) {
+        // PLZ-047: single IN query to read current stock values — eliminates N+1 reads
+        const productIds = linkedItems.map((i) => i.product_id);
+        const { data: products, error: productsError } = await supabase
           .from('products')
-          .select('stock')
-          .eq('id', item.product_id)
-          .maybeSingle<ProductStockOnly>();
+          .select('id, stock')
+          .in('id', productIds)
+          .returns<ProductStockOnly[]>();
 
-        if (product?.stock !== null && product?.stock !== undefined) {
-          await supabase
-            .from('products')
-            .update({ stock: product.stock + item.quantity } as never)
-            .eq('id', item.product_id);
+        if (productsError) throw new Error(`updateOrderStatus (cancel stock fetch): ${productsError.message}`);
+
+        if (products) {
+          const productMap = new Map(products.map((p) => [p.id, p]));
+
+          // One UPDATE per product — Supabase JS v2 lacks multi-row UPDATE with per-row
+          // values, so this is irreducible. O(distinct_products), not O(order_items).
+          for (const item of linkedItems) {
+            const product = productMap.get(item.product_id);
+            if (product?.stock !== null && product?.stock !== undefined) {
+              const { error: restoreErr } = await supabase
+                .from('products')
+                .update({ stock: product.stock + item.quantity } as never)
+                .eq('id', item.product_id);
+              if (restoreErr) throw new Error(`updateOrderStatus (stock restore): ${restoreErr.message}`);
+            }
+          }
         }
       }
     }

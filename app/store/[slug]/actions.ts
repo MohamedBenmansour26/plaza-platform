@@ -41,17 +41,38 @@ export type CreateOrderPayload = {
 // Read helpers
 // ---------------------------------------------------------------------------
 
+// PLZ-048: Columns consumed across storefront layout, pages, and info sheet.
+// Excluded: user_id, pin_hash, recovery_email, otp_attempts,
+//           locked_until, city (deprecated), created_at, phone_verified.
+// Cast to Merchant so callers need no changes — excluded columns are never
+// accessed by any storefront component.
+const MERCHANT_STOREFRONT_SELECT =
+  'id, store_name, store_slug, description, logo_url, banner_url, primary_color, ' +
+  'category, is_online, delivery_free_threshold, phone, ' +
+  'location_lat, location_lng, location_description, ' +
+  'terminal_enabled, cmi_enabled, working_hours';
+
 export async function getMerchantBySlug(
   slug: string,
 ): Promise<Merchant | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('merchants')
-    .select('*')
+    .select(MERCHANT_STOREFRONT_SELECT)
     .eq('store_slug', slug)
-    .single<Merchant>();
-  return data ?? null;
+    .maybeSingle();
+  if (!data) return null;
+  // Cast is safe: excluded columns are never accessed by any storefront component
+  return data as unknown as Merchant;
 }
+
+// PLZ-048: Columns consumed by storefront product listing and detail views.
+// Excluded: merchant_id (filter param only, never rendered), created_at (not displayed).
+// Cast to Product so callers need no changes.
+const PRODUCT_STOREFRONT_SELECT =
+  'id, name_fr, name_ar, description, price, stock, image_url, ' +
+  'is_visible, category_l1, category_l2, category_l3, ' +
+  'original_price, discount_active';
 
 export async function getProductsByMerchant(
   merchantId: string,
@@ -59,12 +80,12 @@ export async function getProductsByMerchant(
   const supabase = await createClient();
   const { data } = await supabase
     .from('products')
-    .select('*')
+    .select(PRODUCT_STOREFRONT_SELECT)
     .eq('merchant_id', merchantId)
     .eq('is_visible', true)
-    .order('created_at', { ascending: false })
-    .returns<Product[]>();
-  return data ?? [];
+    .order('id', { ascending: false });
+  // Cast is safe: excluded columns (merchant_id, created_at) are never accessed in storefront
+  return (data as Product[]) ?? [];
 }
 
 export async function getProductById(
@@ -74,12 +95,14 @@ export async function getProductById(
   const supabase = await createClient();
   const { data } = await supabase
     .from('products')
-    .select('*')
+    .select(PRODUCT_STOREFRONT_SELECT)
     .eq('id', id)
     .eq('merchant_id', merchantId)
     .eq('is_visible', true)
-    .single<Product>();
-  return data ?? null;
+    .maybeSingle();
+  if (!data) return null;
+  // Cast is safe: excluded columns (merchant_id, created_at) are never accessed in storefront
+  return data as unknown as Product;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,18 +125,27 @@ export async function createOrder(
 
   const supabase = await createClient();
 
-  // Stock pre-flight check — throws so the caller's existing catch block handles it
-  for (const item of payload.items) {
-    const { data: product } = await supabase
-      .from('products')
-      .select('stock, name_fr')
-      .eq('id', item.productId)
-      .maybeSingle<{ stock: number | null; name_fr: string }>();
+  // PLZ-047: Stock pre-flight — single bulk IN query instead of one query per item (N+1 eliminated)
+  {
+    const productIds = payload.items.map((i) => i.productId).filter(Boolean);
+    if (productIds.length > 0) {
+      const { data: products, error: stockError } = await supabase
+        .from('products')
+        .select('id, stock, name_fr')
+        .in('id', productIds)
+        .returns<{ id: string; stock: number | null; name_fr: string }[]>();
 
-    if (product && product.stock !== null && product.stock < item.quantity) {
-      throw new Error(
-        `Stock insuffisant: ${product.name_fr} (${product.stock} disponible, ${item.quantity} demandé)`,
-      );
+      if (stockError) throw new Error(`Stock check failed: ${stockError.message}`);
+
+      const productMap = new Map((products ?? []).map((p) => [p.id, p]));
+      for (const item of payload.items) {
+        const product = productMap.get(item.productId);
+        if (product && product.stock !== null && product.stock < item.quantity) {
+          throw new Error(
+            `Stock insuffisant: ${product.name_fr} (${product.stock} disponible, ${item.quantity} demandé)`,
+          );
+        }
+      }
     }
   }
 
