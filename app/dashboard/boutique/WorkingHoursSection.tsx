@@ -77,16 +77,10 @@ export function WorkingHoursSection({ initialHours }: Props) {
         Horaires d&apos;ouverture
       </h2>
 
-      {/* Draft warning banner */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-5">
-        ⚠️ Cette fonctionnalité nécessite une mise à jour de la base de données.{' '}
-        En attente d&apos;approbation.
-      </div>
-
-      {/* Schema error banner */}
+      {/* Schema error banner — shown only if save fails unexpectedly */}
       {schemaPending && (
         <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm text-amber-900 mb-4">
-          ℹ️ Les horaires ne peuvent pas être sauvegardés — mise à jour de schema en attente.
+          ℹ️ Les horaires ne peuvent pas être sauvegardés pour le moment. Veuillez réessayer.
         </div>
       )}
 
