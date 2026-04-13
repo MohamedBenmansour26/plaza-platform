@@ -8,6 +8,7 @@ import { ArrowLeft, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCart } from '../_components/CartProvider';
 import type { CartItem } from '../_components/CartProvider';
+import { createClient } from '@/lib/supabase/client';
 import DateTimePicker from '../_components/DateTimePicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
 import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
@@ -28,7 +29,7 @@ export default function CheckoutPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const router = useRouter();
-  const { items: contextItems, total: contextTotal } = useCart();
+  const { items: contextItems, total: contextTotal, removeItem, updateQuantity } = useCart();
 
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,6 +42,7 @@ export default function CheckoutPage() {
   const [city, setCity] = useState('');
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [stockWarnings, setStockWarnings] = useState<string[]>([]);
 
   // Read cart directly from localStorage to avoid CSR hydration timing issues
   // (cart context items/total may still be [] / 0 at first render).
@@ -90,6 +92,56 @@ export default function CheckoutPage() {
     if (cartItems.length === 0) {
       router.replace(`/store/${slug}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Stock re-validation on mount — single bulk query to detect stale stock
+  useEffect(() => {
+    type ProductStockRow = { id: string; name_fr: string; stock: number | null };
+
+    const validateStock = async () => {
+      const supabase = createClient();
+      const productIds = cartItems.map((i) => i.id);
+
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name_fr, stock')
+        .in('id', productIds)
+        .returns<ProductStockRow[]>();
+
+      const productMap = new Map((products ?? []).map((p) => [p.id, p]));
+      const warnings: string[] = [];
+      const adjustedItems: CartItem[] = [];
+
+      for (const item of cartItems) {
+        const product = productMap.get(item.id);
+        if (!product) {
+          removeItem(item.id);
+          warnings.push(`${item.name} n'est plus disponible`);
+          continue;
+        }
+        if (item.quantity > (product.stock ?? Infinity)) {
+          if ((product.stock ?? 0) === 0) {
+            removeItem(item.id);
+            warnings.push(`${product.name_fr} n'est plus disponible`);
+          } else {
+            updateQuantity(item.id, product.stock!, product.stock!);
+            warnings.push(`La quantité de ${product.name_fr} a été ajustée car le stock disponible a changé.`);
+            adjustedItems.push({ ...item, quantity: product.stock! });
+          }
+        } else {
+          adjustedItems.push(item);
+        }
+      }
+
+      if (warnings.length > 0) {
+        setStockWarnings(warnings);
+        setCartItems(adjustedItems);
+        setCartTotal(adjustedItems.reduce((sum, i) => sum + i.price * i.quantity, 0));
+      }
+    };
+
+    if (cartItems.length > 0) { void validateStock(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -214,6 +266,16 @@ export default function CheckoutPage() {
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto px-4 py-6 space-y-6"
       >
+        {/* Stock warnings — shown when cart was adjusted on mount */}
+        {stockWarnings.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1">
+            <p className="text-sm font-semibold text-amber-800">Votre panier a été mis à jour</p>
+            {stockWarnings.map((msg) => (
+              <p key={msg} className="text-sm text-amber-700">• {msg}</p>
+            ))}
+          </div>
+        )}
+
         {/* Contact Information */}
         <div className="bg-white rounded-xl p-5 space-y-4 border border-[#E2E8F0]">
           <h2 className="font-bold text-[17px]">Informations de contact</h2>
