@@ -169,3 +169,29 @@ Fixed 2 P1/P0 issues during this session:
 - **UUID vs PLZ-XXX routing:** On any PR touching the order flow — verify "Suivre ma commande" routes to UUID, /track redirects to UUID, and tracking page handles both formats gracefully.
 - **Product images on tracking:** Always check the order_items query includes `products(name_fr, image_url, price)` join. Without it, images silently disappear.
 - **FloatingCartBar amount:** Check whether it shows subtotal only vs subtotal+delivery. Currently shows subtotal — note for UX review.
+
+---
+
+## PLZ-DB-001 — Backend audit: P0 data leak + CartItem stock — 13 April 2026
+
+**PR #37** — feat/DB-001-backend-audit-fixes — **MERGED** (squash `9161d2e`)
+
+**Verdict:** APPROVED — merged
+
+**Phase 1 (code review):** PASS
+- tsc: EXIT:0
+- No console.log, no hardcoded colors
+- `getOrderByNumber` + `getOrderById` in `app/store/[slug]/actions.ts`: merchantId param added, `.eq('merchant_id', merchantId)` filter applied, `select('*')` replaced with `STOREFRONT_ORDER_SELECT` constant
+- Caller audit: single call site each (commande/[id]/page.tsx), merchant resolved before order query, notFound() guard present
+- CartProvider: `stock: number | null` on CartItem, `addItem` stores stock, `updateQuantity` accepts `maxQty` param
+- CartDrawer: both +/− updateQuantity calls pass `item.stock ?? null`
+
+**Phase 2 (runtime test):** Not required — DB-layer-only change, no UI flow affected beyond stock cap which was covered in prior round
+
+**Bugs fixed by this PR:** 2 P0 issues found by Youssef
+- P0: Cross-merchant order data leak (storefront actions)
+- P0: CartItem stock field inactive (updateQuantity cap silently skipped)
+
+**Checklist additions:**
+- **Storefront order query functions**: always verify `getOrderByNumber` / `getOrderById` include `merchantId` filter when signature changes
+- **CartItem interface changes**: when new fields added to CartItem, verify all downstream consumers (CartDrawer, confirmation, etc.) pass the field correctly
