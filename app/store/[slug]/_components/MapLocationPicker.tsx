@@ -66,8 +66,8 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     if (!initializedRef.current) {
       initializedRef.current = true;
       map.fitBounds(
-        [[-17.5, 20.77], [-1.0, 35.92]] as [[number, number], [number, number]],
-        { padding: 40, duration: 0 },
+        [[-17.5, 20.0], [-1.0, 35.92]] as [[number, number], [number, number]],
+        { padding: 20, duration: 0 },
       );
     }
     map.getCanvas().style.cursor = 'crosshair';
