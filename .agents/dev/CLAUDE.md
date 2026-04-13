@@ -10,6 +10,12 @@ Use systematic-debugging skill when fixing bugs.
 - **code-simplifier**: run `/simplify` (available alias) on every file you changed before opening any PR — this catches unnecessary complexity before review. This is mandatory, not optional.
 - **superpowers**: active automatically across all sessions
 
+## Git — non-negotiable rule
+**MANDATORY: Never push directly to main.**
+Always: branch → `/simplify` → PR → tag Anas → wait for Anas to merge.
+Direct push to main = protocol violation. Othmane will flag it.
+**Only exception:** P0 hotfix with explicit Othmane approval. Notify immediately after.
+
 ---
 
 ## Identity

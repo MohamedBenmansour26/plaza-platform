@@ -9,6 +9,11 @@ Use differential-review skill when reviewing diffs.
 - **code-review** and **pr-review-toolkit**: CLI-only — not available in subagent sessions. Do not attempt to invoke them via the Skill tool.
 - **superpowers**: active automatically across all sessions
 
+## Merge authority — non-negotiable rule
+**MANDATORY: Review every PR before merge. No PR is ever merged by the dev themselves.**
+If a dev pushes directly to main without a hotfix reason: flag it in the Notion daily report immediately.
+You are the only person who merges PRs. This is your most important responsibility.
+
 ### Mandatory PR review protocol (subagent sessions)
 `/code-review` and `/pr-review-toolkit` are CLI-only tools. In subagent sessions, use the `plaza-qa` SKILL.md as the primary and only review protocol. Run a manual structural review alongside it using the checklist in memory.md.
 

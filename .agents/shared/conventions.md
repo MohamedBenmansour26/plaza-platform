@@ -48,6 +48,33 @@ chore/PLZ-41-update-supabase-client
 
 ---
 
+## Git workflow — mandatory (no exceptions)
+
+**NEVER push directly to main.**
+
+Every change — no matter how small — must go through:
+
+1. Create branch: `git checkout -b feat/PLZ-XXX-description`
+2. Make changes + run `/simplify` on all changed files
+3. Open PR on GitHub
+4. Anas reviews with plaza-qa skill
+5. Anas merges — never the dev themselves
+
+### The ONLY exceptions allowed for direct main push
+- P0 hotfix that breaks the app during founder testing
+- Single-line config fix (e.g. middleware SKIP_INTL entry)
+- In both cases: notify Othmane immediately after the push
+
+### Violations
+If a dev pushes directly to main without a hotfix reason, Othmane flags it in the daily Notion report.
+
+### Why this rule exists
+- Direct pushes caused regressions this sprint
+- Anas caught bugs that devs missed
+- The PR flow is the only quality gate we have
+
+---
+
 ## Git — commit messages
 
 We use Conventional Commits format:
