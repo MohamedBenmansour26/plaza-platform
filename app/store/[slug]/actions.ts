@@ -92,6 +92,17 @@ export async function getProductById(
 export async function createOrder(
   payload: CreateOrderPayload,
 ): Promise<{ orderNumber: string; customerPin: number; orderId: string }> {
+  if (payload.items.length === 0) {
+    throw new Error('Panier vide');
+  }
+  const computedSubtotal = payload.items.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0,
+  );
+  if (computedSubtotal <= 0) {
+    throw new Error('Total invalide');
+  }
+
   const supabase = await createClient();
 
   // Stock pre-flight check — throws so the caller's existing catch block handles it
