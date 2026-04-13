@@ -82,6 +82,7 @@ export function ProductDetailClient({
       : null;
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const atStockLimit = product.stock !== null && quantity >= product.stock;
 
   // Breadcrumb parts
   const breadcrumbParts = [product.category_l1, product.category_l2, product.category_l3].filter(
@@ -90,14 +91,16 @@ export function ProductDetailClient({
 
   function handleAddToCart() {
     if (outOfStock) return;
-    for (let i = 0; i < quantity; i++) {
-      addItem({
+    addItem(
+      {
         id: product.id,
         name: product.name_fr,
         price: priceMAD,
         image: product.image_url ?? '',
-      });
-    }
+        stock: product.stock,
+      },
+      quantity,
+    );
   }
 
   function handleBuyNow() {
@@ -255,13 +258,20 @@ export function ProductDetailClient({
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-12 h-12 flex items-center justify-center hover:bg-gray-50"
+                  onClick={() => {
+                    if (product.stock !== null && quantity >= product.stock) return;
+                    setQuantity(quantity + 1);
+                  }}
+                  disabled={atStockLimit}
+                  className="w-12 h-12 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-5 h-5 text-[#78716C]" />
                 </button>
               </div>
             </div>
+            {atStockLimit && (
+              <p className="text-xs text-amber-600 mt-1">Plus que {product.stock} en stock</p>
+            )}
           </div>
 
           {/* Desktop Action Buttons */}
@@ -378,13 +388,20 @@ export function ProductDetailClient({
                 {quantity}
               </span>
               <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-12 h-12 flex items-center justify-center hover:bg-gray-50"
+                onClick={() => {
+                  if (product.stock !== null && quantity >= product.stock) return;
+                  setQuantity(quantity + 1);
+                }}
+                disabled={atStockLimit}
+                className="w-12 h-12 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus className="w-5 h-5 text-[#78716C]" />
               </button>
             </div>
           </div>
+          {atStockLimit && (
+            <p className="text-xs text-amber-600 mt-1">Plus que {product.stock} en stock</p>
+          )}
         </div>
 
         {/* Trust Badges */}

@@ -13,6 +13,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const onLocationSelectRef = useRef(onLocationSelect);
+  const initializedRef = useRef(false);
   const [picked, setPicked] = useState(false);
   const [locating, setLocating] = useState(false);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
@@ -62,7 +63,13 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     });
     mapRef.current = map;
 
-    map.fitBounds([[-17.5, 20.5], [-0.5, 36.5]] as [[number, number], [number, number]], { padding: 20, duration: 0 });
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      map.fitBounds(
+        [[-17.5, 20.77], [-1.0, 35.92]] as [[number, number], [number, number]],
+        { padding: 40, duration: 0 },
+      );
+    }
     map.getCanvas().style.cursor = 'crosshair';
 
     map.on('click', async (e) => {
