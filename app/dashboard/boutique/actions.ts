@@ -118,6 +118,18 @@ export async function updateBoutique(formData: FormData): Promise<void> {
   revalidatePath('/dashboard');
 }
 
+// ─── Terminal Enabled Action ───────────────────────────────────────────────────
+
+export async function updateTerminalEnabled(enabled: boolean): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
+  const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', user.id).maybeSingle<Pick<Merchant, 'id'>>();
+  if (!merchant) redirect('/onboarding');
+  await supabase.from('merchants').update({ terminal_enabled: enabled } as never).eq('id', merchant.id);
+  revalidatePath('/dashboard/boutique');
+}
+
 // ─── Working Hours Action ──────────────────────────────────────────────────────
 
 export type DaySchedule = { open: boolean; from: string; to: string }

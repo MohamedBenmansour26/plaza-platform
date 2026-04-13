@@ -69,6 +69,11 @@ export type Database = {
           location_lat:             number | null
           location_lng:             number | null
           location_description:     string | null
+          // Payment guardrails (migration PLZ-043 — pending approval)
+          terminal_enabled:         boolean
+          phone_verified:           boolean
+          // CMI per-merchant flag (migration PLZ-044 — pending approval)
+          cmi_enabled:              boolean
         }
         Insert: {
           id?:                      string
@@ -92,6 +97,9 @@ export type Database = {
           location_lat?:            number | null
           location_lng?:            number | null
           location_description?:    string | null
+          terminal_enabled?:        boolean
+          phone_verified?:          boolean
+          cmi_enabled?:             boolean
         }
         Update: {
           id?:                      string
@@ -115,6 +123,9 @@ export type Database = {
           location_lat?:            number | null
           location_lng?:            number | null
           location_description?:    string | null
+          terminal_enabled?:        boolean
+          phone_verified?:          boolean
+          cmi_enabled?:             boolean
         }
         Relationships: [
           {

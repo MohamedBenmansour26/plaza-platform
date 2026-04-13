@@ -16,10 +16,11 @@ import type { Merchant } from '@/types/supabase';
 import type { PaymentMethod } from '@/types/supabase';
 
 
-type UIPaymentMethod = 'cash' | 'card-delivery';
+type UIPaymentMethod = 'cash' | 'card-delivery' | 'online';
 
 function uiPaymentToDb(method: UIPaymentMethod): PaymentMethod {
   if (method === 'cash') return 'cod';
+  if (method === 'online') return 'card';
   return 'terminal';
 }
 
@@ -83,6 +84,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     getMerchantBySlug(slug).then(setMerchant);
   }, [slug]);
+
+  // Redirect to store if cart is empty — prevents zero-item orders
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      router.replace(`/store/${slug}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // "Acheter maintenant" direct-buy: sessionStorage takes priority
@@ -296,43 +305,51 @@ export default function CheckoutPage() {
             <span className="font-medium text-[#1C1917]">Paiement à la livraison</span>
           </label>
 
-          <label
-            className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-              paymentMethod === 'card-delivery'
-                ? ''
-                : 'border-[#E2E8F0] hover:border-[var(--color-primary)]'
-            }`}
-            style={paymentMethod === 'card-delivery' ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
-          >
-            <input
-              type="radio"
-              name="payment"
-              value="card-delivery"
-              checked={paymentMethod === 'card-delivery'}
-              onChange={() => setPaymentMethod('card-delivery')}
-              className="w-4 h-4"
-              style={{ accentColor: 'var(--color-primary)' }}
-            />
-            <CreditCard className="w-5 h-5 text-[#78716C]" />
-            <span className="font-medium text-[#1C1917]">Carte à la livraison</span>
-          </label>
+          {merchant?.terminal_enabled === true && (
+            <label
+              className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                paymentMethod === 'card-delivery'
+                  ? ''
+                  : 'border-[#E2E8F0] hover:border-[var(--color-primary)]'
+              }`}
+              style={paymentMethod === 'card-delivery' ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
+            >
+              <input
+                type="radio"
+                name="payment"
+                value="card-delivery"
+                checked={paymentMethod === 'card-delivery'}
+                onChange={() => setPaymentMethod('card-delivery')}
+                className="w-4 h-4"
+                style={{ accentColor: 'var(--color-primary)' }}
+              />
+              <CreditCard className="w-5 h-5 text-[#78716C]" />
+              <span className="font-medium text-[#1C1917]">Carte à la livraison</span>
+            </label>
+          )}
 
-          {/* Online payment — coming soon */}
-          <div className="flex items-center gap-3 p-3 border-2 border-[#E2E8F0] rounded-lg cursor-not-allowed opacity-60">
-            <input
-              type="radio"
-              name="payment"
-              value="online"
-              disabled
-              className="w-4 h-4"
-              style={{ accentColor: 'var(--color-primary)' }}
-            />
-            <Smartphone className="w-5 h-5 text-[#78716C]" />
-            <span className="font-medium text-[#1C1917] flex-1">Paiement en ligne (via CMI)</span>
-            <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-              Bientôt disponible
-            </span>
-          </div>
+          {merchant?.cmi_enabled === true && (
+            <label
+              className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                paymentMethod === 'online'
+                  ? ''
+                  : 'border-[#E2E8F0] hover:border-[var(--color-primary)]'
+              }`}
+              style={paymentMethod === 'online' ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
+            >
+              <input
+                type="radio"
+                name="payment"
+                value="online"
+                checked={paymentMethod === 'online'}
+                onChange={() => setPaymentMethod('online')}
+                className="w-4 h-4"
+                style={{ accentColor: 'var(--color-primary)' }}
+              />
+              <Smartphone className="w-5 h-5 text-[#78716C]" />
+              <span className="font-medium text-[#1C1917]">Paiement en ligne (via CMI)</span>
+            </label>
+          )}
 
         </div>
 
