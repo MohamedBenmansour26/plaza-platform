@@ -291,7 +291,8 @@ export default function VerificationPage() {
         <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-stone-500 text-sm">Confirmation de votre commande...</p>
+            <p className="text-stone-700 text-sm font-medium">Confirmation de votre commande...</p>
+            <p className="text-stone-500 text-xs mt-1">Veuillez patienter quelques instants</p>
           </div>
         </div>
       )}

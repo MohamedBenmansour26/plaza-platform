@@ -43,6 +43,8 @@ export default function ConfirmationPage() {
   const [confirmSubtotal, setConfirmSubtotal] = useState(0);
   const [confirmDelivery, setConfirmDelivery] = useState(30);
   const [confirmTotal, setConfirmTotal] = useState(0);
+  const [confirmDate, setConfirmDate] = useState('');
+  const [confirmSlot, setConfirmSlot] = useState('');
 
   useEffect(() => {
     // ── Read confirm* keys (written by verification/page.tsx before createOrder) ──
@@ -54,10 +56,14 @@ export default function ConfirmationPage() {
     const ssOrderId = sessionStorage.getItem('confirmOrderId');
     const ssOrderNumber = sessionStorage.getItem('confirmOrderNumber');
     const ssPin = sessionStorage.getItem('confirmPin');
+    const ssDate = sessionStorage.getItem('confirmDate') || sessionStorage.getItem('deliveryDate') || '';
+    const ssSlot = sessionStorage.getItem('confirmSlot') || sessionStorage.getItem('deliverySlot') || '';
 
     if (ssSubtotal) setConfirmSubtotal(parseFloat(ssSubtotal));
     if (ssDelivery) setConfirmDelivery(parseFloat(ssDelivery));
     if (ssTotal) setConfirmTotal(parseFloat(ssTotal));
+    if (ssDate) setConfirmDate(ssDate);
+    if (ssSlot) setConfirmSlot(ssSlot);
 
     // ── Read order metadata from plaza_pending_order ──
     // Used for order number, orderId, customerPin, delivery date/slot display.
@@ -128,7 +134,7 @@ export default function ConfirmationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const orderNumber = order.orderNumber ?? 'PLZ-???';
+  const orderNumber = order.orderNumber || '';
   const deliveryFee = confirmDelivery;
 
   const handleCopy = async () => {
@@ -245,28 +251,33 @@ export default function ConfirmationPage() {
         )}
 
         {/* Delivery Time */}
-        {(order.deliveryDisplayDate || order.deliverySlot) && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="rounded-xl border px-4 py-3 flex items-center justify-center gap-2"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 40%, transparent)' }}
-          >
-            <Clock className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
-              {order.deliveryDisplayDate && order.deliverySlot
-                ? (() => {
-                    const [start, end] = order.deliverySlot.split('-');
-                    const fmt = (t: string) => t.replace(':', 'h');
-                    return `Livraison le ${order.deliveryDisplayDate} entre ${fmt(start)} et ${fmt(end)}`;
-                  })()
-                : order.deliveryDisplayDate
-                  ? `Livraison le ${order.deliveryDisplayDate}`
-                  : 'Livraison planifiée'}
-            </span>
-          </motion.div>
-        )}
+        {(() => {
+          const displayDate = order.deliveryDisplayDate || confirmDate;
+          const slot = order.deliverySlot || confirmSlot;
+          if (!displayDate && !slot) return null;
+          const fmt = (t: string) => t.replace(':', 'h').replace(/^(\d+h)00$/, '$1');
+          let label = 'Livraison planifiée';
+          if (displayDate && slot) {
+            const [start, end] = slot.split('-');
+            label = `Livraison le ${displayDate} entre ${fmt(start)} et ${fmt(end)}`;
+          } else if (displayDate) {
+            label = `Livraison le ${displayDate}`;
+          }
+          return (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="rounded-xl border px-4 py-3 flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 40%, transparent)' }}
+            >
+              <Clock className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
+                {label}
+              </span>
+            </motion.div>
+          );
+        })()}
 
         {/* Order Summary */}
         <motion.div
