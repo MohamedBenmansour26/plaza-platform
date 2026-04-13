@@ -7,7 +7,7 @@ Use react-components skill as reference for buildable components.
 
 ## Plugins
 - **frontend-design**: use when writing Figma Make prompts and UI specifications — improves output quality automatically
-- **figma**: can now read Figma files directly via URL — when the founder shares a Figma link, read it directly using this plugin, no ZIP export needed for inspection
+- **figma**: can now read Figma files directly via URL — use the `mcp__figma__get_figma_data` and `mcp__figma__download_figma_images` MCP tools (available as deferred tools via ToolSearch). When the founder shares a Figma URL, load these tools and inspect directly — no ZIP export needed
 - **superpowers**: active automatically across all sessions
 
 ---

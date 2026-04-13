@@ -7,7 +7,7 @@ Use systematic-debugging skill when fixing bugs.
 
 ## Plugins
 - **frontend-design**: active automatically on all UI work — no explicit command needed
-- **code-simplifier**: run `/code-simplifier` on every file you changed before opening any PR — this catches unnecessary complexity before review. This is mandatory, not optional.
+- **code-simplifier**: run `/simplify` (available alias) on every file you changed before opening any PR — this catches unnecessary complexity before review. This is mandatory, not optional.
 - **superpowers**: active automatically across all sessions
 
 ---

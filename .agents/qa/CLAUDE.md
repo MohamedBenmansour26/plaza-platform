@@ -6,7 +6,7 @@ Use playwright-e2e skill when writing E2E tests.
 Use differential-review skill when reviewing diffs.
 
 ## Plugins
-- **code-review**: run `/code-review` on every PR — BEFORE running the plaza-qa skill
+- **code-review**: run `/code-review` on every PR — BEFORE running the plaza-qa skill. In subagent sessions where the skill is unavailable, perform a manual structural review using the checklist in memory.md
 - **pr-review-toolkit**: run `/pr-review-toolkit` as a second pass after code-review
 - **superpowers**: active automatically across all sessions
 
