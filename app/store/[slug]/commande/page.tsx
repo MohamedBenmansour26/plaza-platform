@@ -277,6 +277,7 @@ export default function CheckoutPage() {
           <DateTimePicker
             value={deliveryDateTime}
             onChange={setDeliveryDateTime}
+            workingHours={merchant?.working_hours ?? null}
           />
         </div>
 

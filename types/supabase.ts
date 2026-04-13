@@ -74,6 +74,8 @@ export type Database = {
           phone_verified:           boolean
           // CMI per-merchant flag (migration PLZ-044 — pending approval)
           cmi_enabled:              boolean
+          // Working hours (migration PLZ-049)
+          working_hours:            Record<string, { open: boolean; from?: string; to?: string }> | null
         }
         Insert: {
           id?:                      string
@@ -100,6 +102,7 @@ export type Database = {
           terminal_enabled?:        boolean
           phone_verified?:          boolean
           cmi_enabled?:             boolean
+          working_hours?:           Record<string, { open: boolean; from?: string; to?: string }> | null
         }
         Update: {
           id?:                      string
@@ -126,6 +129,7 @@ export type Database = {
           terminal_enabled?:        boolean
           phone_verified?:          boolean
           cmi_enabled?:             boolean
+          working_hours?:           Record<string, { open: boolean; from?: string; to?: string }> | null
         }
         Relationships: [
           {
