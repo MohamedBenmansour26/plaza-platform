@@ -12,10 +12,11 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Lock,
 } from 'lucide-react';
 import type { Merchant, DeliveryZone } from '@/types/supabase';
 import { createClient } from '@/lib/supabase/client';
-import { updateBoutique } from './actions';
+import { updateBoutique, updateTerminalEnabled } from './actions';
 import { DeliveryZones } from './DeliveryZones';
 import { WorkingHoursSection } from './WorkingHoursSection';
 import type { WorkingHours } from './actions';
@@ -79,6 +80,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   // Status
   const [isOnline, setIsOnline] = useState(merchant.is_online ?? true);
 
+  // Payment modes
+  const [terminalEnabled, setTerminalEnabled] = useState(merchant.terminal_enabled ?? false);
+
   // Working hours — column is DRAFT (not yet in DB)
   const DEFAULT_WORKING_HOURS: WorkingHours = {
     lundi:    { open: true,  from: '09:00', to: '18:00' },
@@ -113,15 +117,22 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       return;
     }
 
-    // Turning on — re-fetch saved merchant record from DB to verify saved state
+    // Re-fetch saved merchant record + product count in parallel to verify saved state
     // (prevents gap where form is filled but not yet saved)
     const supabase = createClient();
-    type GateFields = Pick<Merchant, 'logo_url' | 'description' | 'category' | 'location_lat'>;
-    const gateResult = await supabase
-      .from('merchants')
-      .select('logo_url, description, category, location_lat')
-      .eq('id', merchant.id)
-      .maybeSingle();
+    type GateFields = Pick<Merchant, 'logo_url' | 'description' | 'category' | 'location_lat' | 'phone_verified'>;
+    const [gateResult, { count: visibleCount }] = await Promise.all([
+      supabase
+        .from('merchants')
+        .select('logo_url, description, category, location_lat, phone_verified')
+        .eq('id', merchant.id)
+        .maybeSingle(),
+      supabase
+        .from('products')
+        .select('id', { count: 'exact', head: true })
+        .eq('merchant_id', merchant.id)
+        .eq('is_visible', true),
+    ]);
     const saved = gateResult.data as GateFields | null;
 
     const missing: { label: string; href: string }[] = [];
@@ -138,14 +149,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     if (saved?.location_lat === null || saved?.location_lat === undefined) {
       missing.push({ label: 'Localisation — épingle sur la carte', href: '#location' });
     }
-
-    // Check visible products
-    const { count: visibleCount } = await supabase
-      .from('products')
-      .select('id', { count: 'exact', head: true })
-      .eq('merchant_id', merchant.id)
-      .eq('is_visible', true);
-
+    if (!saved?.phone_verified) {
+      missing.push({ label: 'Vérifiez votre numéro de téléphone', href: '/dashboard/compte' });
+    }
     if ((visibleCount ?? 0) < 1) {
       missing.push({ label: 'Au moins 1 produit publié', href: '/dashboard/produits' });
     }
@@ -582,6 +588,50 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     </div>
   );
 
+  const paymentModesSection = (
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      <h2 className="text-base font-semibold text-[#1C1917] pb-3 mb-4 border-b border-[#E2E8F0]">
+        Modes de paiement acceptés
+      </h2>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between py-2">
+          <span className="text-sm text-[#1C1917]">Paiement à la livraison (espèces)</span>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-[#16A34A]" />
+            <span className="text-xs font-medium text-[#16A34A]">Activé</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between py-2 border-t border-[#F1F5F9]">
+          <span className="text-sm text-[#1C1917]">Terminal carte</span>
+          <Toggle
+            checked={terminalEnabled}
+            onChange={() => {
+              const next = !terminalEnabled;
+              setTerminalEnabled(next);
+              startTransition(() => updateTerminalEnabled(next));
+            }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between py-2 border-t border-[#F1F5F9]">
+          <span className="text-sm text-[#1C1917]">Carte en ligne (CMI)</span>
+          {merchant.cmi_enabled ? (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-[#16A34A]" />
+              <span className="text-xs font-medium text-[#16A34A]">Activé par Plaza</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-[#A8A29E]" />
+              <span className="text-xs font-medium text-[#78716C]">Non activé</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   const previewPanel = (
     <div className="hidden md:block w-[300px] flex-shrink-0">
       <div className="bg-white rounded-xl shadow-sm p-4 sticky top-8">
@@ -686,6 +736,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
         <DeliveryZones initialZones={deliveryZones} />
         {statusSection}
         {workingHoursSection}
+        {paymentModesSection}
       </div>
 
       <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
@@ -727,6 +778,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             <DeliveryZones initialZones={deliveryZones} />
             {statusSection}
             {workingHoursSection}
+            {paymentModesSection}
 
             <div className="pt-2">
               <button
