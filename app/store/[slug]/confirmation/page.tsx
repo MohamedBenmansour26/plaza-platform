@@ -258,8 +258,14 @@ export default function ConfirmationPage() {
           const fmt = (t: string) => t.replace(':', 'h').replace(/^(\d+h)00$/, '$1');
           let label = 'Livraison planifiée';
           if (displayDate && slot) {
-            const [start, end] = slot.split('-');
-            label = `Livraison le ${displayDate} entre ${fmt(start)} et ${fmt(end)}`;
+            const parts = slot.split('-');
+            const start = parts[0];
+            const end = parts[1];
+            if (start && end) {
+              label = `Livraison le ${displayDate} entre ${fmt(start)} et ${fmt(end)}`;
+            } else if (start) {
+              label = `Livraison le ${displayDate} à partir de ${fmt(start)}`;
+            }
           } else if (displayDate) {
             label = `Livraison le ${displayDate}`;
           }
