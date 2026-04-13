@@ -274,6 +274,7 @@ export default function VerificationPage() {
       setError(true);
       setErrorMessage('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
+      setIsProcessing(false);
     }
   };
 
