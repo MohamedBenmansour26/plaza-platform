@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { applyMoroccoMapStyle, MOROCCO_DEFAULT_VIEW } from '@/lib/mapbox-utils';
 
 type Props = {
   lat: number | null;
@@ -57,13 +58,12 @@ export default function MapboxMap({ lat, lng, onLocationChange }: Props) {
 
     mapRef.current = map;
 
+    map.on('load', () => applyMoroccoMapStyle(map));
+
     if (!initializedRef.current) {
       initializedRef.current = true;
       if (!(lat && lng)) {
-        map.fitBounds(
-          [[-17.5, 20.0], [-1.0, 35.92]] as [[number, number], [number, number]],
-          { padding: 20, duration: 0 },
-        );
+        map.jumpTo(MOROCCO_DEFAULT_VIEW);
       }
     }
 
