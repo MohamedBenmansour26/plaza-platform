@@ -133,9 +133,35 @@ export default function VerificationPage() {
     setError(false);
 
     try {
-      // Use sessionStorage direct-buy items if CartProvider context is empty
-      const items = cartContextItems.length > 0 ? cartContextItems : directBuyItems;
-      const total = cartContextTotal > 0 ? cartContextTotal : directBuyTotal;
+      // Resolve cart items: prefer sessionStorage direct-buy (written synchronously
+      // by handleBuyNow) so we never depend on potentially-stale React state.
+      // Fall back to CartProvider context for the normal add-to-cart flow.
+      const ssItems = sessionStorage.getItem('cartItems');
+      const ssSlug = sessionStorage.getItem('cartSlug');
+      const ssSubtotal = sessionStorage.getItem('subtotal');
+      const directBuyFromStorage =
+        ssItems && ssSlug === slug
+          ? (JSON.parse(ssItems) as CartItem[])
+          : null;
+
+      const items: CartItem[] =
+        directBuyFromStorage && directBuyFromStorage.length > 0
+          ? directBuyFromStorage
+          : cartContextItems.length > 0
+            ? cartContextItems
+            : directBuyItems;
+
+      const total: number =
+        directBuyFromStorage && directBuyFromStorage.length > 0
+          ? ssSubtotal
+            ? parseFloat(ssSubtotal)
+            : directBuyFromStorage.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0,
+              )
+          : cartContextTotal > 0
+            ? cartContextTotal
+            : directBuyTotal;
 
       const payload: CreateOrderPayload = {
         orderNumber: pendingOrder.orderNumber,
