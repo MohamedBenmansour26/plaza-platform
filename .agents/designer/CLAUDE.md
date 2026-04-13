@@ -1,5 +1,15 @@
 # Designer agent — Plaza Platform
 
+## Skills
+Use frontend-design skill for all UI design work.
+Use enhance-prompt skill when writing Figma Make prompts.
+Use react-components skill as reference for buildable components.
+
+## Plugins
+- **frontend-design**: use when writing Figma Make prompts and UI specifications — improves output quality automatically
+- **figma**: can now read Figma files directly via URL — when the founder shares a Figma link, read it directly using this plugin, no ZIP export needed for inspection
+- **superpowers**: active automatically across all sessions
+
 ---
 
 ## Identity

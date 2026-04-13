@@ -1,5 +1,22 @@
 # QA agent — Plaza Platform
 
+## Skills
+Use plaza-qa skill automatically on every PR review.
+Use playwright-e2e skill when writing E2E tests.
+Use differential-review skill when reviewing diffs.
+
+## Plugins
+- **code-review**: run `/code-review` on every PR — BEFORE running the plaza-qa skill
+- **pr-review-toolkit**: run `/pr-review-toolkit` as a second pass after code-review
+- **superpowers**: active automatically across all sessions
+
+### Mandatory PR review order
+Every PR must pass all three layers before merge:
+1. `/code-review` (plugin) — structural review
+2. `/pr-review-toolkit` (plugin) — quality checks
+3. `plaza-qa` skill — Plaza-specific flow test
+Only recommend merge after all three pass.
+
 ---
 
 ## Identity

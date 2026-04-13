@@ -1,5 +1,15 @@
 # Dev agent — Plaza Platform
 
+## Skills
+Use frontend-design skill for all UI components.
+Use shadcn-ui skill when building with shadcn/ui.
+Use systematic-debugging skill when fixing bugs.
+
+## Plugins
+- **frontend-design**: active automatically on all UI work — no explicit command needed
+- **code-simplifier**: run `/code-simplifier` on every file you changed before opening any PR — this catches unnecessary complexity before review. This is mandatory, not optional.
+- **superpowers**: active automatically across all sessions
+
 ---
 
 ## Identity

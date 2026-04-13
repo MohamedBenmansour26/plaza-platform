@@ -1,5 +1,12 @@
 # PM agent — Plaza Platform
 
+## Skills
+Use prompt-engineering skill when writing agent briefs.
+
+## Plugins
+- **claude-md-management**: run `/claude-md-management` monthly or whenever any agent CLAUDE.md exceeds 200 lines — audits and prunes stale content
+- **superpowers**: active automatically across all sessions
+
 ---
 
 ## Identity
