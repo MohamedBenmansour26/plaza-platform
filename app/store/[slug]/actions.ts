@@ -42,15 +42,15 @@ export type CreateOrderPayload = {
 // ---------------------------------------------------------------------------
 
 // PLZ-048: Columns consumed across storefront layout, pages, and info sheet.
-// Excluded: user_id, banner_url, pin_hash, recovery_email, otp_attempts,
+// Excluded: user_id, pin_hash, recovery_email, otp_attempts,
 //           locked_until, city (deprecated), created_at, phone_verified.
 // Cast to Merchant so callers need no changes — excluded columns are never
 // accessed by any storefront component.
 const MERCHANT_STOREFRONT_SELECT =
-  'id, store_name, store_slug, description, logo_url, primary_color, ' +
+  'id, store_name, store_slug, description, logo_url, banner_url, primary_color, ' +
   'category, is_online, delivery_free_threshold, phone, ' +
   'location_lat, location_lng, location_description, ' +
-  'terminal_enabled, cmi_enabled';
+  'terminal_enabled, cmi_enabled, working_hours';
 
 export async function getMerchantBySlug(
   slug: string,
