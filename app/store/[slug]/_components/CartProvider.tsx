@@ -14,6 +14,7 @@ export interface CartItem {
   price: number; // MAD (already divided by 100)
   quantity: number;
   image: string;
+  stock: number | null; // null = unlimited; activates client-side cap in CartDrawer
 }
 
 export type AddItemResult = { blocked: true; reason: 'stock' } | { blocked: false };
@@ -59,9 +60,10 @@ export function CartProvider({
     newItem: Omit<CartItem, 'quantity'> & { stock?: number | null },
     quantity: number = 1,
   ): AddItemResult => {
-    // Destructure stock out so CartItem shape stays clean
-    const { stock, ...itemData } = newItem;
-    const maxQty = stock ?? Infinity; // null/undefined stock = unlimited
+    // Destructure stock so it is stored on the CartItem for client-side cap (PLZ-045).
+    const { stock: stockRaw, ...itemData } = newItem;
+    const stock = stockRaw ?? null; // normalise undefined → null
+    const maxQty = stock ?? Infinity; // null = unlimited
 
     let result: AddItemResult = { blocked: false };
 
@@ -82,7 +84,7 @@ export function CartProvider({
             : item,
         );
       }
-      return [...current, { ...itemData, quantity: allowedQty }];
+      return [...current, { ...itemData, stock, quantity: allowedQty }];
     });
 
     return result;

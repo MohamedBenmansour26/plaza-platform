@@ -12,10 +12,15 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 export default async function OrderStatusPage({ params }: Props) {
   const { slug, id } = await params;
   const isUuid = UUID_REGEX.test(id);
-  const [merchant, order] = await Promise.all([
-    getMerchantBySlug(slug),
-    isUuid ? getOrderById(id) : getOrderByNumber(id),
-  ]);
+
+  // Merchant must resolve first — its id is used to gate the order query (P0 fix).
+  const merchant = await getMerchantBySlug(slug);
+  if (!merchant) notFound();
+
+  const order = isUuid
+    ? await getOrderById(id, merchant.id)
+    : await getOrderByNumber(id, merchant.id);
+
   if (!order) notFound();
   return (
     <OrderStatusClient order={order} merchantPhone={merchant?.phone ?? null} />

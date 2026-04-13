@@ -94,7 +94,7 @@ function CartContent({
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className="flex items-center border border-[#E2E8F0] rounded-lg overflow-hidden">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1, null)}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1, item.stock ?? null)}
                         className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
                       >
                         <Minus className="w-3.5 h-3.5 text-[#78716C]" />
@@ -102,9 +102,8 @@ function CartContent({
                       <span className="w-8 text-center text-sm font-semibold text-[#1C1917]">
                         {item.quantity}
                       </span>
-                      {/* TODO: stock not on CartItem — cap relies on server-side pre-flight only */}
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1, null)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.stock ?? null)}
                         className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
                       >
                         <Plus className="w-3.5 h-3.5 text-[#78716C]" />
