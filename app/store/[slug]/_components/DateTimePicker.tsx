@@ -1,31 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns/format';
 import { fr } from 'date-fns/locale/fr';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar as CalendarIcon, Clock, ChevronRight } from 'lucide-react';
 
+type DayConfig = { open: boolean; from?: string; to?: string };
+
 interface DateTimePickerProps {
   value?: { date?: Date; time?: string };
   onChange: (value: { date: Date; time: string }) => void;
+  workingHours?: Record<string, DayConfig> | null;
 }
 
-const timeSlots = [
+// All default hourly slots 09:00–20:00 (last slot starts at 19:00, ends 20:00)
+const ALL_TIME_SLOTS = [
   '09:00', '10:00', '11:00', '12:00', '13:00', '14:00',
-  '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
+  '15:00', '16:00', '17:00', '18:00', '19:00',
 ];
 
-export default function DateTimePicker({ value, onChange }: DateTimePickerProps) {
+const DAY_NAMES_FR = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+
+function getSlotsForDate(
+  date: Date | undefined,
+  workingHours: Record<string, DayConfig> | null | undefined,
+): { slots: string[]; closed: boolean } {
+  if (!date) return { slots: ALL_TIME_SLOTS, closed: false };
+
+  if (workingHours) {
+    const dayName = DAY_NAMES_FR[date.getDay()];
+    const dayConfig = workingHours[dayName];
+
+    if (dayConfig !== undefined) {
+      if (dayConfig.open === false) {
+        return { slots: [], closed: true };
+      }
+      if (dayConfig.open === true && dayConfig.from && dayConfig.to) {
+        const filtered = ALL_TIME_SLOTS.filter(
+          (slot) => slot >= dayConfig.from! && slot < dayConfig.to!,
+        );
+        return { slots: filtered, closed: false };
+      }
+    }
+  }
+
+  return { slots: ALL_TIME_SLOTS, closed: false };
+}
+
+export default function DateTimePicker({ value, onChange, workingHours }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(value?.date);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(value?.time);
 
+  const { slots: timeSlots, closed: isClosed } = useMemo(
+    () => getSlotsForDate(selectedDate, workingHours),
+    [selectedDate, workingHours],
+  );
+
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
-      if (selectedTime) {
+      // Reset selected time if the current time is no longer available for the new date
+      const { slots } = getSlotsForDate(date, workingHours);
+      if (selectedTime && !slots.includes(selectedTime)) {
+        setSelectedTime(undefined);
+      } else if (selectedTime && slots.includes(selectedTime)) {
         onChange({ date, time: selectedTime });
       }
     }
@@ -103,30 +144,37 @@ export default function DateTimePicker({ value, onChange }: DateTimePickerProps)
                     )}
                   </h3>
                 </div>
-                <div className="grid grid-cols-3 gap-2 flex-1 content-start">
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => handleTimeSelect(time)}
-                      disabled={!selectedDate}
-                      className={`h-11 rounded-lg text-[14px] font-medium transition-all ${
-                        selectedTime === time
-                          ? 'text-white'
-                          : selectedDate
-                            ? 'bg-[#FAFAF9] hover:border-[var(--color-primary)] border border-[#E2E8F0]'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      }`}
-                      style={selectedTime === time ? { backgroundColor: 'var(--color-primary)' } : {}}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+
+                {isClosed ? (
+                  <p className="text-[14px] text-amber-600 font-medium py-4">
+                    La boutique est fermée ce jour
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 flex-1 content-start">
+                    {timeSlots.map((time) => (
+                      <button
+                        key={time}
+                        type="button"
+                        onClick={() => handleTimeSelect(time)}
+                        disabled={!selectedDate}
+                        className={`h-11 rounded-lg text-[14px] font-medium transition-all ${
+                          selectedTime === time
+                            ? 'text-white'
+                            : selectedDate
+                              ? 'bg-[#FAFAF9] hover:border-[var(--color-primary)] border border-[#E2E8F0]'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        }`}
+                        style={selectedTime === time ? { backgroundColor: 'var(--color-primary)' } : {}}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {selectedDate && selectedTime && (
+            {selectedDate && selectedTime && !isClosed && (
               <div className="p-4 border-t" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
                 <div className="flex items-center justify-between">
                   <div className="text-[14px]">
