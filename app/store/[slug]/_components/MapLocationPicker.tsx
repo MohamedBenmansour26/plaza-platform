@@ -57,7 +57,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     mapboxgl.accessToken = token;
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [-6.8, 31.5] as [number, number],
       zoom: 4.5,
     });
