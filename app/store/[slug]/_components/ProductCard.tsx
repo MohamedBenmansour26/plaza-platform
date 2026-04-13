@@ -18,6 +18,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
   const { addItem, items } = useCart();
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
 
   const priceMAD = product.price / 100;
   const originalPriceMAD =
@@ -57,20 +58,15 @@ export function ProductCard({ product, slug }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
+    setBuyingNow(true);
     // Build a direct single-item cart and write to sessionStorage
     // so commande/page.tsx reads it immediately without localStorage race
-    const directCart = [{
-      id: product.id,
-      name: product.name_fr,
-      price: priceMAD,          // MAD (already divided by 100)
-      quantity: 1,
-      image: product.image_url ?? '',
-      stock: product.stock ?? null,
-    }];
+    const directCart = [{ id: product.id, name: product.name_fr, price: priceMAD, quantity: 1, image: product.image_url ?? '', stock: product.stock ?? null }];
     sessionStorage.setItem('cartItems', JSON.stringify(directCart));
     sessionStorage.setItem('cartSlug', slug);
     sessionStorage.setItem('subtotal', String(priceMAD));
     router.push(`/store/${slug}/commande`);
+    // Note: no setBuyingNow(false) needed — navigation unmounts the component
   }
 
   return (
@@ -138,13 +134,6 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Stock status badge */}
-          {product.stock === 0 ? (
-            <span className="text-xs font-medium text-red-500">Rupture de stock</span>
-          ) : product.stock !== null && product.stock <= 5 ? (
-            <span className="text-xs font-medium text-amber-600">Plus que {product.stock} en stock</span>
-          ) : null}
-
           {/* Action buttons */}
           <div className="mt-auto pt-2 flex gap-1.5">
             <button
@@ -178,13 +167,20 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             </button>
             <button
               onClick={handleBuyNow}
-              disabled={outOfStock}
-              className={`flex-1 h-8 text-xs font-semibold rounded-lg transition-colors text-white ${
+              disabled={outOfStock || buyingNow}
+              className={`flex-1 h-8 text-xs font-semibold rounded-lg transition-colors text-white disabled:opacity-70 disabled:cursor-wait ${
                 outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
               }`}
-              style={!outOfStock ? { backgroundColor: 'var(--color-primary)' } : {}}
+              style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
             >
-              Acheter
+              {buyingNow ? (
+                <span className="flex items-center justify-center gap-1.5">
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Chargement...
+                </span>
+              ) : (
+                'Acheter'
+              )}
             </button>
           </div>
         </div>

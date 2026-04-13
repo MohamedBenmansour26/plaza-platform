@@ -60,6 +60,7 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [cartOpen, setCartOpen] = useState(false);
   const [_infoOpen, setInfoOpen] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
 
   useEffect(() => {
     const handler = () => setCartOpen(true);
@@ -105,6 +106,7 @@ export function ProductDetailClient({
 
   function handleBuyNow() {
     if (outOfStock) return;
+    setBuyingNow(true);
     // Build a direct single-item cart and write to sessionStorage
     // so commande/page.tsx reads it immediately without localStorage race
     const directCart = [{
@@ -118,6 +120,7 @@ export function ProductDetailClient({
     sessionStorage.setItem('cartSlug', slug);
     sessionStorage.setItem('subtotal', String(priceMAD * quantity));
     router.push(`/store/${slug}/commande`);
+    // Note: no setBuyingNow(false) needed — navigation unmounts the component
   }
 
   const productImage = product.image_url ?? '';
@@ -294,13 +297,20 @@ export function ProductDetailClient({
             </button>
             <button
               onClick={handleBuyNow}
-              disabled={outOfStock}
-              className={`flex-1 py-3.5 rounded-lg font-bold text-white transition-colors ${
+              disabled={outOfStock || buyingNow}
+              className={`flex-1 py-3.5 rounded-lg font-bold text-white transition-colors disabled:opacity-70 disabled:cursor-wait ${
                 outOfStock ? 'bg-gray-300 cursor-not-allowed' : ''
               }`}
-              style={!outOfStock ? { backgroundColor: 'var(--color-primary)' } : {}}
+              style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
             >
-              Acheter maintenant
+              {buyingNow ? (
+                <span className="flex items-center justify-center gap-1.5">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Chargement...
+                </span>
+              ) : (
+                'Acheter maintenant'
+              )}
             </button>
           </div>
 
@@ -444,13 +454,20 @@ export function ProductDetailClient({
           </button>
           <button
             onClick={handleBuyNow}
-            disabled={outOfStock}
-            className={`flex-1 h-12 rounded-lg font-semibold text-white transition-colors ${
-              outOfStock ? 'bg-gray-300 cursor-not-allowed' : 'active:scale-[0.97]'
+            disabled={outOfStock || buyingNow}
+            className={`flex-1 h-12 rounded-lg font-semibold text-white transition-colors disabled:opacity-70 disabled:cursor-wait ${
+              outOfStock ? 'bg-gray-300 cursor-not-allowed' : buyingNow ? '' : 'active:scale-[0.97]'
             }`}
-            style={!outOfStock ? { backgroundColor: 'var(--color-primary)' } : {}}
+            style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
           >
-            Acheter maintenant
+            {buyingNow ? (
+              <span className="flex items-center justify-center gap-1.5">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Chargement...
+              </span>
+            ) : (
+              'Acheter maintenant'
+            )}
           </button>
         </div>
       </div>
