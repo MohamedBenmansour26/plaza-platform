@@ -133,6 +133,13 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             </span>
           </div>
 
+          {/* Stock status badge */}
+          {product.stock === 0 ? (
+            <span className="text-xs font-medium text-red-500">Rupture de stock</span>
+          ) : product.stock !== null && product.stock <= 5 ? (
+            <span className="text-xs font-medium text-amber-600">Plus que {product.stock} en stock</span>
+          ) : null}
+
           {/* Action buttons */}
           <div className="mt-auto pt-2 flex gap-1.5">
             <button

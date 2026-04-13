@@ -262,29 +262,42 @@ export async function updateOrderStatus(
       }
     }
 
-    // 3. All checks passed — decrement stock atomically
+    // 3. All checks passed — decrement stock atomically via RPC
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: decrementError } = await (supabase as any)
+      .rpc('decrement_stock', { order_id: orderId });
+
+    if (decrementError) {
+      throw new Error(`Stock insuffisant pour certains produits`);
+    }
+  }
+
+  // ── Stock restore: return stock to products when cancelling a confirmed order ─
+  if (newStatus === 'cancelled' && current.status === 'confirmed') {
+    type OrderItemStockRow = { product_id: string | null; quantity: number };
     type ProductStockOnly = { stock: number | null };
-    for (const item of orderItems) {
-      if (!item.product_id) continue;
 
-      const { data: productForUpdate } = await supabase
-        .from('products')
-        .select('stock')
-        .eq('id', item.product_id)
-        .maybeSingle<ProductStockOnly>();
+    const { data: orderItems } = await supabase
+      .from('order_items')
+      .select('product_id, quantity')
+      .eq('order_id', orderId)
+      .returns<OrderItemStockRow[]>();
 
-      if (productForUpdate?.stock !== null && productForUpdate?.stock !== undefined) {
-        const { error: updateStockErr } = await supabase
+    if (orderItems) {
+      for (const item of orderItems) {
+        if (!item.product_id) continue;
+
+        const { data: product } = await supabase
           .from('products')
-          .update({ stock: Math.max(0, productForUpdate.stock - item.quantity) } as never)
-          .eq('id', item.product_id);
+          .select('stock')
+          .eq('id', item.product_id)
+          .maybeSingle<ProductStockOnly>();
 
-        if (updateStockErr) {
-          // Non-fatal: log but don't block order confirmation
-          console.error(
-            `Failed to decrement stock for product ${item.product_id}:`,
-            updateStockErr,
-          );
+        if (product?.stock !== null && product?.stock !== undefined) {
+          await supabase
+            .from('products')
+            .update({ stock: product.stock + item.quantity } as never)
+            .eq('id', item.product_id);
         }
       }
     }
