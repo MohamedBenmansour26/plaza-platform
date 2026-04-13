@@ -31,6 +31,21 @@ interface ConfirmedOrder {
   customerPin?: number;
 }
 
+const MONTHS_FR = [
+  'janvier','février','mars','avril','mai','juin',
+  'juillet','août','septembre','octobre','novembre','décembre'
+]
+
+function formatDateFR(dateStr: string): string {
+  if (!dateStr) return ''
+  const parts = dateStr.split('-')
+  if (parts.length !== 3) return dateStr
+  const [year, month, day] = parts
+  const monthName = MONTHS_FR[parseInt(month, 10) - 1]
+  if (!monthName) return dateStr
+  return `${parseInt(day, 10)} ${monthName} ${year}`
+}
+
 export default function ConfirmationPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
@@ -79,8 +94,8 @@ export default function ConfirmationPage() {
         setOrder({
           ...parsedOrder,
           // Prefer confirm* identity keys as they are written after createOrder resolves
-          orderId: parsedOrder.orderId ?? ssOrderId ?? undefined,
-          orderNumber: parsedOrder.orderNumber ?? ssOrderNumber ?? undefined,
+          orderId: ssOrderId || parsedOrder.orderId || undefined,
+          orderNumber: ssOrderNumber || parsedOrder.orderNumber || undefined,
           customerPin: parsedOrder.customerPin ?? (ssPin ? parseInt(ssPin, 10) : undefined),
         });
       } catch {
@@ -252,10 +267,14 @@ export default function ConfirmationPage() {
 
         {/* Delivery Time */}
         {(() => {
-          const displayDate = order.deliveryDisplayDate || confirmDate;
+          const rawDate = order.deliveryDisplayDate || confirmDate;
           const slot = order.deliverySlot || confirmSlot;
-          if (!displayDate && !slot) return null;
-          const fmt = (t: string) => t.replace(':', 'h').replace(/^(\d+h)00$/, '$1');
+          if (!rawDate && !slot) return null;
+          // Format date: if it looks like ISO (YYYY-MM-DD) convert to "16 avril 2026"
+          const displayDate = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+            ? formatDateFR(rawDate)
+            : rawDate;
+          const fmt = (t: string) => t.replace(':', 'h');
           let label = 'Livraison planifiée';
           if (displayDate && slot) {
             const parts = slot.split('-');
