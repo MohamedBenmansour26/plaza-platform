@@ -55,6 +55,14 @@ export type OrderWithDetails = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  delivery_date: string | null;
+  delivery_slot: string | null;
+  /** PLZ-052: merchant pickup code — null until schema migration runs */
+  merchant_pickup_code: number | null;
+  /** PLZ-052: status timestamps — null until schema migration runs */
+  confirmed_at: string | null;
+  dispatched_at: string | null;
+  delivered_at: string | null;
   items: OrderLineItem[];
   delivery: OrderDelivery;
 };
@@ -93,6 +101,12 @@ type RawOrderRow = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  delivery_date: string | null;
+  delivery_slot: string | null;
+  merchant_pickup_code: number | null;
+  confirmed_at: string | null;
+  dispatched_at: string | null;
+  delivered_at: string | null;
   customers: {
     id: string;
     full_name: string;
@@ -132,6 +146,12 @@ function normaliseOrder(row: RawOrderRow): OrderWithDetails {
     notes: row.notes,
     created_at: row.created_at,
     updated_at: row.updated_at,
+    delivery_date: row.delivery_date ?? null,
+    delivery_slot: row.delivery_slot ?? null,
+    merchant_pickup_code: row.merchant_pickup_code ?? null,
+    confirmed_at: row.confirmed_at ?? null,
+    dispatched_at: row.dispatched_at ?? null,
+    delivered_at: row.delivered_at ?? null,
     items: (row.order_items ?? []).map((i) => ({
       id: i.id,
       name_fr: i.name_fr,
@@ -146,7 +166,8 @@ function normaliseOrder(row: RawOrderRow): OrderWithDetails {
 const ORDER_SELECT = `
   id, order_number, merchant_id, status, payment_method,
   subtotal, delivery_fee, plaza_commission, total, notes,
-  created_at, updated_at,
+  created_at, updated_at, delivery_date, delivery_slot,
+  merchant_pickup_code, confirmed_at, dispatched_at, delivered_at,
   customers ( id, full_name, phone, address, city ),
   order_items (
     id, name_fr, quantity, unit_price,
@@ -303,10 +324,20 @@ export async function updateOrderStatus(
     }
   }
 
+  // PLZ-052: set status timestamp alongside status update
+  const timestampField =
+    newStatus === 'confirmed'  ? 'confirmed_at' :
+    newStatus === 'dispatched' ? 'dispatched_at' :
+    newStatus === 'delivered'  ? 'delivered_at' :
+    null;
+
+  const updatePayload: Record<string, unknown> = { status: newStatus };
+  if (timestampField) updatePayload[timestampField] = new Date().toISOString();
+
   // Supabase JS v2: .update() param collapses to `never` with chained .eq() — known SDK regression.
   const { error: updateErr } = await supabase
     .from('orders')
-    .update({ status: newStatus } as never)
+    .update(updatePayload as never)
     .eq('id', orderId)
     .eq('merchant_id', merchantId);
 

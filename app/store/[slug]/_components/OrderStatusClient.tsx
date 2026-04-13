@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, Check, RefreshCw, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
-import type { Order, OrderItem, Customer, OrderStatus } from '@/types/supabase';
+import type { Order, OrderItem, Customer } from '@/types/supabase';
 
 type OrderItemWithProduct = OrderItem & {
   products: { name_fr: string; image_url: string | null; price: number } | null;
@@ -17,63 +17,95 @@ type OrderItemWithProduct = OrderItem & {
 type OrderWithRelations = Order & {
   customer: Customer;
   order_items: OrderItemWithProduct[];
+  merchant: { store_name: string; phone: string | null } | null;
+  // Add timestamp fields (may be null until schema migration runs)
+  confirmed_at?: string | null;
+  dispatched_at?: string | null;
+  delivered_at?: string | null;
 };
 
-interface Step {
-  id: number;
-  label: string;
-  eta?: string;
-  completed: boolean;
-  current: boolean;
-}
+// ─── Helper functions ──────────────────────────────────────────────────────────
 
 function formatDeliverySlot(slot: string | null): string {
   if (!slot) return '';
   return slot.replace('-', ' – ').replace(/(\d{2}):00/g, '$1h00');
 }
 
-function buildSteps(status: OrderStatus, deliverySlot: string | null): Step[] {
-  const slotEnd = deliverySlot ? deliverySlot.split('-')[1] : null;
-  const steps: Step[] = [
-    { id: 1, label: 'Commande reçue', completed: false, current: false },
-    { id: 2, label: 'En cours de confirmation', eta: 'Dans 30–60 min', completed: false, current: false },
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatSlot(slot: string): string {
+  // "HH:MM-HH:MM" → "15h00 et 16h00"
+  const [start, end] = slot.split('-');
+  return `${start.replace(':00', 'h00')} et ${end.replace(':00', 'h00')}`;
+}
+
+// ─── Timeline ─────────────────────────────────────────────────────────────────
+
+interface TimelineStep {
+  key: string;
+  label: string;
+  sublabel: string;
+  done: boolean;
+  active: boolean;
+  cancelled?: boolean;
+}
+
+function getTimelineSteps(order: OrderWithRelations): TimelineStep[] {
+  const storeName = order.merchant?.store_name ?? 'la boutique';
+  const slot = order.delivery_slot ? formatSlot(order.delivery_slot) : '';
+  const dateStr = order.delivery_date ? formatDate(order.delivery_date) : '';
+
+  return [
     {
-      id: 3,
-      label: 'En route',
-      eta: deliverySlot ? `Départ ${formatDeliverySlot(deliverySlot)}` : 'Selon votre créneau',
-      completed: false,
-      current: false,
+      key: 'received',
+      label: `Commande reçue par ${storeName}`,
+      sublabel: formatDateTime(order.created_at),
+      done: true,
+      active: order.status === 'pending',
     },
     {
-      id: 4,
-      label: 'Livrée',
-      eta: slotEnd ? `Avant ${slotEnd.replace(':00', 'h00')}` : undefined,
-      completed: false,
-      current: false,
+      key: 'confirmed',
+      label:
+        order.status === 'cancelled'
+          ? `Commande annulée par ${storeName}`
+          : order.status === 'pending'
+          ? `En cours de confirmation par ${storeName}`
+          : `Commande confirmée par ${storeName}`,
+      sublabel: formatDateTime(order.confirmed_at),
+      done: ['confirmed', 'dispatched', 'delivered', 'cancelled'].includes(order.status),
+      active: order.status === 'pending',
+      cancelled: order.status === 'cancelled',
+    },
+    {
+      key: 'pickup',
+      label:
+        order.status === 'dispatched' || order.status === 'delivered'
+          ? `Livraison en cours pour le ${dateStr} entre ${slot}`
+          : `Livraison planifiée pour le ${dateStr} entre ${slot}`,
+      sublabel: formatDateTime(order.dispatched_at),
+      done: ['dispatched', 'delivered'].includes(order.status),
+      active: order.status === 'confirmed',
+    },
+    {
+      key: 'delivered',
+      label: order.status === 'delivered' ? `Livraison effectuée le ${dateStr}` : 'Livraison',
+      sublabel: formatDateTime(order.delivered_at),
+      done: order.status === 'delivered',
+      active: order.status === 'dispatched',
     },
   ];
-
-  if (status === 'pending') {
-    steps[0].completed = true;
-    steps[1].current = true;
-  } else if (status === 'confirmed') {
-    steps[0].completed = true;
-    steps[1].completed = true;
-    steps[2].current = true;
-  } else if (status === 'dispatched') {
-    steps[0].completed = true;
-    steps[1].completed = true;
-    steps[2].completed = true;
-    steps[3].current = true;
-  } else if (status === 'delivered') {
-    steps.forEach((s) => {
-      s.completed = true;
-      s.current = false;
-    });
-  }
-
-  return steps;
 }
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
   order: OrderWithRelations;
@@ -90,8 +122,8 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
     return () => clearInterval(interval);
   }, [order.status, router]);
 
-  const steps = buildSteps(order.status, order.delivery_slot ?? null);
   const isCancelled = order.status === 'cancelled';
+  const timelineSteps = getTimelineSteps(order);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -137,8 +169,9 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           transition={{ delay: 0.1 }}
           className="bg-white rounded-xl p-5"
         >
-          {isCancelled ? (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          {/* Cancelled banner — always shown when cancelled */}
+          {isCancelled && (
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-4">
               <svg
                 className="w-5 h-5 text-red-600 flex-shrink-0"
                 fill="none"
@@ -156,56 +189,80 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
                 Cette commande a été annulée.
               </p>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        step.completed
-                          ? 'bg-[#16A34A] text-white'
-                          : step.current
-                            ? 'text-white animate-pulse'
-                            : 'bg-gray-200 text-gray-400'
-                      }`}
-                      style={step.current && !step.completed ? { backgroundColor: 'var(--color-primary)' } : {}}
-                    >
-                      {step.completed ? (
-                        <Check className="w-5 h-5" strokeWidth={2.5} />
-                      ) : (
-                        <span className="text-sm font-bold">{index + 1}</span>
-                      )}
-                    </div>
-                    {index < steps.length - 1 && (
-                      <div
-                        className={`w-0.5 h-12 ${
-                          step.completed ? 'bg-[#16A34A]' : 'bg-gray-200'
-                        }`}
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1 pb-2">
-                    <h3
-                      className={`font-semibold ${
-                        step.completed
-                          ? 'text-[#16A34A]'
-                          : step.current
-                            ? ''
-                            : 'text-gray-400'
-                      }`}
-                      style={step.current && !step.completed ? { color: 'var(--color-primary)' } : {}}
-                    >
-                      {step.label}
-                    </h3>
-                    {step.eta && step.current && (
-                      <p className="text-sm text-[#78716C] mt-0.5">{step.eta}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
+
+          <div className="space-y-0">
+            {timelineSteps.map((step, index) => (
+              <div key={step.key} className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  {/* Circle */}
+                  {step.cancelled ? (
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        className="w-5 h-5 text-red-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </div>
+                  ) : step.done ? (
+                    <div className="w-10 h-10 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                  ) : step.active ? (
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse"
+                      style={{ backgroundColor: 'var(--color-primary)' }}
+                    >
+                      <span className="text-sm font-bold text-white">{index + 1}</span>
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-gray-400">{index + 1}</span>
+                    </div>
+                  )}
+
+                  {/* Connector line */}
+                  {index < timelineSteps.length - 1 && (
+                    <div
+                      className={`w-0.5 h-12 ${
+                        step.done ? 'bg-[#16A34A]' : 'bg-gray-200'
+                      }`}
+                    />
+                  )}
+                </div>
+
+                <div className="flex-1 pb-2 pt-2">
+                  {/* Label */}
+                  <h3
+                    className={`font-semibold ${
+                      step.cancelled
+                        ? 'text-red-600'
+                        : step.done
+                        ? 'text-[#16A34A]'
+                        : step.active
+                        ? ''
+                        : 'text-gray-400'
+                    }`}
+                    style={step.active && !step.done && !step.cancelled ? { color: 'var(--color-primary)' } : {}}
+                  >
+                    {step.label}
+                  </h3>
+                  {/* Sublabel — show timestamp when non-empty */}
+                  {step.sublabel && (
+                    <p className="text-xs text-gray-400 mt-0.5">{step.sublabel}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         {/* Customer Info */}

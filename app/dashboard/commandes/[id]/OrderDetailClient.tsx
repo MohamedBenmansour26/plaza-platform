@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition, useState } from 'react';
+import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, User, Phone, MapPin, Check, Loader2 } from 'lucide-react';
@@ -8,9 +8,6 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import {
   confirmOrderAction,
-  dispatchOrderAction,
-  deliverOrderAction,
-  cancelOrderAction,
 } from '../actions';
 import { formatMAD, formatDate } from '../OrdersClient';
 import type { OrderWithDetails } from '@/lib/db/orders';
@@ -106,7 +103,6 @@ export function OrderDetailClient({ order }: Props) {
   const router = useRouter();
   const t = useTranslations('orders');
   const [isPending, startTransition] = useTransition();
-  const [showCancelModal, setShowCancelModal] = useState(false);
 
   // User-facing string arrays MUST be inside the component after t() — see memory.md BUG-013–016
   const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
@@ -132,6 +128,8 @@ export function OrderDetailClient({ order }: Props) {
       router.refresh();
     });
   };
+
+  const isActive = order.status !== 'delivered' && order.status !== 'cancelled';
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
@@ -252,6 +250,47 @@ export function OrderDetailClient({ order }: Props) {
             <DeliveryTimeline status={order.status} steps={STEPS} pendingLabel={t('step_pending_confirmation')} />
           </div>
 
+          {/* Pickup code card — shown after merchant confirms */}
+          {order.status === 'confirmed' && order.merchant_pickup_code != null && (
+            <div className="rounded-xl p-4 border border-[#BFDBFE] bg-[#EFF6FF] space-y-3">
+              <p className="text-[14px] font-semibold text-[#1E40AF]">
+                Le coursier viendra chercher votre commande
+              </p>
+              <div className="text-[13px] text-[#1E3A8A] space-y-1">
+                {order.delivery_date && (
+                  <p>Date de collecte : <span className="font-medium">{formatDate(order.delivery_date)}</span></p>
+                )}
+                {order.delivery_slot && (
+                  <p>Créneau : <span className="font-medium">{order.delivery_slot}</span></p>
+                )}
+              </div>
+              <div>
+                <p className="text-[12px] text-[#1E3A8A] mb-2">
+                  Code de collecte à donner au coursier :
+                </p>
+                <div className="flex gap-2 justify-center">
+                  {String(order.merchant_pickup_code).padStart(6, '0').split('').map((digit, i) => (
+                    <div key={i} className="w-9 h-11 border-2 border-[#93C5FD] rounded-lg flex items-center justify-center bg-white text-[18px] font-bold text-[#1E40AF]">
+                      {digit}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] text-[#3B82F6] text-center">
+                Communiquez ce code uniquement au coursier Plaza assigné à votre commande.
+              </p>
+            </div>
+          )}
+
+          {/* Dispatched info */}
+          {order.status === 'dispatched' && (
+            <div className="rounded-xl p-4 border border-[#FED7AA] bg-[#FFF7ED]">
+              <p className="text-[14px] font-medium text-[#9A3412] text-center">
+                En attente du livreur Plaza
+              </p>
+            </div>
+          )}
+
           {/* Date info */}
           <p className="text-xs text-[#A8A29E] text-center">
             Commandé le {formatDate(order.created_at)}
@@ -261,7 +300,7 @@ export function OrderDetailClient({ order }: Props) {
       </div>
 
       {/* Fixed action bar */}
-      {order.status !== 'delivered' && order.status !== 'cancelled' && (
+      {isActive && (
         <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#E2E8F0] p-4 max-w-[480px] mx-auto">
           {isPending ? (
             <div className="flex items-center justify-center gap-2 h-12 text-[#78716C]">
@@ -269,65 +308,25 @@ export function OrderDetailClient({ order }: Props) {
               Mise à jour…
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               {order.status === 'pending' && (
-                <>
-                  <button
-                    onClick={() => run(confirmOrderAction)}
-                    className="flex-1 h-12 bg-[#2563EB] text-white text-[14px] font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors"
-                  >
-                    Confirmer
-                  </button>
-                  <button
-                    onClick={() => setShowCancelModal(true)}
-                    className="flex-1 h-12 border-[1.5px] border-[#DC2626] text-[#DC2626] text-[14px] font-semibold rounded-lg hover:bg-[#FEF2F2] transition-colors"
-                  >
-                    Annuler
-                  </button>
-                </>
-              )}
-              {order.status === 'confirmed' && (
                 <button
-                  onClick={() => run(dispatchOrderAction)}
-                  className="flex-1 h-12 bg-[#E8632A] text-white text-[14px] font-semibold rounded-lg hover:bg-[#d45424] transition-colors"
+                  onClick={() => run(confirmOrderAction)}
+                  className="w-full h-12 bg-[#2563EB] text-white text-[14px] font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors"
                 >
-                  Marquer comme expédiée
+                  Confirmer la commande
                 </button>
               )}
-              {order.status === 'dispatched' && (
-                <button
-                  onClick={() => run(deliverOrderAction)}
-                  className="flex-1 h-12 bg-[#16A34A] text-white text-[14px] font-semibold rounded-lg hover:bg-[#158a3c] transition-colors"
-                >
-                  Marquer comme livrée
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  window.location.href = `mailto:support@plaza.ma?subject=Problème commande ${order.order_number}&body=Bonjour, je rencontre un problème avec la commande ${order.order_number}.`;
+                }}
+                className="w-full h-12 border border-[#E2E8F0] text-[#78716C] text-[14px] font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
+              >
+                Signaler un problème
+              </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Cancel confirmation modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-[18px] font-semibold text-[#1C1917] mb-2">Annuler cette commande ?</h3>
-            <p className="text-[14px] text-[#78716C] mb-6">Cette action ne peut pas être annulée.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-[14px] font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
-              >
-                Non
-              </button>
-              <button
-                onClick={() => { setShowCancelModal(false); run(cancelOrderAction); }}
-                className="flex-1 h-10 bg-[#DC2626] text-white text-[14px] font-medium rounded-lg hover:bg-[#b91c1c] transition-colors"
-              >
-                Oui, annuler
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

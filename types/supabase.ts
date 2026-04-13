@@ -257,6 +257,11 @@ export type Database = {
           customer_pin:     number | null
           delivery_date:    string | null   // YYYY-MM-DD from Postgres date
           delivery_slot:    string | null   // format: "09:00-10:00"
+          // PLZ-052: merchant pickup code + status timestamps (migration pending)
+          merchant_pickup_code: number | null
+          confirmed_at:     string | null
+          dispatched_at:    string | null
+          delivered_at:     string | null
         }
         Insert: {
           id?:               string
@@ -275,6 +280,10 @@ export type Database = {
           customer_pin?:     number | null
           delivery_date?:    string | null
           delivery_slot?:    string | null
+          merchant_pickup_code?: number | null
+          confirmed_at?:     string | null
+          dispatched_at?:    string | null
+          delivered_at?:     string | null
         }
         Update: {
           id?:               string
@@ -293,6 +302,10 @@ export type Database = {
           customer_pin?:     number | null
           delivery_date?:    string | null
           delivery_slot?:    string | null
+          merchant_pickup_code?: number | null
+          confirmed_at?:     string | null
+          dispatched_at?:    string | null
+          delivered_at?:     string | null
         }
         Relationships: [
           {
