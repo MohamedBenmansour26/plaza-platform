@@ -17,7 +17,7 @@ export function DeliveryZones({ initialZones: _initialZones }: Props) {
       </h2>
 
       <div className="flex items-start gap-2 mb-4">
-        <MapPin className="w-4 h-4 text-[#2563EB] flex-shrink-0 mt-0.5" />
+        <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
         <p className="text-sm text-[#78716C]">
           Plaza livre actuellement dans ces villes :
         </p>
@@ -27,7 +27,12 @@ export function DeliveryZones({ initialZones: _initialZones }: Props) {
         {PLAZA_CITIES.map((city) => (
           <span
             key={city}
-            className="px-3 py-1.5 rounded-full text-sm font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]"
+            className="px-3 py-1.5 rounded-full text-sm font-medium"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)',
+              color: 'var(--color-primary)',
+              border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+            }}
           >
             {city}
           </span>
@@ -38,7 +43,8 @@ export function DeliveryZones({ initialZones: _initialZones }: Props) {
         Vous souhaitez une nouvelle ville ?{' '}
         <a
           href="/dashboard/support"
-          className="text-[#2563EB] hover:underline font-medium"
+          className="hover:underline font-medium"
+          style={{ color: 'var(--color-primary)' }}
         >
           Contactez-nous.
         </a>

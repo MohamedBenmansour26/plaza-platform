@@ -35,9 +35,11 @@ function formatChartDate(iso: string, period: Period): string {
 
 // ─── Payment colours ──────────────────────────────────────────────────────────
 
+// Note: PAYMENT_COLORS values are used as SVG/Recharts fill colors.
+// terminal uses the primary color CSS variable resolved at runtime.
 const PAYMENT_COLORS: Record<string, string> = {
   cod:      '#6B7280',
-  terminal: '#2563EB',
+  terminal: 'var(--color-primary)',
   card:     '#7C3AED',
 };
 
@@ -105,7 +107,7 @@ export function FinancesClient({ metrics, period }: Props) {
               onClick={() => router.push(`?period=${p.id}`)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 period === p.id
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
               }`}
             >
@@ -295,7 +297,7 @@ export function FinancesClient({ metrics, period }: Props) {
                           {p.product_id ? (
                             <Link
                               href={`/dashboard/produits/${p.product_id}`}
-                              className="text-sm font-medium text-[#1C1917] truncate hover:text-[#2563EB] block"
+                              className="text-sm font-medium text-[#1C1917] truncate hover:text-[var(--color-primary)] block"
                             >
                               {p.name_fr}
                             </Link>
@@ -393,7 +395,7 @@ export function FinancesClient({ metrics, period }: Props) {
                 <div className="space-y-3">
                   {metrics.topProducts.map((p, i) => (
                     <div key={p.product_id ?? p.name_fr} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-semibold flex-shrink-0" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
                         {i + 1}
                       </div>
                       <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">

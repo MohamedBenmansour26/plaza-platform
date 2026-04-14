@@ -174,7 +174,7 @@ export function ProductForm({ product }: Props) {
   // ─── Shared sub-components ────────────────────────────────────────────────
 
   const priceCalculator = (
-    <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#2563EB]">
+    <div className="bg-white rounded-xl shadow-sm p-6 border-l-4" style={{ borderLeftColor: 'var(--color-primary)' }}>
       <h2 className="text-base font-semibold text-[#1C1917] mb-1">{t('formPriceTitle')}</h2>
       <p className="text-[13px] text-[#78716C] mb-4">{t('formPriceSubtitle')}</p>
 
@@ -209,7 +209,7 @@ export function ProductForm({ product }: Props) {
               type="number"
               value={originalPrice}
               onChange={(e) => setOriginalPrice(e.target.value)}
-              className="w-full h-14 px-4 pr-16 border border-[#E2E8F0] rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 transition-all"
+              className="w-full h-14 px-4 pr-16 border border-[#E2E8F0] rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
             />
             <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
           </div>
@@ -231,7 +231,7 @@ export function ProductForm({ product }: Props) {
             className={`w-full h-14 px-4 pr-16 border rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none transition-all ${
               errors.price || priceError
                 ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20'
-                : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
+                : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
             }`}
           />
           <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
@@ -290,7 +290,7 @@ export function ProductForm({ product }: Props) {
         ) : (
           <div className="w-full h-full bg-[#F5F5F4] hover:bg-[#EEEEEE] transition-colors flex flex-col items-center justify-center gap-2">
             <Camera className="w-8 h-8 text-[#A8A29E]" />
-            <span className="text-[13px] text-[#2563EB]">
+            <span className="text-[13px]" style={{ color: 'var(--color-primary)' }}>
               {uploading ? t('uploading') : (imageUrl ? t('formPhotoChange') : t('formPhotoAdd'))}
             </span>
           </div>
@@ -300,7 +300,8 @@ export function ProductForm({ product }: Props) {
         <button
           type="button"
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className="text-[13px] text-[#2563EB] hover:underline"
+          className="text-[13px] hover:underline"
+          style={{ color: 'var(--color-primary)' }}
         >
           {uploading ? t('uploading') : t('formPhotoChange')}
         </button>
@@ -318,8 +319,8 @@ export function ProductForm({ product }: Props) {
           onClick={() => setIsVisible((v) => !v)}
           role="switch"
           aria-checked={isVisible}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
-            isVisible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
+            isVisible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
           }`}
         >
           <span
@@ -387,7 +388,7 @@ export function ProductForm({ product }: Props) {
               className={`w-full h-11 px-3 border rounded-lg text-sm focus:outline-none ${
                 errors.nameFr
                   ? 'border-[#DC2626] focus:border-[#DC2626]'
-                  : 'border-[#E2E8F0] focus:border-[#2563EB]'
+                  : 'border-[#E2E8F0] focus:border-[var(--color-primary)]'
               }`}
             />
             {errors.nameFr && (
@@ -404,7 +405,7 @@ export function ProductForm({ product }: Props) {
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] resize-none"
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] resize-none"
             />
           </div>
 
@@ -416,7 +417,7 @@ export function ProductForm({ product }: Props) {
             <select
               value={catL1}
               onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
-              className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+              className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
             >
               <option value="">Sélectionner une catégorie</option>
               {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
@@ -428,7 +429,7 @@ export function ProductForm({ product }: Props) {
               <select
                 value={catL2}
                 onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
-                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
               >
                 <option value="">Sous-catégorie</option>
                 {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
@@ -441,7 +442,7 @@ export function ProductForm({ product }: Props) {
               <select
                 value={catL3}
                 onChange={(e) => setCatL3(e.target.value)}
-                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+                className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
               >
                 <option value="">Type (optionnel)</option>
                 {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
@@ -460,7 +461,7 @@ export function ProductForm({ product }: Props) {
               type="number"
               value={stock}
               onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB]"
+              className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)]"
             />
           </div>
 
@@ -473,7 +474,7 @@ export function ProductForm({ product }: Props) {
               role="switch"
               aria-checked={isVisible}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isVisible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+                isVisible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
               }`}
             >
               <span
@@ -498,7 +499,8 @@ export function ProductForm({ product }: Props) {
           type="button"
           onClick={handleSubmit}
           disabled={isPending || uploading}
-          className="w-full h-12 bg-[#2563EB] text-white text-base font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+          className="w-full h-12 text-white text-base font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+          style={{ backgroundColor: 'var(--color-primary)' }}
         >
           {isPending
             ? isEdit ? t('formSaving') : t('formPublishing')
@@ -528,7 +530,8 @@ export function ProductForm({ product }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={isPending || uploading}
-            className="h-10 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+            className="h-10 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             {isPending
               ? isEdit ? t('formSaving') : t('formPublishing')
@@ -555,7 +558,7 @@ export function ProductForm({ product }: Props) {
                     className={`w-full h-10 px-3 border rounded-lg text-sm focus:outline-none focus:ring-1 ${
                       errors.nameFr
                         ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]'
-                        : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-[#2563EB]'
+                        : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]'
                     }`}
                   />
                   {errors.nameFr && (
@@ -570,7 +573,7 @@ export function ProductForm({ product }: Props) {
                     rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] resize-none"
+                    className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] resize-none"
                   />
                 </div>
 
@@ -582,7 +585,7 @@ export function ProductForm({ product }: Props) {
                   <select
                     value={catL1}
                     onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
-                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
                   >
                     <option value="">Sélectionner une catégorie</option>
                     {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
@@ -594,7 +597,7 @@ export function ProductForm({ product }: Props) {
                     <select
                       value={catL2}
                       onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
-                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white mb-2"
+                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
                     >
                       <option value="">Sous-catégorie</option>
                       {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
@@ -607,7 +610,7 @@ export function ProductForm({ product }: Props) {
                     <select
                       value={catL3}
                       onChange={(e) => setCatL3(e.target.value)}
-                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+                      className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
                     >
                       <option value="">Type (optionnel)</option>
                       {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
@@ -632,7 +635,7 @@ export function ProductForm({ product }: Props) {
                       type="number"
                       value={stock}
                       onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-24 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm text-center focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                      className="w-24 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm text-center focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
                     />
                     <button
                       type="button"

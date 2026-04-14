@@ -43,8 +43,8 @@ export function ParametresClient() {
       aria-checked={checked}
       onClick={onChange}
       disabled={disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-        checked ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+        checked ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
       }`}
     >
       <span
@@ -100,7 +100,7 @@ export function ParametresClient() {
             {/* French — active, always selected */}
             <div className="h-12 w-full flex items-center justify-between px-1 border-b border-[#F3F4F6]">
               <span className="text-sm text-[#1C1917]">{t('langFr')}</span>
-              <div className="w-5 h-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <Check className="w-3 h-3 text-white" />
               </div>
             </div>

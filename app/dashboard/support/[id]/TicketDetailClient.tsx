@@ -20,7 +20,7 @@ export function TicketDetailClient({ ticket }: Props) {
   const t = useTranslations('support');
   const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
     open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
-    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)' },
     resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
     closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
   };
@@ -89,7 +89,8 @@ export function TicketDetailClient({ ticket }: Props) {
                 <span className="text-[#78716C]">{t('linked_order')}: </span>
                 <Link
                   href={`/dashboard/commandes/${ticket.order_id}`}
-                  className="text-[#2563EB] hover:underline"
+                  className="hover:underline"
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   {t('view_order')}
                 </Link>
@@ -136,7 +137,7 @@ export function TicketDetailClient({ ticket }: Props) {
               return (
                 <div key={msg.id} className="flex justify-end">
                   <div className="flex flex-col items-end max-w-[85%]">
-                    <div className="bg-[#2563EB] text-white rounded-xl rounded-tr-none p-3">
+                    <div className="bg-[var(--color-primary)] text-white rounded-xl rounded-tr-none p-3">
                       <p className="text-[14px]">{msg.content}</p>
                     </div>
                     <div className="text-[11px] text-[#A8A29E] mt-1">{time}</div>
@@ -147,7 +148,7 @@ export function TicketDetailClient({ ticket }: Props) {
 
             return (
               <div key={msg.id} className="flex gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-[14px] font-semibold flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[14px] font-semibold flex-shrink-0">
                   P
                 </div>
                 <div className="flex-1">
@@ -177,12 +178,12 @@ export function TicketDetailClient({ ticket }: Props) {
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               disabled={isSending}
-              className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-[14px] focus:outline-none focus:border-[#2563EB]"
+              className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-[14px] focus:outline-none focus:border-[var(--color-primary)]"
             />
             <button
               onClick={handleSend}
               disabled={!content.trim() || isSending}
-              className="w-10 h-10 rounded-full bg-[#2563EB] flex items-center justify-center text-white hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
+              className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {isSending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

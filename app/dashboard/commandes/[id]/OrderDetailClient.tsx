@@ -56,8 +56,8 @@ function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus
                 </div>
               )}
               {state === 'current' && (
-                <div className="w-6 h-6 rounded-full bg-[#2563EB] flex-shrink-0 relative">
-                  <div className="absolute inset-0 rounded-full bg-[#2563EB] animate-ping opacity-75" />
+                <div className="w-6 h-6 rounded-full flex-shrink-0 relative" style={{ backgroundColor: 'var(--color-primary)' }}>
+                  <div className="absolute inset-0 rounded-full animate-ping opacity-75" style={{ backgroundColor: 'var(--color-primary)' }} />
                 </div>
               )}
               {state === 'pending' && (
@@ -68,11 +68,14 @@ function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus
               )}
             </div>
             <div className="pt-0.5">
-              <div className={`text-[14px] ${
-                state === 'done'    ? 'font-medium text-[#1C1917]' :
-                state === 'current' ? 'font-semibold text-[#2563EB]' :
-                'text-[#A8A29E]'
-              }`}>
+              <div
+                className={`text-[14px] ${
+                  state === 'done'    ? 'font-medium text-[#1C1917]' :
+                  state === 'current' ? 'font-semibold' :
+                  'text-[#A8A29E]'
+                }`}
+                style={state === 'current' ? { color: 'var(--color-primary)' } : undefined}
+              >
                 {step.label}
               </div>
             </div>
@@ -83,11 +86,11 @@ function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus
       {/* Extra step for pending orders */}
       {status === 'pending' && (
         <div className="flex gap-3 -mt-2">
-          <div className="w-6 h-6 rounded-full bg-[#2563EB] flex-shrink-0 relative">
-            <div className="absolute inset-0 rounded-full bg-[#2563EB] animate-ping opacity-75" />
+          <div className="w-6 h-6 rounded-full flex-shrink-0 relative" style={{ backgroundColor: 'var(--color-primary)' }}>
+            <div className="absolute inset-0 rounded-full animate-ping opacity-75" style={{ backgroundColor: 'var(--color-primary)' }} />
           </div>
           <div className="pt-0.5">
-            <div className="text-[14px] font-semibold text-[#2563EB]">{pendingLabel}</div>
+            <div className="text-[14px] font-semibold" style={{ color: 'var(--color-primary)' }}>{pendingLabel}</div>
           </div>
         </div>
       )}
@@ -107,7 +110,7 @@ export function OrderDetailClient({ order }: Props) {
   // User-facing string arrays MUST be inside the component after t() — see memory.md BUG-013–016
   const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
     pending:    { bg: '#FFF7ED', text: '#E8632A', label: t('banner_pending') },
-    confirmed:  { bg: '#EFF6FF', text: '#2563EB', label: t('banner_confirmed') },
+    confirmed:  { bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)', label: t('banner_confirmed') },
     dispatched: { bg: '#FFF7ED', text: '#E8632A', label: t('banner_dispatched') },
     delivered:  { bg: '#F0FDF4', text: '#16A34A', label: t('banner_delivered') },
     cancelled:  { bg: '#FEF2F2', text: '#DC2626', label: t('banner_cancelled') },
@@ -175,7 +178,8 @@ export function OrderDetailClient({ order }: Props) {
                 <Phone size={18} className="text-[#78716C] flex-shrink-0" />
                 <a
                   href={`tel:${order.customer.phone}`}
-                  className="text-[14px] text-[#2563EB] hover:underline"
+                  className="text-[14px] hover:underline"
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   {order.customer.phone}
                 </a>
@@ -252,11 +256,17 @@ export function OrderDetailClient({ order }: Props) {
 
           {/* Pickup code card — shown after merchant confirms */}
           {order.status === 'confirmed' && order.merchant_pickup_code != null && (
-            <div className="rounded-xl p-4 border border-[#BFDBFE] bg-[#EFF6FF] space-y-3">
-              <p className="text-[14px] font-semibold text-[#1E40AF]">
+            <div
+              className="rounded-xl p-4 space-y-3"
+              style={{
+                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)',
+              }}
+            >
+              <p className="text-[14px] font-semibold" style={{ color: 'var(--color-primary)' }}>
                 Le coursier viendra chercher votre commande
               </p>
-              <div className="text-[13px] text-[#1E3A8A] space-y-1">
+              <div className="text-[13px] space-y-1" style={{ color: 'var(--color-primary)' }}>
                 {order.delivery_date && (
                   <p>Date de collecte : <span className="font-medium">{formatDate(order.delivery_date)}</span></p>
                 )}
@@ -265,18 +275,27 @@ export function OrderDetailClient({ order }: Props) {
                 )}
               </div>
               <div>
-                <p className="text-[12px] text-[#1E3A8A] mb-2">
+                <p className="text-[12px] mb-2" style={{ color: 'var(--color-primary)' }}>
                   Code de collecte à donner au coursier :
                 </p>
                 <div className="flex gap-2 justify-center">
                   {String(order.merchant_pickup_code).padStart(6, '0').split('').map((digit, i) => (
-                    <div key={i} className="w-9 h-11 border-2 border-[#93C5FD] rounded-lg flex items-center justify-center bg-white text-[18px] font-bold text-[#1E40AF]">
+                    <div
+                      key={i}
+                      className="w-9 h-11 rounded-lg flex items-center justify-center bg-white text-[18px] font-bold"
+                      style={{
+                        borderWidth: '2px',
+                        borderStyle: 'solid',
+                        borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                        color: 'var(--color-primary)',
+                      }}
+                    >
                       {digit}
                     </div>
                   ))}
                 </div>
               </div>
-              <p className="text-[11px] text-[#3B82F6] text-center">
+              <p className="text-[11px] text-center" style={{ color: 'var(--color-primary)' }}>
                 Communiquez ce code uniquement au coursier Plaza assigné à votre commande.
               </p>
             </div>
@@ -312,7 +331,8 @@ export function OrderDetailClient({ order }: Props) {
               {order.status === 'pending' && (
                 <button
                   onClick={() => run(confirmOrderAction)}
-                  className="w-full h-12 bg-[#2563EB] text-white text-[14px] font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors"
+                  className="w-full h-12 text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
                   Confirmer la commande
                 </button>

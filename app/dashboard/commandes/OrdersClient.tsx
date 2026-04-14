@@ -72,7 +72,7 @@ export function OrdersClient({ orders }: Props) {
               onClick={() => setActiveFilter(f.id)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeFilter === f.id
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
               }`}
             >

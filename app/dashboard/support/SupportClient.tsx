@@ -34,7 +34,7 @@ function MessageBubble({ msg, plazaLabel }: { msg: SupportMessage; plazaLabel: s
     return (
       <div className="flex justify-end">
         <div className="flex flex-col items-end max-w-[70%]">
-          <div className="bg-[#2563EB] text-white px-4 py-2.5 rounded-xl rounded-tr-none text-sm">
+          <div className="bg-[var(--color-primary)] text-white px-4 py-2.5 rounded-xl rounded-tr-none text-sm">
             {msg.content}
           </div>
           <div className="text-[11px] text-[#A8A29E] mt-1">{time}</div>
@@ -45,7 +45,7 @@ function MessageBubble({ msg, plazaLabel }: { msg: SupportMessage; plazaLabel: s
 
   return (
     <div className="flex gap-2 max-w-[70%]">
-      <div className="w-8 h-8 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+      <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
         P
       </div>
       <div>
@@ -90,7 +90,7 @@ function ChatPanel({
 
   const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
     open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
-    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)' },
     resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
     closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
   };
@@ -112,7 +112,7 @@ function ChatPanel({
         <div className="mx-4 mt-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 text-sm flex items-center gap-4">
           <span className="text-[#78716C]">
             {t('linked_order')}:{' '}
-            <Link href={`/dashboard/commandes/${ticket.order_id}`} className="text-[#2563EB] hover:underline">
+            <Link href={`/dashboard/commandes/${ticket.order_id}`} className="hover:underline" style={{ color: 'var(--color-primary)' }}>
               {t('view_order')}
             </Link>
           </span>
@@ -164,13 +164,13 @@ function ChatPanel({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+          className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           disabled={isSending}
         />
         <button
           onClick={handleSend}
           disabled={!content.trim() || isSending}
-          className="w-10 h-10 bg-[#2563EB] text-white rounded-full flex items-center justify-center hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
+          className="w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 transition-colors"
         >
           {isSending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -195,7 +195,7 @@ export function SupportClient({ tickets }: Props) {
   const t = useTranslations('support');
   const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
     open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
-    in_progress: { label: t('ticket_status_in_progress'), bg: '#EFF6FF', text: '#2563EB' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)' },
     resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
     closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
   };
@@ -263,7 +263,7 @@ export function SupportClient({ tickets }: Props) {
               <h2 className="text-lg font-semibold text-[#1C1917]">{t('title')}</h2>
               <button
                 onClick={() => setShowNewTicket(true)}
-                className="h-9 px-3 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+                className="h-9 px-3 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
               >
                 {t('new_ticket')}
               </button>
@@ -324,7 +324,7 @@ export function SupportClient({ tickets }: Props) {
               />
             ) : loadingMessages ? (
               <div className="flex-1 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#2563EB]" />
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
               </div>
             ) : (
               <div className="flex-1 flex items-center justify-center">
@@ -347,7 +347,7 @@ export function SupportClient({ tickets }: Props) {
           <h1 className="text-xl font-semibold text-[#1C1917]">{t('title')}</h1>
           <button
             onClick={() => setShowNewTicket(true)}
-            className="h-9 px-3 bg-[#2563EB] text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-[#1d4ed8] transition-colors"
+            className="h-9 px-3 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:opacity-90 transition-colors"
           >
             <Plus className="w-4 h-4" />
             {t('new_ticket_mobile')}

@@ -74,7 +74,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
         <h1 className="text-[18px] font-semibold text-[#1C1917]">{t('title')}</h1>
         <Link
           href="/dashboard/produits/nouveau"
-          className="h-9 px-4 bg-[#2563EB] text-white text-sm rounded-lg hover:bg-[#1d4ed8] transition-colors flex items-center"
+          className="h-9 px-4 text-white text-sm rounded-lg hover:opacity-90 transition-opacity flex items-center"
+          style={{ backgroundColor: 'var(--color-primary)' }}
         >
           {t('add')}
         </Link>
@@ -89,7 +90,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 ps-10 pe-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+            className="w-full h-10 ps-10 pe-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
           />
         </div>
       </div>
@@ -102,7 +103,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
             onClick={() => setFilter(f.id)}
             className={`px-3 h-10 rounded-full text-sm whitespace-nowrap font-medium transition-colors ${
               filter === f.id
-                ? 'bg-[#2563EB] text-white'
+                ? 'bg-[var(--color-primary)] text-white'
                 : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
             }`}
           >
@@ -227,8 +228,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                   aria-label={product.is_visible ? t('visible') : t('hidden')}
                   disabled={isPending}
                   onClick={() => handleToggleVisibility(product.id, product.is_visible)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 disabled:opacity-60 ${
-                    product.is_visible ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-60 ${
+                    product.is_visible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
                   }`}
                 >
                   <span
@@ -242,7 +243,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
               <div className="w-20 flex items-center gap-1">
                 <Link
                   href={`/dashboard/produits/${product.id}`}
-                  className="p-1 text-[#78716C] hover:text-[#2563EB] transition-colors"
+                  className="p-1 text-[#78716C] hover:text-[var(--color-primary)] transition-colors"
                   title={t('editButton')}
                 >
                   <Edit2 className="w-5 h-5" />
@@ -308,14 +309,15 @@ function EmptyState({ hasProducts }: { hasProducts: boolean }) {
   }
   return (
     <div className="py-16 text-center">
-      <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center mx-auto mb-4">
-        <Plus className="w-8 h-8 text-[#2563EB]" />
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+        <Plus className="w-8 h-8" style={{ color: 'var(--color-primary)' }} />
       </div>
       <h3 className="text-base font-semibold text-[#1C1917] mb-2">{t('emptyTitle')}</h3>
       <p className="text-sm text-[#78716C] mb-4">{t('emptyCta')}</p>
       <Link
         href="/dashboard/produits/nouveau"
-        className="inline-flex items-center gap-2 h-9 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+        className="inline-flex items-center gap-2 h-9 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+        style={{ backgroundColor: 'var(--color-primary)' }}
       >
         <Plus className="w-4 h-4" />
         {t('addButton')}

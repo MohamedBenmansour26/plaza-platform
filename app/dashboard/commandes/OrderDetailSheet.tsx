@@ -70,12 +70,14 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
                 </div>
               )}
               {state === 'current' && (
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  status === 'dispatched' ? 'border-[#E8632A]' : 'border-[#2563EB]'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full animate-pulse ${
-                    status === 'dispatched' ? 'bg-[#E8632A]' : 'bg-[#2563EB]'
-                  }`} />
+                <div
+                  className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                  style={{ borderColor: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ backgroundColor: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' }}
+                  />
                 </div>
               )}
               {state === 'pending' && (
@@ -85,11 +87,14 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
                 <div className="w-0.5 h-5 bg-[#E2E8F0] my-1" />
               )}
             </div>
-            <span className={`text-[13px] pt-0.5 ${
-              state === 'done'    ? 'text-[#1C1917]' :
-              state === 'current' ? (status === 'dispatched' ? 'font-semibold text-[#E8632A]' : 'font-semibold text-[#2563EB]') :
-              'text-[#A8A29E]'
-            }`}>
+            <span
+              className={`text-[13px] pt-0.5 ${
+                state === 'done'    ? 'text-[#1C1917]' :
+                state === 'current' ? 'font-semibold' :
+                'text-[#A8A29E]'
+              }`}
+              style={state === 'current' ? { color: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' } : undefined}
+            >
               {step.label}
             </span>
           </div>
@@ -154,7 +159,8 @@ function ActionBar({
         {!isPending && order.status === 'pending' && (
           <button
             onClick={() => run(confirmOrderAction)}
-            className="flex-1 h-10 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+            className="flex-1 h-10 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Confirmer la commande
           </button>
@@ -230,7 +236,8 @@ export function OrderDetailSheet({ order, onClose }: Props) {
                       <Phone className="w-4 h-4 text-[#78716C] flex-shrink-0" />
                       <a
                         href={`tel:${order.customer.phone}`}
-                        className="text-sm text-[#2563EB] hover:underline"
+                        className="text-sm hover:underline"
+                        style={{ color: 'var(--color-primary)' }}
                         dir="ltr"
                       >
                         {order.customer.phone}

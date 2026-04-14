@@ -113,9 +113,9 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Mobile top bar */}
       <div className="md:hidden bg-white px-4 py-4 flex items-center justify-between border-b border-[#E2E8F0]">
-        <div className="text-[#2563EB] font-bold text-xl">Plaza</div>
+        <div className="font-bold text-xl" style={{ color: 'var(--color-primary)' }}>Plaza</div>
         <Link href="/dashboard/compte">
-          <div className="w-10 h-10 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center font-semibold text-sm">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
             {merchant.store_name.slice(0, 2).toUpperCase()}
           </div>
         </Link>
@@ -150,8 +150,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
           <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#EFF6FF] flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-[#2563EB]" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+                <ShoppingBag className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
               </div>
             </div>
             <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
@@ -296,19 +296,22 @@ export default async function DashboardPage() {
               <div className="text-sm font-semibold text-[#1C1917] mb-1">
                 Votre boutique est en ligne !
               </div>
-              <div className="text-sm text-[#2563EB] underline mb-3">{storeUrl}</div>
+              <div className="text-sm underline mb-3" style={{ color: 'var(--color-primary)' }}>{storeUrl}</div>
               <CopyButton url={`https://${storeUrl}`} />
             </div>
 
             {/* Desktop card */}
             <div className="hidden md:block bg-white rounded-xl shadow-sm p-5">
               <div className="text-[13px] text-[#78716C] uppercase mb-2">Votre boutique</div>
-              <p className="text-sm text-[#2563EB] underline mb-3">{storeUrl}</p>
+              <p className="text-sm underline mb-3" style={{ color: 'var(--color-primary)' }}>{storeUrl}</p>
               <a
                 href={`https://${storeUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-9 border border-[#2563EB] text-[#2563EB] rounded-lg text-sm font-medium hover:bg-[#EFF6FF] transition-colors flex items-center justify-center gap-2"
+                className="w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 8%, white)')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <ExternalLink className="w-4 h-4" />
                 Voir la boutique
