@@ -15,7 +15,7 @@ type OrderItemWithProduct = OrderItem & {
 };
 
 type OrderWithRelations = Order & {
-  customer: Customer;
+  customer: Customer | null;
   order_items: OrderItemWithProduct[];
   merchant: { store_name: string; phone: string | null } | null;
   // Add timestamp fields (may be null until schema migration runs)
@@ -275,18 +275,18 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <h2 className="font-semibold text-[#1C1917] mb-3">Informations client</h2>
           <div className="text-sm">
             <p className="text-[#78716C]">Nom</p>
-            <p className="font-medium text-[#1C1917]">{order.customer.full_name}</p>
+            <p className="font-medium text-[#1C1917]">{order.customer?.full_name ?? ''}</p>
           </div>
           <div className="text-sm">
             <p className="text-[#78716C]">Téléphone</p>
-            <p className="font-medium text-[#1C1917]">{order.customer.phone}</p>
+            <p className="font-medium text-[#1C1917]">{order.customer?.phone ?? ''}</p>
           </div>
-          {order.customer.address && (
+          {order.customer?.address && (
             <div className="text-sm">
               <p className="text-[#78716C]">Adresse</p>
               <p className="font-medium text-[#1C1917]">
-                {order.customer.address}
-                {order.customer.city ? `, ${order.customer.city}` : ''}
+                {order.customer?.address}
+                {order.customer?.city ? `, ${order.customer.city}` : ''}
               </p>
             </div>
           )}
