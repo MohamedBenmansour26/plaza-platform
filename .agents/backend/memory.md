@@ -5,8 +5,9 @@ _Updated after every session._
 
 ## Current state
 
-Status: Sprint 2 — 13 April 2026.
-PLZ-047 (P1) + PLZ-048 (P2) complete. PR #38 open, tagged Anas for review.
+Status: Sprint 2 — 14 April 2026.
+PLZ-047 (P1) + PLZ-048 (P2) complete. PR #38 merged.
+PLZ-054 (P0): customers anon SELECT RLS policy — PR open, tagged Anas for review.
 
 ---
 
@@ -93,6 +94,7 @@ Post findings to Notion: "Backend Audit — [date]"
 | 2026-04-13 | working_hours jsonb | ✅ Production | DROP COLUMN working_hours |
 | 2026-04-13 | terminal_enabled, phone_verified, cmi_enabled | ✅ Production | DROP COLUMN terminal_enabled, phone_verified, cmi_enabled |
 | 2026-04-13 | decrement_stock() function | ✅ Production | DROP FUNCTION decrement_stock(uuid) |
+| 2026-04-14 | PLZ-054: customers anon SELECT policy (storefront tracking) | ⏳ PR open | DROP POLICY "customers: public select by order" ON customers |
 
 ---
 
