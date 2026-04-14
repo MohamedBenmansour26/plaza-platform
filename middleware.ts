@@ -9,7 +9,7 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'as-needed',
 });
 
-const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
+const PROTECTED_PREFIXES = ['/dashboard', '/onboarding', '/driver/livraisons', '/driver/historique', '/driver/profil', '/driver/onboarding'];
 // Internal pages that are exempt from auth (no merchant data exposed).
 const PUBLIC_OVERRIDES = ['/dashboard/agents'];
 
@@ -45,7 +45,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      const loginUrl = new URL('/auth/login', request.url);
+      // Route driver users to driver auth, merchants to merchant auth
+      const isDriverRoute = PROTECTED_PREFIXES
+        .filter(p => p.startsWith('/driver'))
+        .some(p => pathname.startsWith(p));
+      const loginUrl = isDriverRoute
+        ? new URL('/driver/auth/phone', request.url)
+        : new URL('/auth/login', request.url);
       return NextResponse.redirect(loginUrl);
     }
   }
