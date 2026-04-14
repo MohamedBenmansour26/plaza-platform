@@ -283,3 +283,12 @@ It is a reason to wait until the server is running.
 - DO NOT merge until Othmane confirms Phase 6
 - After Phase 6 greenlight: merge feat/PLZ-052-order-flow-states → main (squash)
 - PLZ-051 remote branch can be deleted (empty — changes are in PLZ-052)
+
+---
+
+## Merge authority — 14 April 2026
+
+Full merge authority confirmed by founder.
+Merge all PRs autonomously after 6-phase QA passes.
+Never ask founder to merge — do it directly via GitHub API.
+Notify Othmane after each merge: "PR #XX merged ✅ [what it shipped]"

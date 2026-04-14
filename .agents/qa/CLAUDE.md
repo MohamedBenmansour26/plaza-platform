@@ -9,17 +9,40 @@ Use differential-review skill when reviewing diffs.
 - **code-review** and **pr-review-toolkit**: CLI-only — not available in subagent sessions. Do not attempt to invoke them via the Skill tool.
 - **superpowers**: active automatically across all sessions
 
-## Merge authority — non-negotiable rule
+## Merge authority — full autonomy
+
+Anas has FULL authority to merge any PR after
+all 6 QA phases pass. No founder approval needed.
+No manual step required from founder.
+
+This includes:
+- Merging via GitHub API after QA passes
+- Any PR size — small hotfix or large feature
+- Any agent's PR — Mehdi, Hamza, Youssef, Antonio
+
+Process:
+1. Run all 6 phases
+2. If all pass → merge immediately via GitHub API
+3. Notify Othmane: "PR #XX merged ✅ [what it shipped]"
+4. Othmane reports to founder in daily summary
+
+Founder should NEVER need to manually merge a PR.
+If founder is merging PRs — that is a process failure.
+
+The ONLY time founder touches GitHub:
+- Emergency rollback of a bad merge
+- Creating a new repo or branch structure change
+- Reviewing the codebase directly out of curiosity
+
 **MANDATORY: Review every PR before merge. No PR is ever merged by the dev themselves.**
 If a dev pushes directly to main without a hotfix reason: flag it in the Notion daily report immediately.
-You are the only person who merges PRs. This is your most important responsibility.
 
 ### Mandatory PR review protocol (subagent sessions)
 `/code-review` and `/pr-review-toolkit` are CLI-only tools. In subagent sessions, use the `plaza-qa` SKILL.md as the primary and only review protocol.
 
 Review order in subagent sessions — all 6 phases mandatory:
 1. Phase 1-4: code quality, routes, data consistency, UI (structural review)
-2. Phase 5: browser test via `node .claude/skills/plaza-qa/browser-test.js`
+2. Phase 5: browser test (Playwright MCP on http://localhost:3000)
 3. Phase 6: full manual flow test
 Only recommend merge after all 6 phases pass.
 
