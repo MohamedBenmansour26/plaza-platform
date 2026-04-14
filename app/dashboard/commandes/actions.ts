@@ -25,24 +25,16 @@ async function getMerchantId(): Promise<string> {
 
 export async function confirmOrderAction(orderId: string): Promise<void> {
   const merchantId = await getMerchantId();
+  const supabase = await createClient();
+  const pickupCode = Math.floor(100000 + Math.random() * 900000);
+
+  // Write pickup code before status update
+  await supabase
+    .from('orders')
+    .update({ merchant_pickup_code: pickupCode } as never)
+    .eq('id', orderId)
+    .eq('merchant_id', merchantId);
+
   await updateOrderStatus(orderId, 'confirmed', merchantId);
-  revalidatePath('/dashboard/commandes');
-}
-
-export async function dispatchOrderAction(orderId: string): Promise<void> {
-  const merchantId = await getMerchantId();
-  await updateOrderStatus(orderId, 'dispatched', merchantId);
-  revalidatePath('/dashboard/commandes');
-}
-
-export async function deliverOrderAction(orderId: string): Promise<void> {
-  const merchantId = await getMerchantId();
-  await updateOrderStatus(orderId, 'delivered', merchantId);
-  revalidatePath('/dashboard/commandes');
-}
-
-export async function cancelOrderAction(orderId: string): Promise<void> {
-  const merchantId = await getMerchantId();
-  await updateOrderStatus(orderId, 'cancelled', merchantId);
   revalidatePath('/dashboard/commandes');
 }

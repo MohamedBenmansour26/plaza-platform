@@ -6,9 +6,6 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import {
   confirmOrderAction,
-  dispatchOrderAction,
-  deliverOrderAction,
-  cancelOrderAction,
 } from './actions';
 import { formatMAD } from './OrdersClient';
 import type { OrderWithDetails } from '@/lib/db/orders';
@@ -112,7 +109,6 @@ function ActionBar({
   onClose: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const run = (action: (id: string) => Promise<void>) => {
@@ -141,36 +137,13 @@ function ActionBar({
 
   return (
     <>
-      {showCancelConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-base font-semibold text-[#1C1917] mb-2">Annuler cette commande ?</h3>
-            <p className="text-sm text-[#78716C] mb-6">Cette action ne peut pas être annulée.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
-              >
-                Non
-              </button>
-              <button
-                onClick={() => { setShowCancelConfirm(false); run(cancelOrderAction); }}
-                className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors"
-              >
-                Oui, annuler
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {actionError && (
         <div className="w-full mb-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-3 text-sm text-[#DC2626]">
           {actionError}
         </div>
       )}
 
-      <div className="flex gap-3 w-full">
+      <div className="flex flex-col gap-2 w-full">
         {isPending && (
           <div className="flex-1 flex items-center justify-center gap-2 text-sm text-[#78716C]">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -179,37 +152,22 @@ function ActionBar({
         )}
 
         {!isPending && order.status === 'pending' && (
-          <>
-            <button
-              onClick={() => run(confirmOrderAction)}
-              className="flex-1 h-10 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
-            >
-              Confirmer
-            </button>
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              className="flex-1 h-10 border-[1.5px] border-[#DC2626] text-[#DC2626] bg-white rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
-            >
-              Annuler
-            </button>
-          </>
-        )}
-
-        {!isPending && order.status === 'confirmed' && (
           <button
-            onClick={() => run(dispatchOrderAction)}
-            className="flex-1 h-10 bg-[#E8632A] text-white rounded-lg text-sm font-medium hover:bg-[#d45424] transition-colors"
+            onClick={() => run(confirmOrderAction)}
+            className="flex-1 h-10 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
           >
-            Marquer comme expédiée
+            Confirmer la commande
           </button>
         )}
 
-        {!isPending && order.status === 'dispatched' && (
+        {!isPending && (
           <button
-            onClick={() => run(deliverOrderAction)}
-            className="flex-1 h-10 bg-[#16A34A] text-white rounded-lg text-sm font-medium hover:bg-[#158a3c] transition-colors"
+            onClick={() => {
+              window.location.href = `mailto:support@plaza.ma?subject=Problème commande ${order.order_number}&body=Bonjour, je rencontre un problème avec la commande ${order.order_number}.`;
+            }}
+            className="flex-1 h-10 border border-[#E2E8F0] text-[#78716C] rounded-lg text-sm font-medium hover:bg-[#F5F5F4] transition-colors"
           >
-            Marquer comme livrée
+            Signaler un problème
           </button>
         )}
       </div>

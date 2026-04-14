@@ -240,19 +240,30 @@ const STOREFRONT_ORDER_SELECT = `
   id, order_number, merchant_id, status, payment_method,
   subtotal, delivery_fee, total, notes, customer_pin,
   created_at, updated_at, delivery_date, delivery_slot,
+  confirmed_at, dispatched_at, delivered_at,
   customer:customers(
     id, full_name, phone, address, city
   ),
   order_items(
     id, product_id, name_fr, quantity, unit_price,
     products(name_fr, image_url, price)
-  )
+  ),
+  merchant:merchants(store_name, phone)
 ` as const;
+
+export type StorefrontOrder = Order & {
+  customer: Customer;
+  order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[];
+  merchant: { store_name: string; phone: string | null } | null;
+  confirmed_at?: string | null;
+  dispatched_at?: string | null;
+  delivered_at?: string | null;
+};
 
 export async function getOrderByNumber(
   orderNumber: string,
   merchantId: string,
-): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
+): Promise<StorefrontOrder | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('orders')
@@ -261,13 +272,13 @@ export async function getOrderByNumber(
     .eq('merchant_id', merchantId)
     .single();
   if (error || !data) return null;
-  return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
+  return data as StorefrontOrder;
 }
 
 export async function getOrderById(
   id: string,
   merchantId: string,
-): Promise<(Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] }) | null> {
+): Promise<StorefrontOrder | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('orders')
@@ -276,7 +287,7 @@ export async function getOrderById(
     .eq('merchant_id', merchantId)
     .single();
   if (error || !data) return null;
-  return data as Order & { customer: Customer; order_items: (OrderItem & { products: { name_fr: string; image_url: string | null; price: number } | null })[] };
+  return data as StorefrontOrder;
 }
 
 // getSlugByOrderNumber lives in app/_actions/trackOrder.ts — import from there
