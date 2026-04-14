@@ -257,7 +257,7 @@ export type Database = {
           customer_pin:     number | null
           delivery_date:    string | null   // YYYY-MM-DD from Postgres date
           delivery_slot:    string | null   // format: "09:00-10:00"
-          // PLZ-052: merchant pickup code + status timestamps (migration pending)
+          // PLZ-052/PLZ-056: merchant pickup code + status timestamps (applied 2026-04-14)
           merchant_pickup_code: number | null
           confirmed_at:     string | null
           dispatched_at:    string | null

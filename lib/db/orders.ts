@@ -57,9 +57,9 @@ export type OrderWithDetails = {
   updated_at: string;
   delivery_date: string | null;
   delivery_slot: string | null;
-  /** PLZ-052: merchant pickup code — null until schema migration runs */
+  /** PLZ-056: merchant pickup code for driver handoff verification (migration applied 2026-04-14) */
   merchant_pickup_code: number | null;
-  /** PLZ-052: status timestamps — null until schema migration runs */
+  /** PLZ-052: status timestamps (migration applied 2026-04-14) */
   confirmed_at: string | null;
   dispatched_at: string | null;
   delivered_at: string | null;
