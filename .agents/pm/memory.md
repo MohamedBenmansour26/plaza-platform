@@ -128,3 +128,36 @@ New token with `repo` + `workflow` scope provided by founder. Updated in `.env.l
 ### Blockers
 - PLZ-006 (Supabase schema) blocked on PLZ-003 merge
 - PLZ-007 (Auth) blocked on PLZ-006
+
+---
+
+## Session — 13–14 April 2026
+
+### Shipped
+- SKILL.md Phase 5 → Playwright MCP (localhost:3000 only, 6-step sequence)
+- QA memory → Playwright MCP rules documented
+- PLZ-051: on main (`24d81f6`)
+- PR #38 (PLZ-047/048 N+1 + select): MERGED `ec6ac68` after Youssef fix
+- PR #41 (PLZ-052 order timeline): opened, QA APPROVED all 6 phases
+
+### PR #41 — PLZ-052 — waiting on Anas to merge autonomously
+QA approved. Schema migration (merchant_pickup_code, confirmed_at, dispatched_at, delivered_at) needed before prod deploy — all nullable, app safe until then.
+
+### P2 backlog (10 items)
+- 9× #2563EB hardcoded in dashboard timeline
+- 1× StoreInfoSheet uses hardcoded SCHEDULE not merchant.working_hours (P2-005)
+
+---
+
+## Founder decision — 14 April 2026
+
+**Anas full merge authority confirmed.**
+Anas merges all PRs autonomously after 6-phase QA passes.
+Founder never merges PRs. If founder is merging — that is a process failure, flag it.
+Updated: .agents/qa/CLAUDE.md + .agents/qa/memory.md
+Commit: chore/anas-full-merge-authority → main
+
+**Process change:**
+- Remove "WAITING ON FOUNDER: MERGE PR #XX" from daily reports going forward
+- Merge status comes from Anas notification to Othmane
+- Othmane reports merged items in daily summary only
