@@ -30,7 +30,7 @@ function minutesUntilSlotEnd(slot: string | null): number {
 export function LivraisonsClient({ driver, initialDeliveries }: Props) {
   const router = useRouter();
   const [isAvailable, setIsAvailable] = useState(driver.is_available);
-  const [deliveries, setDeliveries] = useState(initialDeliveries);
+  const [deliveries, _setDeliveries] = useState(initialDeliveries);
   const [pendingAssignment, setPendingAssignment] = useState<DriverDelivery | null>(null);
 
   // Real-time subscription for new assignments
