@@ -57,7 +57,8 @@ function ForgotPINContent() {
         <div className="px-4 pb-8">
           <button
             onClick={handleSendOTP}
-            className="h-14 w-full rounded-xl bg-[#2563EB] text-white text-base font-semibold hover:bg-[#1d4ed8] transition-colors"
+            className="h-14 w-full rounded-xl text-white text-base font-semibold hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             {t('sendSms')}
           </button>

@@ -65,13 +65,13 @@ function PINLoginContent() {
       <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-lg p-8">
         {/* Logo */}
         <div className="pb-6">
-          <div className="text-[28px] font-bold text-[#2563EB] text-center">{t('logo')}</div>
+          <div className="text-[28px] font-bold text-center" style={{ color: 'var(--color-primary)' }}>{t('logo')}</div>
         </div>
 
         {/* Merchant card */}
         <div className="bg-[#FAFAF9] rounded-2xl p-4 flex flex-col items-center">
-          <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center">
-            <span className="text-xl font-semibold text-[#2563EB]">{getInitials(merchantName)}</span>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+            <span className="text-xl font-semibold" style={{ color: 'var(--color-primary)' }}>{getInitials(merchantName)}</span>
           </div>
           <div className="text-lg font-semibold text-[#1C1917] mt-2">{merchantName}</div>
           <div className="text-[13px] text-[#78716C]">{phoneNumber}</div>
@@ -91,7 +91,7 @@ function PINLoginContent() {
                     isLocked
                       ? 'border-2 border-[#A8A29E] bg-[#F5F5F4]'
                       : pin.length > index
-                      ? 'bg-[#2563EB]'
+                      ? 'bg-[var(--color-primary)]'
                       : 'border-2 border-[#E2E8F0] bg-white'
                   }`}
                 />
@@ -128,7 +128,7 @@ function PINLoginContent() {
                 }}
                 id={`pin-login-${index}`}
                 className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
-                  isLocked ? 'border-[#E2E8F0] bg-[#F5F5F4]' : error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
+                  isLocked ? 'border-[#E2E8F0] bg-[#F5F5F4]' : error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               />
             ))}
@@ -187,7 +187,8 @@ function PINLoginContent() {
 
           <button
             onClick={() => router.push('/auth/forgot-pin')}
-            className="text-[13px] text-[#2563EB] text-center mt-4 w-full"
+            className="text-[13px] text-center mt-4 w-full"
+            style={{ color: 'var(--color-primary)' }}
           >
             {t('forgotPin')}
           </button>
@@ -198,7 +199,8 @@ function PINLoginContent() {
             <span className="text-sm text-[#78716C]">Pas encore de compte ?{' '}</span>
             <a
               href="/auth/login"
-              className="text-sm font-medium text-[#2563EB] hover:underline"
+              className="text-sm font-medium hover:underline"
+              style={{ color: 'var(--color-primary)' }}
             >
               S&apos;inscrire
             </a>

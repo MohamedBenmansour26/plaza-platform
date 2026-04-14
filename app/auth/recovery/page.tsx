@@ -58,7 +58,8 @@ export default function PhoneRecoveryPage() {
                 setIsSuccess(false);
                 setEmail('');
               }}
-              className="text-[13px] text-[#2563EB] mt-6"
+              className="text-[13px] mt-6"
+            style={{ color: 'var(--color-primary)' }}
             >
               {t('resend')}
             </button>
@@ -82,8 +83,8 @@ export default function PhoneRecoveryPage() {
 
         <div className="flex-1 px-4 mt-12">
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center">
-              <MailOpen className="w-8 h-8 text-[#2563EB]" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+              <MailOpen className="w-8 h-8" style={{ color: 'var(--color-primary)' }} />
             </div>
           </div>
 
@@ -105,7 +106,7 @@ export default function PhoneRecoveryPage() {
               }}
               placeholder={t('emailPlaceholder')}
               className={`h-12 w-full border rounded-xl px-4 text-sm text-[#1C1917] outline-none transition-colors ${
-                error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[#2563EB]'
+                error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)]'
               }`}
             />
             {error && (
@@ -120,9 +121,10 @@ export default function PhoneRecoveryPage() {
             disabled={!email}
             className={`h-14 w-full rounded-xl text-base font-semibold transition-colors ${
               email
-                ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]'
+                ? 'text-white hover:opacity-90'
                 : 'bg-[#E2E8F0] text-[#A8A29E] cursor-not-allowed'
             }`}
+            style={email ? { backgroundColor: 'var(--color-primary)' } : undefined}
           >
             {t('submit')}
           </button>

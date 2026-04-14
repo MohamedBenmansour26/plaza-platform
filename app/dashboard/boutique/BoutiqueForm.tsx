@@ -233,7 +233,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       role="switch"
       aria-checked={checked}
       onClick={onChange}
-      className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
+      className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
         checked ? 'bg-[#16A34A]' : 'bg-[#E2E8F0]'
       }`}
     >
@@ -259,7 +259,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             type="text"
             value={storeName}
             onChange={(e) => setStoreName(e.target.value)}
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           />
         </div>
         <div>
@@ -270,7 +270,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             onChange={(e) =>
               setStoreSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))
             }
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           />
           <p className="text-xs text-[#78716C] mt-1.5">plaza.ma/store/{storeSlug}</p>
         </div>
@@ -280,7 +280,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] resize-none"
+            className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] resize-none"
           />
         </div>
         <div>
@@ -288,7 +288,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white"
+            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
           >
             <option value="" disabled>Choisir une catégorie…</option>
             {STORE_CATEGORIES.map((cat) => (
@@ -328,7 +328,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             value={locationDescription}
             onChange={(e) => setLocationDescription(e.target.value)}
             placeholder="Ex: 2ème étage, porte bleue, en face du café..."
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           />
         </div>
       </div>
@@ -356,7 +356,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           />
           <div
             onClick={() => !uploadingLogo && logoInputRef.current?.click()}
-            className="w-[120px] h-[120px] border-2 border-dashed border-[#E2E8F0] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#2563EB] transition-colors overflow-hidden"
+            className="w-[120px] h-[120px] border-2 border-dashed border-[#E2E8F0] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-primary)] transition-colors overflow-hidden"
           >
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -410,7 +410,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           />
           <div
             onClick={() => !uploadingBanner && bannerInputRef.current?.click()}
-            className="w-full h-[140px] border-2 border-dashed border-[#E2E8F0] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#2563EB] transition-colors overflow-hidden"
+            className="w-full h-[140px] border-2 border-dashed border-[#E2E8F0] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-primary)] transition-colors overflow-hidden"
           >
             {bannerUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -436,8 +436,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       </h2>
 
       {/* Info box */}
-      <div className="bg-[#EFF6FF] rounded-lg p-3 mb-5 flex gap-3">
-        <Info className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+      <div className="rounded-lg p-3 mb-5 flex gap-3" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
         <div>
           <p className="text-[13px] font-semibold text-[#1C1917] mb-1">{t('deliveryHowTitle')}</p>
           <div className="space-y-0.5 text-xs text-[#78716C] leading-relaxed">
@@ -468,7 +468,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                 type="number"
                 value={freeDeliveryThreshold}
                 onChange={(e) => setFreeDeliveryThreshold(e.target.value)}
-                className="w-[120px] h-12 px-3 text-center text-xl font-semibold border-2 border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+                className="w-[120px] h-12 px-3 text-center text-xl font-semibold border-2 border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
               />
               <span className="text-base text-[#78716C]">MAD</span>
             </div>
@@ -686,7 +686,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             href={`/store/${storeSlug}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 text-[13px] text-[#2563EB] hover:underline flex items-center gap-1"
+            className="mt-2 text-[13px] hover:underline flex items-center gap-1"
+            style={{ color: 'var(--color-primary)' }}
           >
             <ExternalLink className="w-3.5 h-3.5" />
             {t('viewStore')}
@@ -706,7 +707,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           href={`/store/${storeSlug}`}
           target="_blank"
           rel="noreferrer"
-          className="text-sm text-[#2563EB]"
+          className="text-sm"
+          style={{ color: 'var(--color-primary)' }}
         >
           {t('viewStore')}
         </a>
@@ -716,7 +718,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       <div className="bg-white mx-4 mt-4 rounded-xl shadow-sm p-4">
         <p className="text-xs text-[#78716C] uppercase mb-1">{t('storeLink')}</p>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-[#2563EB] flex-1 truncate">
+          <span className="text-sm flex-1 truncate" style={{ color: 'var(--color-primary)' }}>
             plaza.ma/store/{storeSlug}
           </span>
           <button type="button" onClick={copyLink} className="p-1.5">
@@ -744,7 +746,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           type="button"
           onClick={handleSave}
           disabled={isPending || uploadingLogo || uploadingBanner}
-          className="w-full h-12 bg-[#2563EB] text-white text-base font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+          className="w-full h-12 text-white text-base font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+          style={{ backgroundColor: 'var(--color-primary)' }}
         >
           {isPending ? t('saving') : t('save')}
         </button>
@@ -763,7 +766,10 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             href={`/store/${storeSlug}`}
             target="_blank"
             rel="noreferrer"
-            className="h-10 px-4 border border-[#2563EB] text-[#2563EB] rounded-lg text-sm font-medium hover:bg-[#EFF6FF] transition-colors flex items-center gap-2"
+            className="h-10 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)', backgroundColor: 'transparent' }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 8%, white)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
           >
             <ExternalLink className="w-4 h-4" />
             {t('viewStore')}
@@ -785,7 +791,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                 type="button"
                 onClick={handleSave}
                 disabled={isPending || uploadingLogo || uploadingBanner}
-                className="w-[200px] h-12 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+                className="w-[200px] h-12 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {isPending ? t('saving') : t('save')}
               </button>
@@ -825,7 +832,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                   <a
                     href={item.href}
                     onClick={() => setShowIncompleteModal(false)}
-                    className="text-sm text-[#2563EB] hover:underline"
+                    className="text-sm hover:underline"
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     {item.label}
                   </a>

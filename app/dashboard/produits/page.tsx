@@ -37,7 +37,8 @@ export default async function ProduitsPage() {
           <h1 className="text-2xl font-semibold text-[#1C1917]">Mes produits</h1>
           <Link
             href="/dashboard/produits/nouveau"
-            className="h-10 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors flex items-center gap-2"
+            className="h-10 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             <Plus className="w-5 h-5" />
             Ajouter un produit

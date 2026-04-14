@@ -66,7 +66,7 @@ export default function PhoneEntryPage() {
       <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-lg p-8">
         {/* Logo area */}
         <div className="flex flex-col items-center justify-center pb-8">
-          <div className="text-[28px] font-bold text-[#2563EB]">{t('logo')}</div>
+          <div className="text-[28px] font-bold" style={{ color: 'var(--color-primary)' }}>{t('logo')}</div>
           <div className="text-sm text-[#78716C] text-center mt-2">{t('tagline')}</div>
         </div>
 
@@ -106,9 +106,10 @@ export default function PhoneEntryPage() {
             disabled={!isValid || loading}
             className={`h-14 w-full rounded-xl text-base font-semibold transition-colors ${
               isValid && !loading
-                ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]'
+                ? 'text-white hover:opacity-90'
                 : 'bg-[#E2E8F0] text-[#A8A29E] cursor-not-allowed'
             }`}
+            style={isValid && !loading ? { backgroundColor: 'var(--color-primary)' } : undefined}
           >
             {t('continue')}
           </button>
@@ -121,7 +122,8 @@ export default function PhoneEntryPage() {
           <span className="text-sm text-[#78716C]">Vous avez déjà un compte ?{' '}</span>
           <a
             href="/auth/pin-login"
-            className="text-sm font-medium text-[#2563EB] hover:underline"
+            className="text-sm font-medium hover:underline"
+            style={{ color: 'var(--color-primary)' }}
           >
             Se connecter
           </a>

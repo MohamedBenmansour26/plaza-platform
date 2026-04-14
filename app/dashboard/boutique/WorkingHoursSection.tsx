@@ -105,7 +105,7 @@ export function WorkingHoursSection({ initialHours }: Props) {
           id="sameForAll"
           checked={sameForAll}
           onChange={(e) => handleSameForAll(e.target.checked)}
-          className="w-4 h-4 rounded border-[#E2E8F0] text-[#2563EB] focus:ring-[#2563EB]"
+          className="w-4 h-4 rounded border-[#E2E8F0] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
         />
         <label htmlFor="sameForAll" className="text-sm text-[#1C1917] cursor-pointer select-none">
           Mêmes horaires tous les jours
@@ -124,7 +124,7 @@ export function WorkingHoursSection({ initialHours }: Props) {
                 role="switch"
                 aria-checked={day.open}
                 onClick={() => updateDay(key, { open: !day.open })}
-                className={`relative w-10 h-5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 flex-shrink-0 ${
+                className={`relative w-10 h-5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 flex-shrink-0 ${
                   day.open ? 'bg-[#16A34A]' : 'bg-[#E2E8F0]'
                 }`}
               >
@@ -148,14 +148,14 @@ export function WorkingHoursSection({ initialHours }: Props) {
                     type="time"
                     value={day.from}
                     onChange={(e) => updateDay(key, { from: e.target.value })}
-                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                   <span className="text-xs text-[#78716C]">À :</span>
                   <input
                     type="time"
                     value={day.to}
                     onChange={(e) => updateDay(key, { to: e.target.value })}
-                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </div>
               ) : (

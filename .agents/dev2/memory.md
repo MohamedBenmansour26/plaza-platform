@@ -109,3 +109,35 @@ Listed in PR description. NOT added to messages/*.json per standing rule.
 ### StatusBadge i18n coordination:
 Mehdi's PLZ-030 PR migrated StatusBadge.tsx to useTranslations('orders').
 Pull main before opening PLZ-032 PR merge.
+
+---
+
+## PLZ-055 — Full color sweep — 14 April 2026
+
+**Branch:** `feat/PLZ-055-color-sweep`
+**Status:** PR open, awaiting Anas review
+
+### What was done:
+Replaced all hardcoded `#2563EB` (blue) with `var(--color-primary)` across 30 files in `app/`.
+
+### Replacement patterns used:
+- Tailwind: `bg-[#2563EB]` → `bg-[var(--color-primary)]`, `text-[#2563EB]` → `text-[var(--color-primary)]`
+- `hover:bg-[#1d4ed8]` removed → replaced with `hover:opacity-90 transition-opacity`
+- Light blue palette (#EFF6FF, #BFDBFE, #DBEAFE) → `color-mix(in srgb, var(--color-primary) 8%, white)` via inline style
+- Inline styles: `style={{ color: '#2563EB' }}` → `style={{ color: 'var(--color-primary)' }}`
+- SVG: `fill="#2563EB"` → `fill="var(--color-primary)"`
+
+### Intentionally NOT changed (data values):
+- `app/dashboard/boutique/BoutiqueForm.tsx` line 30: `{ value: '#2563EB', name: 'Bleu' }` — color picker option
+- `app/dashboard/boutique/BoutiqueForm.tsx` line 69: `useState(merchant.primary_color ?? '#2563EB')` — form state
+- `app/dashboard/boutique/actions.ts` line 89: fallback `'#2563EB'` — server action default
+
+### Note on Recharts SVG:
+`PAYMENT_COLORS.terminal` uses `'var(--color-primary)'` as SVG fill value.
+Modern browsers resolve CSS custom properties in SVG rendered in HTML context.
+Comment added in FinancesClient.tsx to document this.
+
+### Hover on outlined buttons:
+`onMouseEnter`/`onMouseLeave` handlers used in BoutiqueForm.tsx (view store button) and
+dashboard/page.tsx (view store button) — required because Tailwind v3 cannot express
+`hover:bg-[color-mix(...)]` for dynamic CSS variable tints.

@@ -423,11 +423,11 @@ export function ProductDetailClient({
               <p className="text-xs text-[#16A34A]/80">À votre convenance</p>
             </div>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
-            <Shield className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+          <div className="border rounded-xl p-3 flex items-start gap-2" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+            <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
             <div>
-              <p className="font-semibold text-sm text-[#2563EB]">Paiement sécurisé</p>
-              <p className="text-xs text-[#2563EB]/80">100% protégé</p>
+              <p className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Paiement sécurisé</p>
+              <p className="text-xs" style={{ color: 'var(--color-primary)', opacity: 0.8 }}>100% protégé</p>
             </div>
           </div>
         </div>

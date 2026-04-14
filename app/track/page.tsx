@@ -50,7 +50,7 @@ export default function TrackOrderPage() {
       <div className="bg-white border-b border-[#E2E8F0] h-14 flex items-center justify-center px-4">
         <div className="w-20 h-8">
           <svg viewBox="0 0 80 32" className="w-full h-full">
-            <rect x="0" y="0" width="32" height="32" rx="6" fill="#2563EB" />
+            <rect x="0" y="0" width="32" height="32" rx="6" fill="var(--color-primary)" />
             <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold">
               P
             </text>
@@ -68,8 +68,8 @@ export default function TrackOrderPage() {
           className="w-full max-w-md space-y-6"
         >
           <div className="text-center space-y-3">
-            <div className="w-20 h-20 bg-[#EFF6FF] rounded-full flex items-center justify-center mx-auto">
-              <Package className="w-10 h-10 text-[#2563EB]" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
+              <Package className="w-10 h-10" style={{ color: 'var(--color-primary)' }} />
             </div>
             <h1 className="font-bold text-[28px]">Suivre ma commande</h1>
             <p className="text-[15px] text-[#78716C]">
@@ -91,10 +91,10 @@ export default function TrackOrderPage() {
                     setError(false);
                   }}
                   placeholder="PLZ-042"
-                  className={`w-full h-14 pl-4 pr-12 text-[17px] font-medium tracking-wide border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-colors ${
+                  className={`w-full h-14 pl-4 pr-12 text-[17px] font-medium tracking-wide border-2 rounded-lg focus:outline-none transition-colors ${
                     error
                       ? 'border-[#DC2626] bg-red-50'
-                      : 'border-[#E2E8F0] bg-white focus:border-[#2563EB]'
+                      : 'border-[#E2E8F0] bg-white focus:border-[var(--color-primary)]'
                   }`}
                 />
                 <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8A29E]" />
@@ -113,7 +113,8 @@ export default function TrackOrderPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-[#2563EB] text-white rounded-lg font-medium text-[16px] hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full h-14 text-white rounded-lg font-medium text-[16px] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               {loading ? (
                 <>
@@ -126,18 +127,19 @@ export default function TrackOrderPage() {
             </button>
           </form>
 
-          <div className="bg-[#EFF6FF] rounded-xl p-5 border border-[#2563EB]/20">
+          <div className="rounded-xl p-5" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
             <h3 className="font-medium text-[15px] mb-2">💡 Où trouver mon numéro ?</h3>
             <p className="text-[13px] text-[#78716C] leading-relaxed">
               Votre numéro de commande vous a été fourni lors de la confirmation. Il commence par{' '}
-              <span className="font-medium text-[#2563EB]">PLZ-</span> suivi de 3 chiffres.
+              <span className="font-medium" style={{ color: 'var(--color-primary)' }}>PLZ-</span> suivi de 3 chiffres.
             </p>
           </div>
 
           <div className="text-center">
             <button
               onClick={() => router.back()}
-              className="text-[14px] text-[#2563EB] hover:underline"
+              className="text-[14px] hover:underline"
+              style={{ color: 'var(--color-primary)' }}
             >
               ← Retour
             </button>

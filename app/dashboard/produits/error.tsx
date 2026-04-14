@@ -23,7 +23,8 @@ export default function ProduitsError({ error, reset }: Props) {
         </p>
         <button
           onClick={reset}
-          className="h-10 px-6 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+          className="h-10 px-6 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: 'var(--color-primary)' }}
         >
           Réessayer
         </button>

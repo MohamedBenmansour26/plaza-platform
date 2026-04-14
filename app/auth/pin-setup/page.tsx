@@ -98,8 +98,8 @@ function PINSetupContent() {
           </button>
           {/* Step dots */}
           <div className="flex gap-2">
-            <div className={`w-2 h-2 rounded-full ${step === 1 ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'}`} />
-            <div className={`w-2 h-2 rounded-full ${step === 2 ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'}`} />
+            <div className={`w-2 h-2 rounded-full ${step === 1 ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'}`} />
+            <div className={`w-2 h-2 rounded-full ${step === 2 ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'}`} />
           </div>
           <div className="w-11" />
         </div>
@@ -118,7 +118,7 @@ function PINSetupContent() {
                 key={index}
                 className={`w-5 h-5 rounded-full transition-all ${
                   currentPin.length > index
-                    ? error ? 'bg-[#DC2626]' : 'bg-[#2563EB]'
+                    ? error ? 'bg-[#DC2626]' : 'bg-[var(--color-primary)]'
                     : 'border-2 border-[#E2E8F0] bg-white'
                 }`}
               />
@@ -155,7 +155,7 @@ function PINSetupContent() {
               }}
               id={`pin-input-${index}`}
               className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
-                error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20'
+                error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
               }`}
             />
           ))}

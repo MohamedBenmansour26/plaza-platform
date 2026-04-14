@@ -141,7 +141,7 @@ function OTPContent() {
                   ? 'border border-[#DC2626] bg-[#FEF2F2]'
                   : digit
                   ? 'bg-[#F8FAFC] border border-[#E2E8F0]'
-                  : 'border-2 border-[#2563EB] ring-2 ring-[#2563EB]/20'
+                  : 'border-2 border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20'
               } ${isLocked ? 'bg-[#F5F5F4] text-[#A8A29E]' : 'text-[#1C1917]'}`}
             />
           ))}
@@ -182,7 +182,8 @@ function OTPContent() {
             ) : (
               <button
                 onClick={handleResend}
-                className="text-[13px] text-[#2563EB] underline"
+                className="text-[13px] underline"
+                style={{ color: 'var(--color-primary)' }}
               >
                 {t('resend')}
               </button>
