@@ -3,7 +3,7 @@ import { getDriverProfile, getDeliveryHistory } from '@/lib/db/driver';
 import { redirect } from 'next/navigation';
 import { BottomNav } from '../_components/BottomNav';
 import { LogoutButton } from '../_components/LogoutButton';
-import { Bike, FileText, Shield, CreditCard, Settings, HelpCircle, ChevronRight, TrendingUp } from 'lucide-react';
+import { Bike, FileText, Shield, CreditCard, Settings, HelpCircle, ChevronRight, TrendingUp, Calendar } from 'lucide-react';
 
 export default async function ProfilPage() {
   const supabase = await createClient();
@@ -92,6 +92,7 @@ export default async function ProfilPage() {
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
+            { Icon: Calendar,   label: 'Mes horaires',   color: 'var(--color-primary)', href: '/driver/profil/horaires' },
             { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#' },
             { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#' },
           ].map(({ Icon, label, color, href }) => (
