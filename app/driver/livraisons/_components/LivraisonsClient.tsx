@@ -8,11 +8,15 @@ import { BottomNav } from '../../_components/BottomNav';
 import { OfflineBanner } from '../../_components/OfflineBanner';
 import { UrgencyPill } from '../../_components/UrgencyPill';
 import { NewAssignmentOverlay } from './NewAssignmentOverlay';
+import { PoolCard } from './PoolCard';
 import type { DriverProfile, DriverDelivery } from '@/lib/db/driver';
+import type { PoolDelivery } from '@/lib/dispatch/types';
 
 type Props = {
   driver: DriverProfile;
   initialDeliveries: DriverDelivery[];
+  initialPool:  PoolDelivery[];
+  driverCity:   string;
 };
 
 function minutesUntilSlotEnd(slot: string | null): number {
@@ -27,11 +31,16 @@ function minutesUntilSlotEnd(slot: string | null): number {
   return Math.max(0, Math.round((slotEnd.getTime() - now.getTime()) / 60000));
 }
 
-export function LivraisonsClient({ driver, initialDeliveries }: Props) {
+export function LivraisonsClient({ driver, initialDeliveries, initialPool, driverCity }: Props) {
   const router = useRouter();
   const [isAvailable, setIsAvailable] = useState(driver.is_available);
   const [deliveries, _setDeliveries] = useState(initialDeliveries);
+  const [pool, setPool] = useState<PoolDelivery[]>(initialPool);
   const [pendingAssignment, setPendingAssignment] = useState<DriverDelivery | null>(null);
+
+  const hasActiveDelivery = deliveries.some(
+    d => d.status === 'accepted' || d.status === 'picked_up'
+  );
 
   // Real-time subscription for new assignments
   useEffect(() => {
@@ -61,6 +70,42 @@ export function LivraisonsClient({ driver, initialDeliveries }: Props) {
 
     return () => { supabase.removeChannel(channel); };
   }, [driver.id]);
+
+  // Real-time subscription for pool deliveries in the driver's city
+  useEffect(() => {
+    if (!driverCity) return;
+
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`deliveries:pool:${driverCity}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'deliveries',
+          filter: `pickup_city=eq.${driverCity}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT' && payload.new.status === 'available') {
+            setPool(prev => {
+              const exists = prev.some(d => d.id === payload.new.id);
+              if (exists) return prev;
+              return [...prev, payload.new as PoolDelivery].sort(
+                (a, b) => new Date(a.pool_created_at).getTime() - new Date(b.pool_created_at).getTime()
+              );
+            });
+          }
+          if (payload.eventType === 'UPDATE' && payload.new.status !== 'available') {
+            setPool(prev => prev.filter(d => d.id !== payload.new.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [driverCity]);
 
   async function toggleAvailability() {
     const next = !isAvailable;
@@ -105,13 +150,33 @@ export function LivraisonsClient({ driver, initialDeliveries }: Props) {
             <p className="text-base text-[#78716C]">Vous êtes hors ligne</p>
             <p className="text-[13px] text-[#A8A29E] text-center">Activez votre disponibilité pour recevoir des commandes</p>
           </div>
-        ) : deliveries.length === 0 ? (
+        ) : deliveries.length === 0 && pool.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 gap-3">
             <Package className="w-12 h-12 text-[#A8A29E]" />
             <p className="text-[16px] text-[#78716C]">Aucune livraison active</p>
           </div>
         ) : (
           <>
+            {/* Pool section — hidden when driver has an active delivery */}
+            {!hasActiveDelivery && (
+              <section className="mb-4">
+                {pool.length > 0 ? (
+                  <>
+                    <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--color-primary)]">
+                      Dans votre zone
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {pool.map(d => <PoolCard key={d.id} delivery={d} />)}
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-gray-200 py-8 text-center text-sm text-gray-400">
+                    Aucune livraison disponible pour le moment
+                  </div>
+                )}
+              </section>
+            )}
+
             {toCollect.length > 0 && (
               <>
                 <p className="text-[13px] font-semibold uppercase tracking-wider text-[#78716C] mb-3">À collecter ({toCollect.length})</p>
