@@ -32,7 +32,7 @@ export type Json =
 
 export type PaymentMethod   = 'cod' | 'terminal' | 'card'
 export type OrderStatus     = 'pending' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled'
-export type DeliveryStatus  = 'pending' | 'assigned' | 'picked_up' | 'delivered' | 'failed'
+export type DeliveryStatus  = 'available' | 'accepted' | 'pending' | 'assigned' | 'picked_up' | 'delivered' | 'failed' | 'timed_out' | 'cancelled'
 export type TicketStatus    = 'open' | 'in_progress' | 'resolved' | 'closed'
 export type TicketCategory  = 'order_issue' | 'payment_issue' | 'technical' | 'other'
 
@@ -213,28 +213,35 @@ export type Database = {
       // ── Customers (anonymous buyers) ───────────────────
       customers: {
         Row: {
-          id:         string
-          full_name:  string
-          phone:      string
-          address:    string | null
-          city:       string | null
-          created_at: string
+          id:           string
+          full_name:    string
+          phone:        string
+          address:      string | null
+          city:         string | null
+          created_at:   string
+          // PLZ-058: dispatch engine — customer delivery coordinates
+          location_lat: number | null
+          location_lng: number | null
         }
         Insert: {
-          id?:        string
-          full_name:  string
-          phone:      string
-          address?:   string | null
-          city?:      string | null
-          created_at?: string
+          id?:           string
+          full_name:     string
+          phone:         string
+          address?:      string | null
+          city?:         string | null
+          created_at?:   string
+          location_lat?: number | null
+          location_lng?: number | null
         }
         Update: {
-          id?:        string
-          full_name?: string
-          phone?:     string
-          address?:   string | null
-          city?:      string | null
-          created_at?: string
+          id?:           string
+          full_name?:    string
+          phone?:        string
+          address?:      string | null
+          city?:         string | null
+          created_at?:   string
+          location_lat?: number | null
+          location_lng?: number | null
         }
         Relationships: []
       }
