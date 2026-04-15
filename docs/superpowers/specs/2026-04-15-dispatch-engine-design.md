@@ -107,7 +107,20 @@ pickup_photo_url        text nullable     -- renamed from collection_photo_url
 delivery_photo_url      text nullable     -- already exists from PLZ-057
 ```
 
-### 3.5 Indexes
+### 3.5 New table: `dispatch_errors`
+
+Audit log for failed `createDispatchDelivery` calls. Written by server action (service role). Read by admin via Supabase Studio. No RLS needed.
+
+```sql
+id            uuid pk default gen_random_uuid()
+order_id      uuid references orders(id)
+error_message text not null
+created_at    timestamptz not null default now()
+```
+
+A silent delivery INSERT failure would be invisible to the `timed_out` queue (nothing to time out). This table is the only visibility into that failure mode at MVP.
+
+### 3.7 Indexes
 
 ```sql
 -- Pool eligibility query
@@ -130,7 +143,7 @@ CREATE INDEX deliveries_timeout_idx
   WHERE status = 'available';
 ```
 
-### 3.6 Postgres function: `accept_delivery`
+### 3.8 Postgres function: `accept_delivery`
 
 ```sql
 CREATE OR REPLACE FUNCTION accept_delivery(
@@ -155,7 +168,7 @@ $$;
 
 Returns `true` = accepted, `false` = already taken by another driver.
 
-### 3.7 pg_cron timeout monitor
+### 3.9 pg_cron timeout monitor
 
 Runs every minute via Supabase pg_cron:
 
@@ -172,7 +185,7 @@ SELECT cron.schedule(
 );
 ```
 
-### 3.8 RLS policies (new)
+### 3.10 RLS policies (new)
 
 - `dispatch_config`: SELECT for all authenticated users; INSERT/UPDATE/DELETE for service role only
 - `driver_schedules`: full CRUD for own rows (`driver_id` matches driver's record for `auth.uid()`)
