@@ -194,6 +194,8 @@ CREATE POLICY "driver_schedules: driver full access"
   );
 
 -- deliveries pool: driver can see available deliveries in their city
+-- Note: deliveries RLS may already be enabled from PLZ-057; this is idempotent.
+ALTER TABLE deliveries ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "deliveries: driver can see pool in own city"
   ON deliveries FOR SELECT
   TO authenticated
