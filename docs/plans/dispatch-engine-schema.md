@@ -103,9 +103,21 @@ Full lifecycle values required:
 | `pool_created_at` | `timestamptz` | nullable | Timestamp when the delivery entered the pool (`status` set to `available`). |
 | `pool_expires_at` | `timestamptz` | nullable | `pool_created_at + pool_timeout_minutes`. The timeout background job filters on this column. |
 | `accepted_at` | `timestamptz` | nullable | Timestamp when a driver atomically claimed the delivery. |
-| `merchant_pickup_code` | `text` | nullable | Copied from `orders.merchant_pickup_code` at delivery creation. Avoids a join in `confirmCollection`. Type is `text` here (the orders column is `integer`; cast on copy). |
+| `merchant_pickup_code` | `text` | nullable | Copied from `orders.merchant_pickup_code` at delivery creation. Avoids a join in `confirmCollection`. Type is `text` here (the orders column is `integer`; cast on copy). **See pipeline note below.** |
 | `pickup_photo_url` | `text` | nullable | Photo taken by driver at package collection. See Antonio correction #3 and photo column note in section 7. |
 | `delivery_photo_url` | `text` | nullable | Photo taken by driver at doorstep delivery. Already exists from PLZ-057. |
+
+**Pipeline note — `merchant_pickup_code` copy timing (Othmane correction):**
+
+`merchant_pickup_code` MUST be copied from `orders.merchant_pickup_code` at delivery record creation time, inside `createDispatchDelivery()`. It is NOT fetched later at collection time. The driver reads it from the delivery record locally — no live join to `orders` is needed at the merchant door.
+
+The `INSERT INTO deliveries` statement in `createDispatchDelivery` must include:
+
+```sql
+merchant_pickup_code = (SELECT merchant_pickup_code FROM orders WHERE id = $order_id)
+```
+
+This means the value is embedded in the delivery row at the moment the delivery enters the pool. Any subsequent change to `orders.merchant_pickup_code` does NOT propagate to the delivery record. This is intentional: the code is frozen at dispatch time for consistency.
 
 ---
 
@@ -216,11 +228,20 @@ driver_earnings_mad = base_fee_mad + (per_km_rate_mad × distance_km)
 Where:
 - `base_fee_mad` — from `dispatch_config` at the time of delivery creation
 - `per_km_rate_mad` — from `dispatch_config` at the time of delivery creation
-- `distance_km` — straight-line distance computed from merchant coordinates to customer address coordinates at delivery creation
+- `distance_km` — haversine straight-line distance with a fixed 10% margin applied (see below)
+
+**`distance_km` calculation (Othmane correction — 10% margin is fixed from day one):**
+
+```
+haversine_raw_km  = haversine(merchant_lat, merchant_lng, customer_lat, customer_lng)
+distance_km       = haversine_raw_km * 1.10
+```
+
+The 10% margin is a fixed, mandatory part of the formula — not a future optional adjustment. It is applied at every delivery creation from the first day of PLZ-058. The rationale is that straight-line distance consistently underestimates the real road distance in urban Moroccan road grids. The 10% correction produces a fairer earnings estimate without requiring a live Mapbox API call.
 
 **Why freeze?** Admin may update `dispatch_config.per_km_rate_mad` between when a delivery is created and when it is completed. Drivers must see (and rely on) the earnings figure shown at acceptance time. Freezing at creation prevents retroactive changes.
 
-**Important:** `distance_km` is straight-line (haversine). The engine does not call any mapping API at this stage. A more accurate road-distance calculation can be added in a later sprint (Part 4 Mapbox integration).
+**Note:** `distance_km` uses the haversine formula (straight-line + 10% margin). The engine does not call any mapping API at this stage. A more accurate road-distance calculation can be added in a later sprint (Part 4 Mapbox integration), but the 10% margin stays in the formula regardless.
 
 ---
 
@@ -386,6 +407,161 @@ DROP INDEX IF EXISTS deliveries_timeout_idx;
 4. **Timeout background job** — how is the timeout enforced? Options: Supabase Edge Function on a schedule (pg_cron or external cron), or a Postgres trigger on `pool_expires_at`. Architecture decision needed before implementation.
 
 5. **`merchant_pickup_code` type** — the column is `integer` on `orders`. The dispatch schema defines it as `text` on `deliveries` for flexibility. Confirm the preferred type or keep as `integer` on both.
+
+---
+
+## 12. Driver App Changes for PLZ-058
+
+This section documents what changes in the driver app code and schema when the dispatch engine is introduced. All items below apply to the branch that implements PLZ-058.
+
+---
+
+### 12.1 `lib/db/driver.ts` — `getActiveDeliveries`
+
+**Change:** Update the status filter.
+
+- Current (PLZ-057): `status IN ('assigned', 'picked_up')`
+- After PLZ-058: `status IN ('accepted', 'picked_up')`
+
+This reflects the `assigned → accepted` enum rename resolved in section 11 (item 1).
+
+---
+
+### 12.2 `lib/db/driver.ts` — new function `getPoolDeliveries(driverCity: string)`
+
+Returns deliveries currently in the pool for the driver's city.
+
+```typescript
+// Query:
+// SELECT id, distance_km, estimated_duration_min, driver_earnings_mad,
+//        pickup_city, pool_created_at, pool_expires_at
+// FROM deliveries
+// WHERE status = 'available'
+//   AND pickup_city = driverCity
+//   AND pool_expires_at > now()
+// ORDER BY pool_created_at ASC   -- oldest first = fairness
+```
+
+**Column selection note:** delivery address detail (street) is NOT included in the pool view — only zone (city). Full address detail is revealed after the driver accepts the delivery.
+
+---
+
+### 12.3 `lib/db/driver.ts` — new function `acceptDelivery(deliveryId: string, driverId: string)`
+
+Atomic update to claim a pool delivery.
+
+```typescript
+// UPDATE deliveries
+// SET status = 'accepted', driver_id = $driverId, accepted_at = now()
+// WHERE id = $deliveryId AND status = 'available'
+// RETURNING id
+
+// Returns: { accepted: boolean }
+// accepted = false means another driver was faster (no row returned by RETURNING)
+```
+
+**Implementation note:** Uses the `accept_delivery` Postgres function (see section 12.4) called from the server action, rather than a direct Supabase update. RLS cannot express "only if `status = 'available'`" on UPDATE without a helper function.
+
+---
+
+### 12.4 New Postgres function: `accept_delivery(p_delivery_id uuid, p_driver_id uuid)`
+
+```sql
+CREATE OR REPLACE FUNCTION accept_delivery(p_delivery_id uuid, p_driver_id uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_updated_id uuid;
+BEGIN
+  UPDATE deliveries
+  SET status = 'accepted',
+      driver_id = p_driver_id,
+      accepted_at = now()
+  WHERE id = p_delivery_id
+    AND status = 'available'
+  RETURNING id INTO v_updated_id;
+
+  RETURN v_updated_id IS NOT NULL;
+END;
+$$;
+```
+
+Returns `true` if the delivery was claimed (status was `'available'` at the moment of update), `false` if another driver was faster. `SECURITY DEFINER` allows the atomic conditional update without requiring service role in server actions.
+
+---
+
+### 12.5 `app/driver/livraisons/page.tsx` (server component)
+
+**Change:** Currently fetches active deliveries only. After PLZ-058, also fetch pool deliveries for the driver's city.
+
+```typescript
+// Before:
+const deliveries = await getActiveDeliveries(driverId);
+
+// After:
+const [deliveries, poolDeliveries] = await Promise.all([
+  getActiveDeliveries(driverId),
+  getPoolDeliveries(driverCity),
+]);
+// Pass both to LivraisonsClient
+```
+
+---
+
+### 12.6 `app/driver/livraisons/_components/LivraisonsClient.tsx`
+
+**Change:** Currently shows active delivery list only. After PLZ-058, add a "pool" section above the active deliveries.
+
+Pool cards display:
+- Distance (`distance_km`)
+- Pickup zone (city)
+- Delivery zone (city — no street detail until acceptance)
+- Estimated time (`estimated_duration_min`)
+- Earnings (`driver_earnings_mad`)
+- "Accepter" button — calls `acceptDelivery(deliveryId, driverId)` server action
+
+**Realtime subscription:** channel `deliveries:pool:{city}`
+- `INSERT` events — new deliveries appear in the pool
+- `UPDATE` events where `status != 'available'` — delivery disappears from pool (accepted by another driver or timed out)
+
+---
+
+### 12.7 `app/driver/profil/page.tsx`
+
+**Change:** Add a "Mes horaires" section with a weekly schedule summary display. Section links to the new page `/driver/profil/horaires`.
+
+---
+
+### 12.8 New page: `app/driver/profil/horaires/page.tsx`
+
+Weekly schedule editor for the driver.
+
+- 7 rows: Monday through Sunday (`day_of_week` 0–6, see section 4 for encoding)
+- Each row contains: active toggle (`is_active`), start time (`start_time`), end time (`end_time`)
+- Saves to `driver_schedules` table (one row per driver per day, `UPSERT` on `(driver_id, day_of_week)`)
+
+---
+
+### 12.9 `app/driver/auth/pin-setup/actions.ts` — `completeDriverPinSetupAction`
+
+**Change:** After PIN setup completes successfully, also `INSERT` default `driver_schedules` rows — one row per day of week, all with `is_active = false` by default.
+
+```sql
+INSERT INTO driver_schedules (driver_id, day_of_week, start_time, end_time, is_active)
+VALUES
+  ($driver_id, 0, '08:00', '20:00', false),
+  ($driver_id, 1, '08:00', '20:00', false),
+  ($driver_id, 2, '08:00', '20:00', false),
+  ($driver_id, 3, '08:00', '20:00', false),
+  ($driver_id, 4, '08:00', '20:00', false),
+  ($driver_id, 5, '08:00', '20:00', false),
+  ($driver_id, 6, '08:00', '20:00', false)
+ON CONFLICT (driver_id, day_of_week) DO NOTHING;
+```
+
+**Why `is_active = false`:** Drivers start with no working hours set — they must configure their schedule in `/driver/profil/horaires` before they appear eligible in the dispatch pool. This prevents a newly registered driver from receiving deliveries before they have confirmed their availability windows.
 
 ---
 
