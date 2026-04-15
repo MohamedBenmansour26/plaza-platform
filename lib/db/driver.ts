@@ -198,7 +198,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
   const { data, error } = await supabase
     .from('deliveries')
     .select(`
-      id, delivered_at,
+      id, delivered_at, driver_earnings_mad,
       orders (
         order_number, total, payment_method, delivery_slot, delivered_at,
         customers ( full_name, city )
@@ -211,6 +211,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
     .returns<{
       id: string;
       delivered_at: string | null;
+      driver_earnings_mad: number | null;
       orders: {
         order_number: string;
         total: number;
@@ -230,7 +231,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
       order_number: row.orders.order_number,
       customer_name: row.orders.customers?.full_name ?? 'Client',
       city: row.orders.customers?.city ?? null,
-      earnings: Math.round((row.orders.total / 100) * 0.08),
+      earnings: row.driver_earnings_mad ?? 0,
       payment_method: row.orders.payment_method,
       on_time: onTime,
       delivery_slot: row.orders.delivery_slot,
