@@ -94,7 +94,7 @@ export default async function ProfilPage() {
           {[
             { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#' },
             { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#' },
-          ].map(({ Icon, label, color, href }, i) => (
+          ].map(({ Icon, label, color, href }) => (
             <a key={label} href={href}
               className="px-4 flex items-center gap-3 border-b border-gray-100"
               style={{ height: 52 }}>
