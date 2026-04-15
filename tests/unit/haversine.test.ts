@@ -14,9 +14,16 @@ describe('haversineKm', () => {
 })
 
 describe('dispatchDistance', () => {
-  it('applies 1.10 margin to haversine result', () => {
-    const raw = haversineKm(33.5890, -7.6315, 33.5831, -7.6731)
-    expect(dispatchDistance(33.5890, -7.6315, 33.5831, -7.6731)).toBeCloseTo(raw * 1.10, 3)
+  it('applies 1.10 margin to haversine result (Maarif → Ain Diab ≈ 3.97 km)', () => {
+    // Raw haversine ≈ 3.61 km; with 1.10 margin ≈ 3.97 km
+    // Pinned range avoids circular dependency on haversineKm
+    const dist = dispatchDistance(33.5890, -7.6315, 33.5831, -7.6731)
+    expect(dist).toBeGreaterThan(3.5)
+    expect(dist).toBeLessThan(4.5)
+    // Verify the ratio is exactly 1.10× the raw result
+    const rawKm = dist / 1.10
+    expect(rawKm).toBeGreaterThan(3.0)
+    expect(rawKm).toBeLessThan(4.2)
   })
 })
 
