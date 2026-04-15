@@ -372,60 +372,110 @@ export type Database = {
         ]
       }
 
-      // ── Drivers ────────────────────────────────────────
+      // ── Drivers ────────────────────────────────────────────────
       drivers: {
         Row: {
-          id:           string
-          full_name:    string
-          phone:        string
-          is_available: boolean
-          created_at:   string
+          id:                 string
+          full_name:          string
+          phone:              string
+          is_available:       boolean
+          created_at:         string
+          // PLZ-057: auth + onboarding columns
+          user_id:            string | null
+          otp_attempts:       number
+          locked_until:       string | null
+          phone_verified:     boolean
+          vehicle_type:       'moto' | 'velo' | 'voiture' | 'autre' | null
+          license_photo_url:  string | null
+          insurance_url:      string | null
+          id_front_url:       string | null
+          id_back_url:        string | null
+          onboarding_status:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
         }
         Insert: {
-          id?:           string
-          full_name:     string
-          phone:         string
-          is_available?: boolean
-          created_at?:   string
+          id?:                string
+          full_name:          string
+          phone:              string
+          is_available?:      boolean
+          created_at?:        string
+          user_id?:           string | null
+          otp_attempts?:      number
+          locked_until?:      string | null
+          phone_verified?:    boolean
+          vehicle_type?:      'moto' | 'velo' | 'voiture' | 'autre' | null
+          license_photo_url?: string | null
+          insurance_url?:     string | null
+          id_front_url?:      string | null
+          id_back_url?:       string | null
+          onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
         }
         Update: {
-          id?:           string
-          full_name?:    string
-          phone?:        string
-          is_available?: boolean
-          created_at?:   string
+          id?:                string
+          full_name?:         string
+          phone?:             string
+          is_available?:      boolean
+          created_at?:        string
+          user_id?:           string | null
+          otp_attempts?:      number
+          locked_until?:      string | null
+          phone_verified?:    boolean
+          vehicle_type?:      'moto' | 'velo' | 'voiture' | 'autre' | null
+          license_photo_url?: string | null
+          insurance_url?:     string | null
+          id_front_url?:      string | null
+          id_back_url?:       string | null
+          onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
         }
         Relationships: []
       }
 
-      // ── Deliveries ─────────────────────────────────────
+      // ── Deliveries ─────────────────────────────────────────────
       deliveries: {
         Row: {
-          id:           string
-          order_id:     string
-          driver_id:    string | null
-          pickup_time:  string | null
-          delivered_at: string | null
-          status:       DeliveryStatus
-          created_at:   string
+          id:                   string
+          order_id:             string
+          driver_id:            string | null
+          pickup_time:          string | null
+          delivered_at:         string | null
+          status:               DeliveryStatus
+          created_at:           string
+          // PLZ-057: confirmation + issue columns
+          collection_photo_url: string | null
+          delivery_photo_url:   string | null
+          cod_confirmed:        boolean
+          issue_type:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
+          issue_notes:          string | null
+          issue_photo_url:      string | null
         }
         Insert: {
-          id?:           string
-          order_id:      string
-          driver_id?:    string | null
-          pickup_time?:  string | null
-          delivered_at?: string | null
-          status?:       DeliveryStatus
-          created_at?:   string
+          id?:                   string
+          order_id:              string
+          driver_id?:            string | null
+          pickup_time?:          string | null
+          delivered_at?:         string | null
+          status?:               DeliveryStatus
+          created_at?:           string
+          collection_photo_url?: string | null
+          delivery_photo_url?:   string | null
+          cod_confirmed?:        boolean
+          issue_type?:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
+          issue_notes?:          string | null
+          issue_photo_url?:      string | null
         }
         Update: {
-          id?:           string
-          order_id?:     string
-          driver_id?:    string | null
-          pickup_time?:  string | null
-          delivered_at?: string | null
-          status?:       DeliveryStatus
-          created_at?:   string
+          id?:                   string
+          order_id?:             string
+          driver_id?:            string | null
+          pickup_time?:          string | null
+          delivered_at?:         string | null
+          status?:               DeliveryStatus
+          created_at?:           string
+          collection_photo_url?: string | null
+          delivery_photo_url?:   string | null
+          cod_confirmed?:        boolean
+          issue_type?:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
+          issue_notes?:          string | null
+          issue_photo_url?:      string | null
         }
         Relationships: [
           {
