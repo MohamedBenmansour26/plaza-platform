@@ -79,7 +79,7 @@ function DeliverContent() {
               <Banknote className="w-5 h-5 text-[#E8632A]" />
               <span className="text-sm font-bold text-[#1C1917]">Paiement à collecter</span>
             </div>
-            <p className="text-[28px] font-bold text-[#E8632A]">{delivery.order.total} MAD</p>
+            <p className="text-[28px] font-bold text-[#E8632A]">{(delivery.order.total / 100).toFixed(2)} MAD</p>
             <label className="flex items-start gap-3 mt-3 cursor-pointer">
               <div
                 onClick={() => setCodChecked(c => !c)}
@@ -92,7 +92,7 @@ function DeliverContent() {
                 {codChecked && <span className="text-white text-sm font-bold">✓</span>}
               </div>
               <span className="text-sm text-[#1C1917]">
-                Je confirme avoir reçu <strong>{delivery.order.total} MAD</strong> en espèces
+                Je confirme avoir reçu <strong>{(delivery.order.total / 100).toFixed(2)} MAD</strong> en espèces
               </span>
             </label>
           </div>
