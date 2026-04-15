@@ -56,6 +56,26 @@ export async function completeDriverPinSetupAction(
     );
   if (upsertError) return { error: upsertError.message };
 
+  // Seed default schedule for all 7 days (0=Monday … 6=Sunday).
+  // ignoreDuplicates so re-setup doesn't wipe an existing schedule.
+  const { data: driverRow } = await service
+    .from('drivers')
+    .select('id')
+    .eq('phone', phone)
+    .maybeSingle();
+  if (driverRow) {
+    const defaultSchedule = Array.from({ length: 7 }, (_, i) => ({
+      driver_id: driverRow.id,
+      day_of_week: i,
+      is_active: false,
+      start_time: '08:00:00',
+      end_time: '18:00:00',
+    }));
+    await (service as any)
+      .from('driver_schedules')
+      .upsert(defaultSchedule, { onConflict: 'driver_id,day_of_week', ignoreDuplicates: true });
+  }
+
   // Establish session with anon client
   const supabase = await createClient();
   const { error: signInError } = await supabase.auth.signInWithPassword({
