@@ -7,9 +7,9 @@
 export type PoolDelivery = {
   id:                     string
   pickup_city:            string
-  distance_km:            number
-  estimated_duration_min: number
-  driver_earnings_mad:    number
+  distance_km:            number | null
+  estimated_duration_min: number | null
+  driver_earnings_mad:    number | null
   pool_created_at:        string
   pool_expires_at:        string
 }

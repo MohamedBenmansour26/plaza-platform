@@ -747,7 +747,12 @@ export type Database = {
 
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      accept_delivery: {
+        Args: { p_delivery_id: string; p_driver_id: string }
+        Returns: boolean
+      }
+    }
     Enums: {
       order_status:    OrderStatus
       payment_method:  PaymentMethod

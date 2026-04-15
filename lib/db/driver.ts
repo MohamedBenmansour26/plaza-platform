@@ -271,12 +271,12 @@ export async function acceptDelivery(
   driverId: string,
 ): Promise<AcceptDeliveryResult> {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .rpc('accept_delivery' as any, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .rpc('accept_delivery', {
       p_delivery_id: deliveryId,
       p_driver_id:   driverId,
-    } as any)
+    }) as { data: boolean | null; error: { message: string } | null }
 
   if (error) throw new Error(`acceptDelivery RPC failed: ${error.message}`)
 
