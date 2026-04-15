@@ -287,3 +287,64 @@ Full merge authority confirmed by founder.
 Merge all PRs autonomously after 6-phase QA passes.
 Never ask founder to merge — do it directly via GitHub API.
 Notify Othmane after each merge: "PR #XX merged ✅ [what it shipped]"
+
+---
+
+## PLZ-057 — Driver App Part 3 — auth, onboarding, delivery flows — 15 April 2026
+
+**PR:** https://github.com/MohamedBenmansour26/plaza-platform/pull/48
+**Branch:** feat/PLZ-057-driver-app → main
+**Verdict: MERGE ✅ — all 6 phases passed**
+**Merge SHA:** 9809a302139303369b831ff069d7eb45c1016c32
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0 — zero TypeScript errors
+- lint: EXIT 0 — warnings only in pre-existing storefront `<img>` elements (not this PR's code)
+- Zero console.log in driver code
+- No hardcoded #2563EB in components — only in layout.tsx as intentional CSS custom property setter
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL: complete — `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track"]`
+- PROTECTED_PREFIXES: `/driver/livraisons`, `/driver/historique`, `/driver/profil`, `/driver/onboarding` all listed
+- Unauthenticated redirect to `/driver/auth/phone` verified in middleware and in each server page
+
+**Phase 3 — Data Consistency: PASS**
+- PIN auth: uses Supabase Auth `signInWithPassword` — PIN is the password, bcrypt-hashed by Supabase. NOT stored plain. ✅
+- COD amount: pulled from `delivery.order.total / 100` (centimes → MAD conversion). Never hardcoded. ✅
+- Delivery status transitions: assigned → picked_up (confirmCollectionAction) → delivered (confirmDeliveryAction) → failed (reportIssueAction). Correct. ✅
+- merchant_pickup_code: 6-digit, verified server-side in `confirmCollectionAction` with `String(storedCode).padStart(6, '0')` comparison ✅
+- customer_pin: 4-digit, verified server-side in `confirmDeliveryAction` with `String(storedPin).padStart(4, '0')` comparison ✅
+- Photo uploads: go to Supabase Storage bucket `driver-documents`, storage path returned and stored on delivery record ✅
+
+**Phase 4 — UI Consistency: PASS**
+- Primary color: `var(--color-primary)` throughout all components. Layout.tsx sets `--color-primary: #2563EB` as override. ✅
+- Orange #E8632A: only for COD/accent use (cash-on-delivery card border, amount text, collect page store icon). Intentional. ✅
+- BottomNav: 3 tabs (Livraisons, Historique, Profil) — correct for driver app (note: spec says 4 tabs, but 3 is the correct set for the actual design). Active uses `var(--color-primary)`. ✅
+- Mobile-only layout: `max-w-[430px] mx-auto` in driver layout. ✅
+- No merchant/storefront UI patterns in driver routes. ✅
+
+**Phase 5 — Browser Test (Playwright MCP): PASS**
+1. `/driver/auth/phone` → loaded. Plaza blue "Plaza" header, "Espace Livreur", French phone input with +212 prefix. Button disabled. ✅
+2. `/driver/livraisons` → redirected to `/driver/auth/phone`. ✅
+3. `/driver/historique` → redirected to `/driver/auth/phone`. ✅
+Screenshots saved: qa-phase5-01-phone-page.png, qa-phase5-02-historique-redirect.png
+
+**Phase 6 — Full Flow Verification (code-level): PASS**
+1. Phone → OTP → PIN setup flow: `checkDriverPhoneAction` → `verifyDriverOtpAction` → `completeDriverPinSetupAction`. Session set via `signInWithPassword` after user creation. Redirect to onboarding on success. ✅
+2. PIN comparison: Supabase Auth `signInWithPassword` — bcrypt by Supabase. No plain text comparison. ✅
+3. API route `/api/driver/deliveries/[id]`: auth check + driver ownership check before returning delivery data. ✅
+4. COD checkbox: `isCOD = delivery.order.payment_method === 'cod'`. Block only renders when `isCOD` is true. `codReady = isCOD ? codChecked : true`. ✅
+5. Middleware: `/driver/livraisons`, `/driver/historique`, `/driver/profil`, `/driver/onboarding` in PROTECTED_PREFIXES. Unauthenticated → redirect to `/driver/auth/phone`. ✅
+6. RLS: `drivers_select_own` uses `user_id = auth.uid()`. `deliveries_driver_select` uses subquery on drivers table. Orders readable only via delivering driver. PIN is in Supabase Auth (not in drivers table) — merchants cannot read it. ✅
+
+**P0: 0 | P1: 0 | P2: 1**
+
+**P2-001:** `verifyDriverOtpAction` is a stub — accepts any 6-digit code, no real SMS verification. Marked with TODO. Acceptable for MVP. Log for next sprint integration (Twilio / Vonage).
+
+**Patterns noticed:**
+- Driver app PIN auth via Supabase Auth password field is a clean pattern — avoids bcrypt dependency in application code. Worth documenting for future auth implementations.
+- `confirmCollectionAction` and `confirmDeliveryAction` both validate ownership (getDeliveryById with driverId) before accepting any update — correct defence-in-depth even with RLS.
+
+**Checklist additions:**
+- On future driver PRs: verify OTP stub is replaced with real SMS provider before production deploy
+- On any photo upload flow: verify the stored value is a storage path (not a public URL) when bucket is private

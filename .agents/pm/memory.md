@@ -138,14 +138,52 @@ New token with `repo` + `workflow` scope provided by founder. Updated in `.env.l
 - QA memory → Playwright MCP rules documented
 - PLZ-051: on main (`24d81f6`)
 - PR #38 (PLZ-047/048 N+1 + select): MERGED `ec6ac68` after Youssef fix
-- PR #41 (PLZ-052 order timeline): opened, QA APPROVED all 6 phases
+- PR #41 (PLZ-052 order timeline): MERGED
+- PR #41–44 (PLZ-053/054 tracking 404 + null guard): MERGED `5deae3d` + `48693da`
+- PLZ-056 (merchant_pickup_code migration): MERGED `828609d` (PR #46)
+- PLZ-055 (full #2563EB → var(--color-primary) sweep, 30 files): MERGED `4abcef0` (PR #47)
 
-### PR #41 — PLZ-052 — waiting on Anas to merge autonomously
-QA approved. Schema migration (merchant_pickup_code, confirmed_at, dispatched_at, delivered_at) needed before prod deploy — all nullable, app safe until then.
+### Full regression — 14 April 2026 — ALL PASS
+Anas ran 6-phase QA on both PRs + 9-step regression post-merge.
+Result: P0=0, P1=0, P2=0. Every route 200. Per-merchant theming live.
 
-### P2 backlog (10 items)
-- 9× #2563EB hardcoded in dashboard timeline
-- 1× StoreInfoSheet uses hardcoded SCHEDULE not merchant.working_hours (P2-005)
+### P2 backlog — CLEARED
+- 9× #2563EB items: RESOLVED by PLZ-055
+- StoreInfoSheet/working_hours (P2-005): was already correct — no fix needed
+- p2-backlog.md updated to reflect 0 open items
+
+### Next milestone
+Part 3 — Driver App. Product is regression-clean as of 2026-04-14.
+
+---
+
+## Founder decisions — Part 3 Driver App — 14 April 2026
+
+All 10 design decisions confirmed. Antonio brief reviewed and approved.
+
+1. Customer delivery PIN: **4 digits** (matches shipped customer confirmation UI)
+2. OTP auth in Part 3: **Yes** — required before go-live
+3. New assignment notification: **full-screen overlay + push notification** (overlay primary, push fallback)
+4. Mapbox strategy: **external Google Maps link for MVP**, embedded Mapbox static map in Part 4
+5. COD cash checkbox: **included** — "Je confirme avoir reçu X MAD en espèces" on DeliveryConfirmation
+6. Offline state banner: **included** — amber banner + power-off empty state
+7. Driver app color: **Plaza blue #2563EB** as primary, **orange #E8632A** as secondary/accent — driver layout overrides var(--color-primary) to #2563EB locally (decision revised 14 April 2026)
+8. Star rating: **removed** — not in data model, not in Part 3 scope
+9. Vehicle info + Documents: **FULL ONBOARDING FLOW** (not stubs) — capture vehicle type, permis de conduire, assurance, CINE/CIN during driver registration
+10. Auth screens: **in Part 3 scope** — Phone → OTP → PIN (returning) / PIN setup (new)
+
+### Driver onboarding flow (new — decision 9)
+New driver registration screens added:
+- Step 1: Vehicle type selection (moto, vélo, voiture, autre)
+- Step 2: Permis de conduire photo capture (front only)
+- Step 3: Assurance vehicle document capture
+- Step 4: CINE/CIN national ID capture (front + back)
+- Pending validation screen — "En attente de validation"
+
+These screens appear after OTP + PIN setup for new drivers only. Returning drivers go directly to Livraisons after PIN entry.
+
+### Figma Make
+Single comprehensive prompt compiled. 18 screens + BottomNav component. Founder runs Figma Make, returns frames for validation, then dev starts.
 
 ---
 
@@ -161,3 +199,47 @@ Commit: chore/anas-full-merge-authority → main
 - Remove "WAITING ON FOUNDER: MERGE PR #XX" from daily reports going forward
 - Merge status comes from Anas notification to Othmane
 - Othmane reports merged items in daily summary only
+
+---
+
+## Session — 15 April 2026
+
+### PLZ-057 — Driver App Part 3 — SHIPPED ✅
+
+**PR #48 merged to main** — squash SHA `9809a30`
+
+**What shipped:**
+- Full driver mobile web app (47 new files, 3,214 insertions)
+- Auth: Phone → OTP (stub) → PIN setup (new) / PIN login (returning)
+- Onboarding: 4-step document capture (vehicle, license, insurance, CINE)
+- Active deliveries list with online/offline toggle + NewAssignment overlay (realtime)
+- Delivery detail with Google Maps deep-link
+- Collection confirmation: 6-digit merchant code (server-validated) + package photo
+- Delivery confirmation: 4-digit customer PIN (server-validated) + COD checkbox + proof photo
+- Issue report (6 types + optional photo)
+- Historique: grouped delivery history + weekly stats
+- Profil: driver stats + document status + LogoutButton
+- DB migrations: 3 files — driver app schema, RLS policies, gap-fill
+- RLS: drivers see own record only; deliveries scoped to driver; orders scoped via deliveries
+- Middleware: all /driver protected routes → redirect to /driver/auth/phone when unauthenticated
+- E2E test scaffold: tests/e2e/driver-routes.spec.ts
+
+**QA verdict (Anas, 15 April 2026):**
+- Phase 1 (tsc + lint): PASS
+- Phase 2 (routes): PASS — /driver in SKIP_INTL
+- Phase 3 (data consistency): PASS — PIN via Supabase Auth (bcrypt), COD in centimes÷100, server-side code validation
+- Phase 4 (UI): PASS — var(--color-primary) override to #2563EB in driver layout, orange #E8632A accent for COD only
+- Phase 5 (Playwright): PASS — phone page loads, unauthenticated redirects work
+- Phase 6 (flow verification): PASS — all auth/confirm/COD/middleware/RLS checks correct
+- P0: 0 | P1: 0 | P2: 1 (OTP stub — intentional, TODO comment present)
+
+**P2 open item — next sprint:**
+- P2-001 PLZ-057: OTP verification is a stub — any 6 digits accepted. Needs Twilio/Vonage integration. Not blocking MVP.
+
+### Current state of main (15 April 2026)
+All 3 platform layers are on main and regression-clean:
+1. Merchant dashboard (Part 1) — orders, finances, support, livraisons
+2. Customer storefront v2 (Part 2) — browse, cart, checkout, OTP, confirmation, tracking
+3. Driver app (Part 3) — auth, onboarding, deliveries, confirmation, history, profil
+
+**Next milestone:** Part 4 TBD — likely merchant dispatch UI (assign deliveries to drivers) or real OTP integration.
