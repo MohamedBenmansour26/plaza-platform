@@ -2,7 +2,10 @@
 
 import { createServiceClient } from '@/lib/supabase/service'
 import { dispatchDistance, driverEarnings } from '@/lib/dispatch/haversine'
-import type { DispatchConfig, DispatchResult } from '@/lib/dispatch/types'
+import type { Database } from '@/types/supabase'
+import type { DispatchResult } from '@/lib/dispatch/types'
+
+type DispatchConfig = Database['public']['Tables']['dispatch_config']['Row']
 
 /**
  * Called immediately after confirmOrderAction succeeds.

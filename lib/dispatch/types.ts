@@ -3,13 +3,6 @@
  * Shared types for the Plaza dispatch engine.
  */
 
-export type DispatchConfig = {
-  id:                   string
-  base_fee_mad:         number
-  per_km_rate_mad:      number
-  pool_timeout_minutes: number
-}
-
 /** A delivery visible in the driver's pool (before acceptance). */
 export type PoolDelivery = {
   id:                     string
