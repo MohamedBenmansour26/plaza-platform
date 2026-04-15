@@ -363,9 +363,23 @@ DROP INDEX IF EXISTS deliveries_timeout_idx;
 
 ## 11. Open Questions (to resolve before migration is written)
 
-1. **`assigned` vs `accepted` status value** — PLZ-057 added `assigned` to the status enum. PLZ-058 uses `accepted`. Decision: rename, keep both, or alias? Needs founder/Othmane sign-off.
+1. **`assigned` → `accepted` status rename** — RESOLVED (Othmane, 2026-04-15). Use:
 
-2. **`collection_photo_url` rename** — Option A (rename to `pickup_photo_url`) or Option B (keep both, deprecate old)? Recommendation: Option A. Needs Othmane confirmation.
+   ```sql
+   ALTER TYPE delivery_status RENAME VALUE 'assigned' TO 'accepted';
+   ```
+
+   This rename will be placed at the top of the PLZ-058 migration file as a cleanup step, before any new columns are added. No data migration is required — the rename is atomic and in-place.
+
+2. **`collection_photo_url` → `pickup_photo_url` column rename** — RESOLVED (Othmane, 2026-04-15). Use Option A (rename):
+
+   ```sql
+   ALTER TABLE deliveries RENAME COLUMN collection_photo_url TO pickup_photo_url;
+   ```
+
+   This rename will also be placed at the top of the PLZ-058 migration file as a cleanup step, alongside the enum rename above, before the new dispatch columns are added. TypeScript types (`types/supabase.ts`) and the `DELIVERY_SELECT` constant in `lib/db/driver.ts` must be updated to reflect the new column name.
+
+   > **Note:** Both renames (items 1 and 2) are combined into a single PLZ-058 migration file. They are NOT separate migrations — they appear together at the top of the PLZ-058 migration SQL as cleanup steps before the new columns are added.
 
 3. **`pickup_city` source** — confirm that the merchant's city column (from the `merchants` table or `delivery_zones`) is the correct source for `pickup_city`. Current assumption: copied from the merchant record at delivery creation.
 
