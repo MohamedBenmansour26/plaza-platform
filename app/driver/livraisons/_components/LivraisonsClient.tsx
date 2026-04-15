@@ -57,7 +57,7 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
         },
         (payload) => {
           const row = payload.new as { status: string; id: string };
-          if (row.status === 'assigned') {
+          if (row.status === 'accepted') {
             // Fetch full delivery details then show overlay
             fetch(`/api/driver/deliveries/${row.id}`)
               .then(r => r.json())
@@ -115,7 +115,7 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
     await supabase.from('drivers').update({ is_available: next } as never).eq('id', driver.id);
   }
 
-  const toCollect  = deliveries.filter(d => d.status === 'assigned');
+  const toCollect  = deliveries.filter(d => d.status === 'accepted');
   const inDelivery = deliveries.filter(d => d.status === 'picked_up');
 
   return (
@@ -212,7 +212,7 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
 
 function DeliveryCard({ delivery, onClick }: { delivery: DriverDelivery; onClick: () => void }) {
   const mins = minutesUntilSlotEnd(delivery.order.delivery_slot);
-  const earnings = Math.round((delivery.order.total / 100) * 0.08); // stub: 8% of order total in MAD
+  const earnings = delivery.driver_earnings_mad ?? 0;
 
   return (
     <button onClick={onClick} className="w-full bg-white rounded-2xl shadow-sm p-4 mb-3 text-left">
