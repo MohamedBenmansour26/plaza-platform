@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS driver_schedules (
   start_time   time  NOT NULL,
   end_time     time  NOT NULL,
   is_active    boolean NOT NULL DEFAULT true,
-  UNIQUE (driver_id, day_of_week)
+  UNIQUE (driver_id, day_of_week),
+  CONSTRAINT start_before_end CHECK (start_time < end_time)
 );
 
 CREATE INDEX IF NOT EXISTS driver_schedules_driver_idx
@@ -111,7 +112,7 @@ COMMENT ON COLUMN deliveries.driver_earnings_mad IS
 
 -- ── 6. Indexes ─────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS deliveries_pool_eligible_idx
-  ON deliveries (pickup_city, status, pool_expires_at)
+  ON deliveries (pickup_city, pool_expires_at)
   WHERE status = 'available';
 
 CREATE INDEX IF NOT EXISTS deliveries_driver_active_idx
@@ -134,6 +135,13 @@ AS $$
 DECLARE
   updated_count int;
 BEGIN
+  -- Verify the caller owns this driver record (defense in depth; app also checks).
+  IF NOT EXISTS (
+    SELECT 1 FROM drivers WHERE id = p_driver_id AND user_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'driver_id does not belong to calling user';
+  END IF;
+
   UPDATE deliveries
   SET status      = 'accepted',
       driver_id   = p_driver_id,
