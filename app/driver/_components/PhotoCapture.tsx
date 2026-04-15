@@ -41,7 +41,19 @@ export function PhotoCapture({ value, onChange, height = 160 }: Props) {
         accept="image/*"
         capture="environment"
         className="hidden"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        onChange={(e) => {
+          const file = e.target.files?.[0] ?? null;
+          if (!file) { onChange(null); return; }
+          if (!file.type.startsWith('image/')) {
+            alert('Veuillez sélectionner une image');
+            return;
+          }
+          if (file.size > 10 * 1024 * 1024) {
+            alert('L\'image doit faire moins de 10 Mo');
+            return;
+          }
+          onChange(file);
+        }}
       />
     </div>
   );
