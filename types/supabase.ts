@@ -1,5 +1,7 @@
 // ============================================================
 // Plaza Platform — Supabase Database Types
+// Updated: 15 April 2026 — PLZ-058 dispatch engine: dispatch_config, dispatch_errors,
+//                           driver_schedules, new delivery columns, drivers.city
 // Updated: 08 April 2026 — OTP auth columns + delivery_zones table (approved migrations)
 //
 // ⚠️  BREAKING CHANGES vs old PLZ-006 migration:
@@ -391,6 +393,8 @@ export type Database = {
           id_front_url:       string | null
           id_back_url:        string | null
           onboarding_status:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
+          // PLZ-058: dispatch engine columns
+          city:               string | null
         }
         Insert: {
           id?:                string
@@ -408,6 +412,7 @@ export type Database = {
           id_front_url?:      string | null
           id_back_url?:       string | null
           onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
+          city?:              string | null
         }
         Update: {
           id?:                string
@@ -425,8 +430,44 @@ export type Database = {
           id_front_url?:      string | null
           id_back_url?:       string | null
           onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
+          city?:              string | null
         }
         Relationships: []
+      }
+
+      // ── Driver Schedules ───────────────────────────────────────
+      driver_schedules: {
+        Row: {
+          id:          string
+          driver_id:   string
+          day_of_week: number
+          start_time:  string
+          end_time:    string
+          is_active:   boolean
+        }
+        Insert: {
+          id?:          string
+          driver_id:    string
+          day_of_week:  number
+          start_time:   string
+          end_time:     string
+          is_active?:   boolean
+        }
+        Update: {
+          day_of_week?: number
+          start_time?:  string
+          end_time?:    string
+          is_active?:   boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'driver_schedules_driver_id_fkey'
+            columns: ['driver_id']
+            isOneToOne: false
+            referencedRelation: 'drivers'
+            referencedColumns: ['id']
+          }
+        ]
       }
 
       // ── Deliveries ─────────────────────────────────────────────
@@ -440,12 +481,21 @@ export type Database = {
           status:               DeliveryStatus
           created_at:           string
           // PLZ-057: confirmation + issue columns
-          collection_photo_url: string | null
+          pickup_photo_url:     string | null
           delivery_photo_url:   string | null
           cod_confirmed:        boolean
           issue_type:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
           issue_notes:          string | null
           issue_photo_url:      string | null
+          // PLZ-058: dispatch engine columns
+          distance_km:            number | null
+          estimated_duration_min: number | null
+          driver_earnings_mad:    number | null
+          pickup_city:            string | null
+          pool_created_at:        string | null
+          pool_expires_at:        string | null
+          accepted_at:            string | null
+          merchant_pickup_code:   string | null
         }
         Insert: {
           id?:                   string
@@ -455,12 +505,20 @@ export type Database = {
           delivered_at?:         string | null
           status?:               DeliveryStatus
           created_at?:           string
-          collection_photo_url?: string | null
+          pickup_photo_url?:     string | null
           delivery_photo_url?:   string | null
           cod_confirmed?:        boolean
           issue_type?:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
           issue_notes?:          string | null
           issue_photo_url?:      string | null
+          distance_km?:            number | null
+          estimated_duration_min?: number | null
+          driver_earnings_mad?:    number | null
+          pickup_city?:            string | null
+          pool_created_at?:        string | null
+          pool_expires_at?:        string | null
+          accepted_at?:            string | null
+          merchant_pickup_code?:   string | null
         }
         Update: {
           id?:                   string
@@ -470,12 +528,20 @@ export type Database = {
           delivered_at?:         string | null
           status?:               DeliveryStatus
           created_at?:           string
-          collection_photo_url?: string | null
+          pickup_photo_url?:     string | null
           delivery_photo_url?:   string | null
           cod_confirmed?:        boolean
           issue_type?:           'client_absent' | 'client_refuse' | 'wrong_address' | 'damaged' | 'payment_issue' | 'other' | null
           issue_notes?:          string | null
           issue_photo_url?:      string | null
+          distance_km?:            number | null
+          estimated_duration_min?: number | null
+          driver_earnings_mad?:    number | null
+          pickup_city?:            string | null
+          pool_created_at?:        string | null
+          pool_expires_at?:        string | null
+          accepted_at?:            string | null
+          merchant_pickup_code?:   string | null
         }
         Relationships: [
           {
@@ -490,6 +556,59 @@ export type Database = {
             columns: ['driver_id']
             isOneToOne: false
             referencedRelation: 'drivers'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      // ── Dispatch Config ────────────────────────────────────────
+      dispatch_config: {
+        Row: {
+          id:                   string
+          base_fee_mad:         number
+          per_km_rate_mad:      number
+          pool_timeout_minutes: number
+          updated_at:           string
+        }
+        Insert: {
+          id?:                   string
+          base_fee_mad?:         number
+          per_km_rate_mad?:      number
+          pool_timeout_minutes?: number
+          updated_at?:           string
+        }
+        Update: {
+          base_fee_mad?:         number
+          per_km_rate_mad?:      number
+          pool_timeout_minutes?: number
+          updated_at?:           string
+        }
+        Relationships: []
+      }
+
+      // ── Dispatch Errors ────────────────────────────────────────
+      dispatch_errors: {
+        Row: {
+          id:            string
+          order_id:      string | null
+          error_message: string
+          created_at:    string
+        }
+        Insert: {
+          id?:            string
+          order_id?:      string | null
+          error_message:  string
+          created_at?:    string
+        }
+        Update: {
+          error_message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'dispatch_errors_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
             referencedColumns: ['id']
           }
         ]
@@ -637,30 +756,39 @@ export type Database = {
 // Convenience helpers (row types)
 // -------------------------------------------------------
 
-export type Merchant       = Database['public']['Tables']['merchants']['Row']
-export type Product        = Database['public']['Tables']['products']['Row']
-export type Customer       = Database['public']['Tables']['customers']['Row']
-export type Order          = Database['public']['Tables']['orders']['Row']
-export type OrderItem      = Database['public']['Tables']['order_items']['Row']
-export type Driver         = Database['public']['Tables']['drivers']['Row']
-export type Delivery       = Database['public']['Tables']['deliveries']['Row']
-export type SupportTicket  = Database['public']['Tables']['support_tickets']['Row']
-export type SupportMessage = Database['public']['Tables']['support_messages']['Row']
-export type DeliveryZone   = Database['public']['Tables']['delivery_zones']['Row']
+export type Merchant        = Database['public']['Tables']['merchants']['Row']
+export type Product         = Database['public']['Tables']['products']['Row']
+export type Customer        = Database['public']['Tables']['customers']['Row']
+export type Order           = Database['public']['Tables']['orders']['Row']
+export type OrderItem       = Database['public']['Tables']['order_items']['Row']
+export type Driver          = Database['public']['Tables']['drivers']['Row']
+export type DriverSchedule  = Database['public']['Tables']['driver_schedules']['Row']
+export type Delivery        = Database['public']['Tables']['deliveries']['Row']
+export type DispatchConfig  = Database['public']['Tables']['dispatch_config']['Row']
+export type DispatchError   = Database['public']['Tables']['dispatch_errors']['Row']
+export type SupportTicket   = Database['public']['Tables']['support_tickets']['Row']
+export type SupportMessage  = Database['public']['Tables']['support_messages']['Row']
+export type DeliveryZone    = Database['public']['Tables']['delivery_zones']['Row']
 
-export type MerchantInsert      = Database['public']['Tables']['merchants']['Insert']
-export type ProductInsert       = Database['public']['Tables']['products']['Insert']
-export type CustomerInsert      = Database['public']['Tables']['customers']['Insert']
-export type OrderInsert         = Database['public']['Tables']['orders']['Insert']
-export type OrderItemInsert     = Database['public']['Tables']['order_items']['Insert']
-export type DeliveryInsert      = Database['public']['Tables']['deliveries']['Insert']
-export type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert']
+export type MerchantInsert       = Database['public']['Tables']['merchants']['Insert']
+export type ProductInsert        = Database['public']['Tables']['products']['Insert']
+export type CustomerInsert       = Database['public']['Tables']['customers']['Insert']
+export type OrderInsert          = Database['public']['Tables']['orders']['Insert']
+export type OrderItemInsert      = Database['public']['Tables']['order_items']['Insert']
+export type DriverScheduleInsert = Database['public']['Tables']['driver_schedules']['Insert']
+export type DeliveryInsert       = Database['public']['Tables']['deliveries']['Insert']
+export type DispatchConfigInsert = Database['public']['Tables']['dispatch_config']['Insert']
+export type DispatchErrorInsert  = Database['public']['Tables']['dispatch_errors']['Insert']
+export type SupportTicketInsert  = Database['public']['Tables']['support_tickets']['Insert']
 export type SupportMessageInsert = Database['public']['Tables']['support_messages']['Insert']
 export type DeliveryZoneInsert   = Database['public']['Tables']['delivery_zones']['Insert']
 
-export type MerchantUpdate      = Database['public']['Tables']['merchants']['Update']
-export type ProductUpdate       = Database['public']['Tables']['products']['Update']
-export type OrderUpdate         = Database['public']['Tables']['orders']['Update']
-export type DeliveryUpdate      = Database['public']['Tables']['deliveries']['Update']
-export type SupportTicketUpdate = Database['public']['Tables']['support_tickets']['Update']
-export type DeliveryZoneUpdate  = Database['public']['Tables']['delivery_zones']['Update']
+export type MerchantUpdate       = Database['public']['Tables']['merchants']['Update']
+export type ProductUpdate        = Database['public']['Tables']['products']['Update']
+export type OrderUpdate          = Database['public']['Tables']['orders']['Update']
+export type DriverScheduleUpdate = Database['public']['Tables']['driver_schedules']['Update']
+export type DeliveryUpdate       = Database['public']['Tables']['deliveries']['Update']
+export type DispatchConfigUpdate = Database['public']['Tables']['dispatch_config']['Update']
+export type DispatchErrorUpdate  = Database['public']['Tables']['dispatch_errors']['Update']
+export type SupportTicketUpdate  = Database['public']['Tables']['support_tickets']['Update']
+export type DeliveryZoneUpdate   = Database['public']['Tables']['delivery_zones']['Update']
