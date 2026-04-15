@@ -9,7 +9,8 @@ export default function DriverPhonePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formattedPhone = '+212 ' + phone;
+  // Strip leading 0 so '0611111111' → '+212611111111' (E.164 Morocco)
+  const formattedPhone = '+212' + phone.replace(/^\s*0/, '');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

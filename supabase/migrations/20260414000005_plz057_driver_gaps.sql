@@ -52,44 +52,48 @@ COMMENT ON COLUMN deliveries.driver_id IS
   'Assigned driver. NULL = unassigned. Set by dispatcher or auto-assign (PLZ-057).';
 
 
--- ── 3. delivery_status enum — add missing values ─────────────
+-- ── 3. delivery_status enum — add missing values (if enum exists) ───────────
 --
--- Current values: pending, dispatched, completed, failed
--- Required by PLZ-057: assigned, picked_up, delivered
---
--- PostgreSQL does not support IF NOT EXISTS on ALTER TYPE ADD VALUE,
--- so each addition is wrapped in a DO block that checks pg_enum first.
+-- The remote DB uses text for deliveries.status rather than a delivery_status
+-- enum type. These blocks are no-ops when the type does not exist.
+-- If the type IS present (local dev or future schema), the values are added.
 
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_enum
-    WHERE enumtypid = 'delivery_status'::regtype
-      AND enumlabel = 'assigned'
-  ) THEN
-    ALTER TYPE delivery_status ADD VALUE 'assigned';
+  IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'delivery_status') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_enum
+      WHERE enumtypid = 'delivery_status'::regtype
+        AND enumlabel = 'assigned'
+    ) THEN
+      ALTER TYPE delivery_status ADD VALUE 'assigned';
+    END IF;
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_enum
-    WHERE enumtypid = 'delivery_status'::regtype
-      AND enumlabel = 'picked_up'
-  ) THEN
-    ALTER TYPE delivery_status ADD VALUE 'picked_up';
+  IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'delivery_status') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_enum
+      WHERE enumtypid = 'delivery_status'::regtype
+        AND enumlabel = 'picked_up'
+    ) THEN
+      ALTER TYPE delivery_status ADD VALUE 'picked_up';
+    END IF;
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_enum
-    WHERE enumtypid = 'delivery_status'::regtype
-      AND enumlabel = 'delivered'
-  ) THEN
-    ALTER TYPE delivery_status ADD VALUE 'delivered';
+  IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'delivery_status') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_enum
+      WHERE enumtypid = 'delivery_status'::regtype
+        AND enumlabel = 'delivered'
+    ) THEN
+      ALTER TYPE delivery_status ADD VALUE 'delivered';
+    END IF;
   END IF;
 END $$;
 

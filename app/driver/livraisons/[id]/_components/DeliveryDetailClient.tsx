@@ -20,7 +20,7 @@ function minutesUntilSlotEnd(slot: string | null): number {
 export function DeliveryDetailClient({ delivery }: { delivery: DriverDelivery }) {
   const router = useRouter();
   const mins = minutesUntilSlotEnd(delivery.order.delivery_slot);
-  const earnings = Math.round(delivery.order.total * 0.08);
+  const earnings = Math.round((delivery.order.total / 100) * 0.08);
   const isCOD = delivery.order.payment_method === 'cod';
   const isToCollect = delivery.status === 'assigned';
 
@@ -140,7 +140,7 @@ export function DeliveryDetailClient({ delivery }: { delivery: DriverDelivery })
               <Banknote className="w-5 h-5 text-[#E8632A]" />
               <span className="text-sm font-bold text-[#1C1917]">Paiement à la livraison</span>
             </div>
-            <p className="text-[28px] font-bold text-[#E8632A]">{delivery.order.total} MAD</p>
+            <p className="text-[28px] font-bold text-[#E8632A]">{(delivery.order.total / 100).toFixed(2)} MAD</p>
             <p className="text-xs text-[#78716C]">À encaisser auprès du client</p>
           </div>
         )}

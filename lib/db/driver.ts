@@ -225,7 +225,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
       order_number: row.orders.order_number,
       customer_name: row.orders.customers?.full_name ?? 'Client',
       city: row.orders.customers?.city ?? null,
-      earnings: Math.round(row.orders.total * 0.08),
+      earnings: Math.round((row.orders.total / 100) * 0.08),
       payment_method: row.orders.payment_method,
       on_time: onTime,
       delivery_slot: row.orders.delivery_slot,

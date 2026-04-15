@@ -147,7 +147,7 @@ export function LivraisonsClient({ driver, initialDeliveries }: Props) {
 
 function DeliveryCard({ delivery, onClick }: { delivery: DriverDelivery; onClick: () => void }) {
   const mins = minutesUntilSlotEnd(delivery.order.delivery_slot);
-  const earnings = Math.round(delivery.order.total * 0.08); // stub
+  const earnings = Math.round((delivery.order.total / 100) * 0.08); // stub: 8% of order total in MAD
 
   return (
     <button onClick={onClick} className="w-full bg-white rounded-2xl shadow-sm p-4 mb-3 text-left">

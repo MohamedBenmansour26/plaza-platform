@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getDriverProfile, getDeliveryHistory } from '@/lib/db/driver';
 import { redirect } from 'next/navigation';
 import { BottomNav } from '../_components/BottomNav';
-import { Bike, FileText, Shield, CreditCard, Settings, HelpCircle, LogOut, ChevronRight, TrendingUp } from 'lucide-react';
+import { LogoutButton } from '../_components/LogoutButton';
+import { Bike, FileText, Shield, CreditCard, Settings, HelpCircle, ChevronRight, TrendingUp } from 'lucide-react';
 
 export default async function ProfilPage() {
   const supabase = await createClient();
@@ -91,25 +92,18 @@ export default async function ProfilPage() {
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
-            { Icon: Settings,    label: 'Paramètres',     color: '#78716C', href: '#', isLogout: false },
-            { Icon: HelpCircle,  label: 'Aide & Support', color: '#78716C', href: '#', isLogout: false },
-            { Icon: LogOut,      label: 'Se déconnecter', color: '#DC2626', href: '/driver/auth/phone', isLogout: true },
-          ].map(({ Icon, label, color, href, isLogout }, i, arr) => (
+            { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#' },
+            { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#' },
+          ].map(({ Icon, label, color, href }, i) => (
             <a key={label} href={href}
-              onClick={isLogout ? async (e) => {
-                e.preventDefault();
-                const { createClient } = await import('@/lib/supabase/client');
-                const sb = createClient();
-                await sb.auth.signOut();
-                window.location.href = '/driver/auth/phone';
-              } : undefined}
-              className={`px-4 flex items-center gap-3 ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}
+              className="px-4 flex items-center gap-3 border-b border-gray-100"
               style={{ height: 52 }}>
               <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} />
               <span className="flex-1 text-[15px]" style={{ color }}>{label}</span>
-              {!isLogout && <ChevronRight className="w-4 h-4 text-gray-300" />}
+              <ChevronRight className="w-4 h-4 text-gray-300" />
             </a>
           ))}
+          <LogoutButton />
         </div>
       </div>
 
