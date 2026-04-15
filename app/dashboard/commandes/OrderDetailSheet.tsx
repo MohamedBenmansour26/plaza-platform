@@ -9,7 +9,7 @@ import {
 } from './actions';
 import { formatMAD } from './OrdersClient';
 import type { OrderWithDetails } from '@/lib/db/orders';
-import type { OrderStatus, PaymentMethod } from '@/types/supabase';
+import type { OrderStatus, PaymentMethod, DeliveryStatus } from '@/types/supabase';
 
 // ─── Delivery timeline ───────────────────────────────────────────────────────
 
@@ -100,6 +100,38 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── Delivery status card ─────────────────────────────────────────────────────
+
+const DELIVERY_STATUS_CONFIG: Partial<Record<DeliveryStatus, { label: string; color: string; bg: string }>> = {
+  available:  { label: 'Recherche livreur…', color: '#D97706', bg: '#FEF3C7' },
+  accepted:   { label: 'Livreur en route',   color: '#2563EB', bg: '#DBEAFE' },
+  assigned:   { label: 'Assigné',            color: '#2563EB', bg: '#DBEAFE' },
+  picked_up:  { label: 'Colis récupéré',     color: '#7C3AED', bg: '#EDE9FE' },
+  delivered:  { label: 'Livré',              color: '#16A34A', bg: '#DCFCE7' },
+  timed_out:  { label: 'Délai dépassé',      color: '#DC2626', bg: '#FEE2E2' },
+  cancelled:  { label: 'Annulée',            color: '#78716C', bg: '#F5F5F4' },
+};
+
+function DeliveryStatusCard({ delivery }: { delivery: NonNullable<OrderWithDetails['delivery']> }) {
+  const cfg = DELIVERY_STATUS_CONFIG[delivery.status] ?? { label: delivery.status, color: '#78716C', bg: '#F5F5F4' };
+  return (
+    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
+      <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Coursier</div>
+      <span
+        className="inline-block px-2.5 py-1 rounded-full text-[12px] font-medium"
+        style={{ color: cfg.color, backgroundColor: cfg.bg }}
+      >
+        {cfg.label}
+      </span>
+      {delivery.pickup_time && (
+        <p className="text-[12px] text-[#78716C] mt-2">
+          Récupéré à {new Date(delivery.pickup_time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
+        </p>
+      )}
     </div>
   );
 }
@@ -310,6 +342,11 @@ export function OrderDetailSheet({ order, onClose }: Props) {
                 <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Livraison</div>
                 <DeliveryTimeline status={order.status} />
               </div>
+
+              {/* Delivery status — shown once a delivery record exists */}
+              {order.delivery && (
+                <DeliveryStatusCard delivery={order.delivery} />
+              )}
 
               {/* Payment */}
               <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">

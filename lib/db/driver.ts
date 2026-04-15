@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import type { DeliveryStatus } from '@/types/supabase';
+import type { PoolDelivery, AcceptDeliveryResult } from '@/lib/dispatch/types';
 
 // ─── Domain types ──────────────────────────────────────────────────────────
 
@@ -30,6 +31,7 @@ export type DriverProfile = {
   phone: string;
   is_available: boolean;
   onboarding_status: OnboardingStatus;
+  city: string | null;
   vehicle_type: 'moto' | 'velo' | 'voiture' | 'autre' | null;
   license_photo_url: string | null;
   insurance_url: string | null;
@@ -41,8 +43,9 @@ export type DriverProfile = {
 export type DriverDelivery = {
   id: string;
   status: DeliveryStatus;
-  collection_photo_url: string | null;
+  pickup_photo_url: string | null;
   delivery_photo_url: string | null;
+  driver_earnings_mad: number | null;
   cod_confirmed: boolean;
   pickup_time: string | null;
   delivered_at: string | null;
@@ -63,8 +66,9 @@ export type DriverDelivery = {
 type RawDeliveryRow = {
   id: string;
   status: DeliveryStatus;
-  collection_photo_url: string | null;
+  pickup_photo_url: string | null;
   delivery_photo_url: string | null;
+  driver_earnings_mad: number | null;
   cod_confirmed: boolean;
   pickup_time: string | null;
   delivered_at: string | null;
@@ -83,7 +87,7 @@ type RawDeliveryRow = {
 };
 
 const DELIVERY_SELECT = `
-  id, status, collection_photo_url, delivery_photo_url, cod_confirmed, pickup_time, delivered_at,
+  id, status, pickup_photo_url, delivery_photo_url, driver_earnings_mad, cod_confirmed, pickup_time, delivered_at,
   orders (
     id, order_number, total, payment_method,
     merchant_pickup_code, customer_pin, delivery_date, delivery_slot,
@@ -96,8 +100,9 @@ function normaliseDelivery(row: RawDeliveryRow): DriverDelivery {
   return {
     id: row.id,
     status: row.status,
-    collection_photo_url: row.collection_photo_url,
+    pickup_photo_url: row.pickup_photo_url,
     delivery_photo_url: row.delivery_photo_url,
+    driver_earnings_mad: row.driver_earnings_mad,
     cod_confirmed: row.cod_confirmed,
     pickup_time: row.pickup_time,
     delivered_at: row.delivered_at,
@@ -136,7 +141,7 @@ export async function getDriverProfile(userId: string): Promise<DriverProfile | 
   const supabase = await createClient();
   const { data } = await supabase
     .from('drivers')
-    .select('id, user_id, full_name, phone, is_available, onboarding_status, vehicle_type, license_photo_url, insurance_url, id_front_url, id_back_url, created_at')
+    .select('id, user_id, full_name, phone, is_available, onboarding_status, city, vehicle_type, license_photo_url, insurance_url, id_front_url, id_back_url, created_at')
     .eq('user_id', userId)
     .maybeSingle<DriverProfile>();
   return data ?? null;
@@ -150,7 +155,7 @@ export async function getActiveDeliveries(driverId: string): Promise<DriverDeliv
     .from('deliveries')
     .select(DELIVERY_SELECT)
     .eq('driver_id', driverId)
-    .in('status', ['assigned', 'picked_up'] satisfies DeliveryStatus[])
+    .in('status', ['accepted', 'picked_up'])
     .order('created_at', { ascending: true })
     .returns<RawDeliveryRow[]>();
   if (error) throw new Error(`getActiveDeliveries: ${error.message}`);
@@ -193,7 +198,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
   const { data, error } = await supabase
     .from('deliveries')
     .select(`
-      id, delivered_at,
+      id, delivered_at, driver_earnings_mad,
       orders (
         order_number, total, payment_method, delivery_slot, delivered_at,
         customers ( full_name, city )
@@ -206,6 +211,7 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
     .returns<{
       id: string;
       delivered_at: string | null;
+      driver_earnings_mad: number | null;
       orders: {
         order_number: string;
         total: number;
@@ -225,10 +231,57 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
       order_number: row.orders.order_number,
       customer_name: row.orders.customers?.full_name ?? 'Client',
       city: row.orders.customers?.city ?? null,
-      earnings: Math.round((row.orders.total / 100) * 0.08),
+      earnings: row.driver_earnings_mad ?? 0,
       payment_method: row.orders.payment_method,
       on_time: onTime,
       delivery_slot: row.orders.delivery_slot,
     };
   });
+}
+
+// ─── Fetch available pool deliveries for a city ───────────────────────────
+
+/**
+ * Returns available pool deliveries for the driver's city.
+ * Ordered oldest-first (fairest distribution).
+ */
+export async function getPoolDeliveries(city: string): Promise<PoolDelivery[]> {
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('deliveries')
+    .select('id, pickup_city, distance_km, estimated_duration_min, driver_earnings_mad, pool_created_at, pool_expires_at')
+    .eq('status', 'available')
+    .eq('pickup_city', city)
+    .gt('pool_expires_at', now)
+    .order('pool_created_at', { ascending: true })
+    .returns<PoolDelivery[]>()
+  if (error) throw new Error(`getPoolDeliveries: ${error.message}`)
+  return data ?? []
+}
+
+// ─── Atomically accept a pool delivery ────────────────────────────────────
+
+/**
+ * Atomically claims an available delivery via the accept_delivery() Postgres function.
+ * Returns { accepted: true } if this driver won the race.
+ * Returns { accepted: false } if another driver was faster.
+ */
+export async function acceptDelivery(
+  deliveryId: string,
+  driverId: string,
+): Promise<AcceptDeliveryResult> {
+  const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .rpc('accept_delivery', {
+      p_delivery_id: deliveryId,
+      p_driver_id:   driverId,
+    }) as { data: boolean | null; error: { message: string } | null }
+
+  if (error) throw new Error(`acceptDelivery RPC failed: ${error.message}`)
+
+  return data === true
+    ? { accepted: true,  deliveryId }
+    : { accepted: false, reason: 'already_taken' }
 }

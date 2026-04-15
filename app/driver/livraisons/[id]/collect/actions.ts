@@ -33,7 +33,7 @@ export async function confirmCollectionAction(
     .update({
       status: 'picked_up' as DeliveryStatus,
       pickup_time: new Date().toISOString(),
-      collection_photo_url: collectionPhotoPath,
+      pickup_photo_url: collectionPhotoPath,
     } as never)
     .eq('id', deliveryId);
 

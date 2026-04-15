@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { PackageOpen } from 'lucide-react';
+import { PackageOpen, AlertTriangle } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import { OrderDetailSheet } from './OrderDetailSheet';
@@ -113,8 +113,13 @@ export function OrdersClient({ orders }: Props) {
               <div className="w-[130px] text-sm font-medium text-[#1C1917]">
                 {formatMAD(order.total)}
               </div>
-              <div className="w-[140px]">
+              <div className="w-[140px] flex items-center gap-1.5">
                 <StatusBadge status={order.status} />
+                {order.delivery?.status === 'timed_out' && (
+                  <span title="Aucun livreur trouvé">
+                    <AlertTriangle className="w-4 h-4 text-[#DC2626]" />
+                  </span>
+                )}
               </div>
               <div className="w-[130px]">
                 <PaymentBadge method={order.payment_method as import('@/types/supabase').PaymentMethod} />
@@ -163,6 +168,12 @@ export function OrdersClient({ orders }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 <StatusBadge status={order.status} />
+                {order.delivery?.status === 'timed_out' && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FEE2E2] text-[#DC2626]">
+                    <AlertTriangle className="w-3 h-3" />
+                    Sans livreur
+                  </span>
+                )}
                 <PaymentBadge method={order.payment_method as import('@/types/supabase').PaymentMethod} />
               </div>
             </Link>

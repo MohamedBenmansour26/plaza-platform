@@ -36,5 +36,17 @@ export async function confirmOrderAction(orderId: string): Promise<void> {
     .eq('merchant_id', merchantId);
 
   await updateOrderStatus(orderId, 'confirmed', merchantId);
+
+  // Trigger dispatch engine — non-blocking: dispatch failure must not block merchant
+  try {
+    const { createDispatchDelivery } = await import('@/lib/dispatch/createDispatchDelivery')
+    const result = await createDispatchDelivery(orderId)
+    if (!result.success) {
+      console.error('[confirmOrderAction] dispatch failed:', result.error)
+    }
+  } catch (err) {
+    console.error('[confirmOrderAction] dispatch threw unexpectedly:', err)
+  }
+
   revalidatePath('/dashboard/commandes');
 }

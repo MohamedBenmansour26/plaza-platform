@@ -4,6 +4,18 @@ This file defines what every agent can do autonomously, what requires founder ap
 
 ---
 
+## HARD RULE — Founder never touches GitHub or Supabase manually
+
+The founder never merges PRs, opens PRs, runs git commands, or touches Supabase manually.
+
+**Anas owns all merges via `gh pr merge`.** After all 6 QA phases pass, Anas merges immediately — no founder confirmation required, no Tier 1 gate.
+
+If Anas is blocked from merging for any reason, Othmane resolves it. It never escalates to the founder.
+
+Merge authority is Anas's alone. If any agent surfaces a merge request to the founder, that is a process failure — log it and correct immediately.
+
+---
+
 ## The golden rule
 
 When in doubt, stop and ask. It is always better to pause and flag something than to proceed and cause an irreversible action. The PM agent is the first escalation point — never go directly to production, external parties, or spending without a clear approval on record.
@@ -21,7 +33,7 @@ Agents must stop work, notify the PM agent, and wait for explicit written approv
 | Deploy to Vercel production | Affects live merchants and real users |
 | Any DB schema change (new table, migration, column change) | Risk of data loss or breaking changes |
 | Any spend above 0 euros (tools, ads, APIs, subscriptions) | Zero autonomous spend at this stage |
-| Merging any PR into main | Code that reaches main can be deployed |
+| ~~Merging any PR into main~~ | **NOT Tier 1 — Anas merges autonomously after 6-phase QA. See HARD RULE above.** |
 | Publishing any public content (blog, landing page, social post) | Brand and legal exposure |
 | Sending any new outreach message not in the pre-approved template library | Reputation risk |
 | Replying to any inbound message (lead, user, partner) outside a pre-approved template | Same |
