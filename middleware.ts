@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { createServerClient } from '@supabase/ssr';
 import { locales, defaultLocale } from './i18n/request';
+import {
+  TRUST_COOKIE_NAME,
+  verifyTrustCookie,
+} from './lib/admin-trust-cookie';
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -13,8 +17,60 @@ const PROTECTED_PREFIXES = ['/dashboard', '/onboarding', '/driver/livraisons', '
 // Internal pages that are exempt from auth (no merchant data exposed).
 const PUBLIC_OVERRIDES = ['/dashboard/agents'];
 
+// Admin routes that should NOT require admin auth (login screen + callback).
+const ADMIN_PUBLIC_PATHS = ['/admin/login', '/admin/auth/callback'];
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
+
+  // ── Admin guard (PLZ-060) ─────────────────────────────────────
+  // /admin/** requires both a Supabase session AND a valid signed
+  // trust cookie. Public paths (login, callback) are exempt.
+  if (pathname.startsWith('/admin')) {
+    const isAdminPublic = ADMIN_PUBLIC_PATHS.some(
+      (p) => pathname === p || pathname.startsWith(p + '/'),
+    );
+
+    if (!isAdminPublic) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll();
+            },
+            setAll() {
+              // Intentionally empty.
+            },
+          },
+        },
+      );
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const trustCookie = request.cookies.get(TRUST_COOKIE_NAME)?.value;
+      const trustOk = user && trustCookie
+        ? verifyTrustCookie(trustCookie, user.id)
+        : false;
+
+      if (!user || !trustOk) {
+        const loginUrl = new URL('/admin/login', request.url);
+        const response = NextResponse.redirect(loginUrl);
+        // Clear stale trust cookie on failure.
+        response.cookies.set(TRUST_COOKIE_NAME, '', {
+          path: '/admin',
+          maxAge: 0,
+        });
+        return response;
+      }
+    }
+
+    // Admin paths never need intl rewriting (French-only for v1).
+    return NextResponse.next();
+  }
 
   const isPublicOverride = PUBLIC_OVERRIDES.some((p) => pathname.startsWith(p));
   const isProtected =
@@ -59,7 +115,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // Skip intl rewriting for root — app/page.tsx
   // handles its own redirect to /dashboard or /auth/login
   // Skip intl rewriting for routes that do not use locale-prefixed folder structure
-  const SKIP_INTL = ["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track"];
+  const SKIP_INTL = ["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"];
   if (SKIP_INTL.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();
   }
