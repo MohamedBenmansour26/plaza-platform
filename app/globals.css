@@ -97,3 +97,57 @@
 [dir="rtl"] {
   text-align: right;
 }
+
+/* ─── Admin console scope ─────────────────────────────────────────────
+   Applied to any route under /admin via the `.admin-scope` class on
+   app/admin/layout.tsx. Admin is monochrome-first, denser, and uses
+   Inter exclusively. No orange (#E8632A) anywhere — that color belongs
+   to merchant+driver surfaces.                                          */
+.admin-scope {
+  --admin-radius: 8px;
+  --admin-color-primary: #2563EB;
+  --admin-color-primary-dark: #1D4ED8;
+  --admin-color-primary-tint: #EFF6FF;
+  --admin-color-bg: #FAFAF9;
+  --admin-color-surface: #FFFFFF;
+  --admin-color-text-primary: #1C1917;
+  --admin-color-text-secondary: #44403C;
+  --admin-color-text-muted: #78716C;
+  --admin-color-text-faint: #A8A29E;
+  --admin-color-border: #E7E5E4;
+  --admin-color-border-soft: #F5F5F4;
+  --admin-color-row-hover: #FAFAF9;
+  --admin-color-row-selected: #F5F5F4;
+  --admin-color-success: #16A34A;
+  --admin-color-success-tint: #F0FDF4;
+  --admin-color-warning: #D97706;
+  --admin-color-warning-tint: #FEF3C7;
+  --admin-color-error: #DC2626;
+  --admin-color-error-tint: #FEF2F2;
+  font-family: var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
+}
+
+/* Desktop-required fallback: below 1024px, hide the shell and show the
+   DesktopRequired card, but ONLY on non-approval routes. The two
+   approval routes add `.admin-approval-route` on their root wrapper,
+   which opts out of this rule. */
+@media (max-width: 1023px) {
+  .admin-scope:not(.admin-approval-route) [data-admin-shell] {
+    display: none !important;
+  }
+  .admin-scope:not(.admin-approval-route) [data-admin-desktop-required] {
+    display: flex !important;
+  }
+  /* On approval routes, we keep the shell mounted but hide the
+     desktop-only sidebar + topbar. The page's own mobile variant
+     renders the mobile topbar and card list / detail. */
+  .admin-scope.admin-approval-route [data-admin-sidebar],
+  .admin-scope.admin-approval-route [data-admin-topbar] {
+    display: none !important;
+  }
+}
+@media (min-width: 1024px) {
+  .admin-scope [data-admin-desktop-required] {
+    display: none !important;
+  }
+}

@@ -502,5 +502,34 @@
     "category_technical": "مشكلة تقنية",
     "category_other": "أخرى",
     "paperclip_tooltip": "المرفقات — قريباً"
+  },
+  "driver": {
+    "onboarding": {
+      "pending": {
+        "pending": {
+          "title": "تم إرسال ملفك!",
+          "body": "ملفك قيد المراجعة من قبل فريق Plaza. تستغرق هذه العملية عادةً من 24 إلى 48 ساعة.",
+          "smsHint": "ستتلقى رسالة SMS فور تفعيل حسابك"
+        },
+        "resubmit": {
+          "title": "يتطلب ملفك تصحيحاً",
+          "body": "راجع فريق Plaza ملفك ويرغب في إعادة تقديم بعض المستندات.",
+          "reasonLabel": "السبب",
+          "cta": "تحديث مستنداتي"
+        },
+        "step": {
+          "phoneVerified": "تم التحقق من الهاتف",
+          "documentsSubmitted": "تم إرسال المستندات",
+          "verifying": "جارٍ التحقق",
+          "activation": "تفعيل الحساب"
+        },
+        "badge": {
+          "validated": "تم التحقق",
+          "received": "مستلم",
+          "inProgress": "قيد التنفيذ"
+        },
+        "contactSupport": "التواصل مع الدعم"
+      }
+    }
   }
 }
