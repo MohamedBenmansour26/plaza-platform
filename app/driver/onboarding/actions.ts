@@ -73,9 +73,17 @@ export async function saveIdentityAndSubmitAction(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'unauthenticated' };
 
+  // PLZ-061: testing-mode revert. Driver goes into the pending-validation
+  // queue, admin must approve via /admin/drivers before onboarding_status
+  // flips to 'active'.
   const { error } = await supabase
     .from('drivers')
-    .update({ id_front_url: frontUrl, id_back_url: backUrl, onboarding_status: 'pending_validation' } as never)
+    .update({
+      id_front_url: frontUrl,
+      id_back_url: backUrl,
+      onboarding_status: 'pending_validation',
+      approval_status: 'pending',
+    } as never)
     .eq('user_id', user.id);
   if (error) return { error: error.message };
   redirect('/driver/onboarding/pending');
@@ -86,9 +94,13 @@ export async function submitOnboardingAction(): Promise<{ error: string } | unde
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'unauthenticated' };
 
+  // PLZ-061: testing-mode revert. See saveIdentityAndSubmitAction.
   const { error } = await supabase
     .from('drivers')
-    .update({ onboarding_status: 'pending_validation' } as never)
+    .update({
+      onboarding_status: 'pending_validation',
+      approval_status: 'pending',
+    } as never)
     .eq('user_id', user.id);
 
   if (error) return { error: error.message };
