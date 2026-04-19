@@ -1,70 +1,63 @@
 'use server';
 
-// TODO (Youssef swap): this file is a STUB. Once
-// `plz-060-061-backend` lands, delete the stub implementations below
-// and re-export the real server actions. Signatures are kept stable so
-// the UI components (`DriverDetailClient`, `MobileDetail`) don't need to
-// change on merge:
-//
-//   import {
-//     approveDriver,
-//     rejectDriver,
-//     requestDocResubmit,
-//     rejectSingleDoc,
-//     getSignedDocUrl,
-//   } from '@/lib/admin-auth';  // or a dedicated driver-actions module
-
 import { redirect } from 'next/navigation';
+import {
+  approveDriverAction,
+  rejectDriverAction,
+  resubmitDocumentAction,
+} from '@/app/admin/drivers/[id]/actions';
 
 export type DocumentKey = 'license' | 'insurance' | 'id_front' | 'id_back';
 
 export type ActionResult = { ok: true } | { error: string };
 
-export async function approveDriver(_driverId: string): Promise<ActionResult> {
-  await new Promise((r) => setTimeout(r, 400));
-  return { ok: true };
+const DOC_FIELD: Record<DocumentKey, 'license_approved' | 'insurance_approved' | 'id_front_approved' | 'id_back_approved'> = {
+  license: 'license_approved',
+  insurance: 'insurance_approved',
+  id_front: 'id_front_approved',
+  id_back: 'id_back_approved',
+};
+
+function normalize(
+  res: { success: true } | { success: false; error: string },
+): ActionResult {
+  return res.success ? { ok: true } : { error: res.error };
+}
+
+export async function approveDriver(driverId: string): Promise<ActionResult> {
+  return normalize(await approveDriverAction(driverId));
 }
 
 export async function approveDriverWithOverride(
-  _driverId: string,
+  driverId: string,
 ): Promise<ActionResult> {
-  await new Promise((r) => setTimeout(r, 400));
-  return { ok: true };
+  return normalize(await approveDriverAction(driverId));
 }
 
 export async function rejectDriver(
-  _driverId: string,
+  driverId: string,
   reason: string,
 ): Promise<ActionResult> {
-  if (reason.trim().length < 10) {
-    return { error: 'reason_too_short' };
-  }
-  await new Promise((r) => setTimeout(r, 400));
-  return { ok: true };
+  return normalize(await rejectDriverAction(driverId, reason));
 }
 
 export async function requestDocResubmit(
-  _driverId: string,
-  _doc: DocumentKey,
+  driverId: string,
+  doc: DocumentKey,
   reason: string,
 ): Promise<ActionResult> {
-  if (reason.trim().length < 5) {
-    return { error: 'reason_too_short' };
-  }
-  await new Promise((r) => setTimeout(r, 300));
-  return { ok: true };
+  return normalize(await resubmitDocumentAction(driverId, DOC_FIELD[doc], reason));
 }
 
+// Per-doc rejection maps to resubmit: schema has a binary per-doc approved
+// flag + a driver-level approval_status. No distinct per-doc rejected state
+// at the DB level; UI's rejected/resubmit distinction is cosmetic for v1.
 export async function rejectSingleDoc(
-  _driverId: string,
-  _doc: DocumentKey,
+  driverId: string,
+  doc: DocumentKey,
   reason: string,
 ): Promise<ActionResult> {
-  if (reason.trim().length < 5) {
-    return { error: 'reason_too_short' };
-  }
-  await new Promise((r) => setTimeout(r, 300));
-  return { ok: true };
+  return normalize(await resubmitDocumentAction(driverId, DOC_FIELD[doc], reason));
 }
 
 export async function redirectToQueue(): Promise<never> {

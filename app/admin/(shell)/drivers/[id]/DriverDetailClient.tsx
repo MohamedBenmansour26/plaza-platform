@@ -372,7 +372,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
         onClose={() => setDialog({ kind: 'closed' })}
         variant="destructive"
         requireReason
-        minReasonLength={5}
+        minReasonLength={10}
         title="Demander une nouvelle soumission"
         body="Le livreur recevra une notification et devra re-téléverser ce document."
         reasonLabel="Motif (obligatoire)"
@@ -392,7 +392,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
         onClose={() => setDialog({ kind: 'closed' })}
         variant="destructive"
         requireReason
-        minReasonLength={5}
+        minReasonLength={10}
         title="Rejeter ce document"
         body="Le document sera marqué comme rejeté. Tu peux ensuite ajuster le statut global du dossier."
         reasonLabel="Motif du rejet (obligatoire)"
