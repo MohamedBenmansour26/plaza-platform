@@ -399,45 +399,110 @@ export type Database = {
           insurance_url:      string | null
           id_front_url:       string | null
           id_back_url:        string | null
-          onboarding_status:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
-          // PLZ-058: dispatch engine columns
+          onboarding_status:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended' | 'rejected'
+          // PLZ-058/059: dispatch engine + city column
           city:               string | null
+          // PLZ-061: admin approval columns
+          approval_status:    'pending' | 'approved' | 'rejected' | 'resubmit'
+          approved_at:        string | null
+          approved_by:        string | null
+          rejection_reason:   string | null
+          license_approved:   boolean
+          insurance_approved: boolean
+          id_front_approved:  boolean
+          id_back_approved:   boolean
         }
         Insert: {
-          id?:                string
-          full_name:          string
-          phone:              string
-          is_available?:      boolean
-          created_at?:        string
-          user_id?:           string | null
-          otp_attempts?:      number
-          locked_until?:      string | null
-          phone_verified?:    boolean
-          vehicle_type?:      'moto' | 'velo' | 'voiture' | 'autre' | null
-          license_photo_url?: string | null
-          insurance_url?:     string | null
-          id_front_url?:      string | null
-          id_back_url?:       string | null
-          onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
-          city?:              string | null
+          id?:                 string
+          full_name:           string
+          phone:               string
+          is_available?:       boolean
+          created_at?:         string
+          user_id?:            string | null
+          otp_attempts?:       number
+          locked_until?:       string | null
+          phone_verified?:     boolean
+          vehicle_type?:       'moto' | 'velo' | 'voiture' | 'autre' | null
+          license_photo_url?:  string | null
+          insurance_url?:      string | null
+          id_front_url?:       string | null
+          id_back_url?:        string | null
+          onboarding_status?:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended' | 'rejected'
+          city?:               string | null
+          approval_status?:    'pending' | 'approved' | 'rejected' | 'resubmit'
+          approved_at?:        string | null
+          approved_by?:        string | null
+          rejection_reason?:   string | null
+          license_approved?:   boolean
+          insurance_approved?: boolean
+          id_front_approved?:  boolean
+          id_back_approved?:   boolean
         }
         Update: {
-          id?:                string
-          full_name?:         string
-          phone?:             string
-          is_available?:      boolean
-          created_at?:        string
-          user_id?:           string | null
-          otp_attempts?:      number
-          locked_until?:      string | null
-          phone_verified?:    boolean
-          vehicle_type?:      'moto' | 'velo' | 'voiture' | 'autre' | null
-          license_photo_url?: string | null
-          insurance_url?:     string | null
-          id_front_url?:      string | null
-          id_back_url?:       string | null
-          onboarding_status?: 'pending_onboarding' | 'pending_validation' | 'active' | 'suspended'
-          city?:              string | null
+          id?:                 string
+          full_name?:          string
+          phone?:              string
+          is_available?:       boolean
+          created_at?:         string
+          user_id?:            string | null
+          otp_attempts?:       number
+          locked_until?:       string | null
+          phone_verified?:     boolean
+          vehicle_type?:       'moto' | 'velo' | 'voiture' | 'autre' | null
+          license_photo_url?:  string | null
+          insurance_url?:      string | null
+          id_front_url?:       string | null
+          id_back_url?:        string | null
+          onboarding_status?:  'pending_onboarding' | 'pending_validation' | 'active' | 'suspended' | 'rejected'
+          city?:               string | null
+          approval_status?:    'pending' | 'approved' | 'rejected' | 'resubmit'
+          approved_at?:        string | null
+          approved_by?:        string | null
+          rejection_reason?:   string | null
+          license_approved?:   boolean
+          insurance_approved?: boolean
+          id_front_approved?:  boolean
+          id_back_approved?:   boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'drivers_approved_by_fkey'
+            columns: ['approved_by']
+            isOneToOne: false
+            referencedRelation: 'admin_users'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+
+      // ── Admin Users (PLZ-060) ───────────────────────────────────
+      admin_users: {
+        Row: {
+          id:         string
+          user_id:    string
+          email:      string
+          role:       'admin' | 'ops' | 'support'
+          is_active:  boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?:         string
+          user_id:     string
+          email:       string
+          role?:       'admin' | 'ops' | 'support'
+          is_active?:  boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?:         string
+          user_id?:    string
+          email?:      string
+          role?:       'admin' | 'ops' | 'support'
+          is_active?:  boolean
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -781,6 +846,7 @@ export type DispatchError   = Database['public']['Tables']['dispatch_errors']['R
 export type SupportTicket   = Database['public']['Tables']['support_tickets']['Row']
 export type SupportMessage  = Database['public']['Tables']['support_messages']['Row']
 export type DeliveryZone    = Database['public']['Tables']['delivery_zones']['Row']
+export type AdminUser       = Database['public']['Tables']['admin_users']['Row']
 
 export type MerchantInsert       = Database['public']['Tables']['merchants']['Insert']
 export type ProductInsert        = Database['public']['Tables']['products']['Insert']
