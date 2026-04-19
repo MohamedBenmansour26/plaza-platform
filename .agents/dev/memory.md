@@ -165,6 +165,41 @@ Updated after every session._
 
 ---
 
+## PLZ-060 + PLZ-061 — Admin panel foundation + driver approvals UI — 18 April 2026
+
+**Branch:** `plz-060-061-frontend` (6 commits, local only — PM reviews, Anas merges)
+
+**What I built:**
+- **PLZ-060 foundation:** `.admin-scope` CSS (Inter font, admin CSS vars, CSS-only `@media (max-width: 1023px)` desktop-required fallback that exempts approval routes via a `.admin-approval-route` class toggled client-side by `ApprovalRouteMarker`). Registered `/admin` in middleware `SKIP_INTL` so next-intl stops rewriting admin paths.
+- **PLZ-060 shared components:** AdminShell, SidebarNav (9 flat items, only Drivers active in P0), SidebarNavItem, Topbar (with "Poste de confiance jusqu'au JJ MMM AAAA" hint from `AdminUser.trustedUntil`), DataTable (generic `<T extends {id: string}>` with `j/k/ArrowUp/ArrowDown` row nav + Enter trigger + skeleton rows + empty slot), FilterBar (auto-focuses on `/`), StatCard, StatusChip (7 variants), ConfirmDialog (neutral/destructive + optional reason textarea with min length), DocumentViewer (fullscreen `<img>` + zoom/rotate/download/arrow-key nav), DesktopRequired (wordmark + email capture). Dev-only demo of every component at `/admin/demo` (404 in production).
+- **PLZ-060 login:** Bare route outside the shell group. Magic-link form auto-focuses email, "Faire confiance à cet appareil" checked by default, transitions to SentState with 60s resend countdown.
+- **PLZ-060 shell layout:** Route group `(shell)` wraps every authed page with Sidebar + Topbar + DesktopRequired. Calls `requireAdmin()` from the stub, redirects to `/admin/login` on failure.
+- **PLZ-061 queue (A3/M1):** `/admin/drivers/pending` — desktop DataTable with filter chips by city + search + refresh, mobile card list with avatar, phone, vehicle+city, relative submitted-at, 4 doc dots, StatusChip + "Examiner →".
+- **PLZ-061 detail (A5/M2):** `/admin/drivers/[id]` — desktop two-column (info card + 2×2 doc grid on left, sticky right action card), mobile sticky-bottom CTA with back arrow + overflow menu. Primary "Approuver le dossier" is **always enabled** (C-2 Option B). If any doc is `resubmit` / `rejected`, the click opens an override ConfirmDialog, and on confirm all docs flip to `approved`. Secondary "Rejeter le dossier" opens a destructive dialog with required reason ≥10 chars. Per-doc overflow menu offers "Demander une nouvelle soumission" (≥5 chars) + "Rejeter ce document" (≥5 chars).
+- **PLZ-061 driver-side:** `/driver/onboarding/pending` now branches on `approval_status = 'resubmit'` (AlertTriangle card + rejection_reason + CTA to `/driver/onboarding/identity`). Added `driver.onboarding.pending.*` namespace to both `fr.json` and `ar.json`.
+
+**Coordination with Youssef:**
+- Every stub import carries a TODO pointing at the swap: change `@/lib/admin-auth.stub` → `@/lib/admin-auth` across `app/admin/**`.
+- `approval_status` + `rejection_reason` columns aren't in the Supabase types yet; the driver pending page probes them via `as unknown as { approval_status?: string | null; rejection_reason?: string | null }` — zero compile cost today, zero work tomorrow when types regenerate.
+- Mock server actions in `app/admin/(shell)/drivers/[id]/actions.ts` + mock data in the `/pending` and `/[id]` server pages. Each file has a top-of-file TODO with the function signature Youssef should expose.
+
+**Key decisions:**
+- Route groups `(shell)` + `_components` (underscore = private, non-routed) solved the mixed-auth layout cleanly. The brief asked for `app/admin/_components/demo/page.tsx` but Next.js treats underscore folders as private — moved the routed entry to `app/admin/demo/page.tsx` while keeping `DemoClient.tsx` under `_components/`.
+- Desktop-required fallback is CSS-only (not JS width detection) to avoid hydration flash. `ApprovalRouteMarker` is the only client-side piece — it toggles a class based on `usePathname()`.
+- No orange `#E8632A` anywhere in admin — primary is `#2563EB`. Inter font is opt-in via `.admin-scope` (rest of the app keeps its default font stack).
+- Verified dev server (Next 14.2.29) renders all admin routes HTTP 200: `/admin`, `/admin/login`, `/admin/drivers/pending`, `/admin/drivers/d-002`, `/admin/demo`. `tsc --noEmit` clean, `next lint` on changed dirs clean.
+
+**Shortcuts taken:**
+- Browser MCP / Playwright screenshot pass **not** done — PM runs through the flow manually before Anas merges. Flagged in deliverable report.
+- Mobile desktop-required card for approval routes is suppressed via `@media (max-width: 1023px)` CSS rule on `.admin-approval-route` (hides `[data-admin-sidebar]`, `[data-admin-topbar]`, and `[data-admin-desktop-required]`); approval pages render the mobile variants inline with Tailwind `lg:hidden` / `hidden lg:block`.
+- 8 of 9 sidebar items are `aria-disabled` — they show but don't navigate. Youssef / future PRs will wire them up.
+
+**Friction:**
+- First dev-server boot failed with 404 on every /admin route — middleware was handing everything to `intlMiddleware` which rewrites to locale-prefixed paths. Fix: add `/admin` to the `SKIP_INTL` array in `middleware.ts`. Trivially found from the server log.
+- Initial attempt to split layouts by reading `x-next-pathname` header failed (header not reliably available) — restructured with Next.js route groups (`(shell)`) which is the idiomatic fix.
+
+---
+
 ## Feedback received
 
 - **Hamza (PLZ-008 review):** Replace `as T | null` casts with `.maybeSingle<Pick<T, ...>>()`. Applied immediately.
