@@ -5,9 +5,74 @@ _Updated after every session._
 
 ## Current state
 
-Status: Sprint 2 — 14 April 2026.
+Status: 18 April 2026.
 PLZ-047 (P1) + PLZ-048 (P2) complete. PR #38 merged.
 PLZ-054 (P0): customers anon SELECT RLS policy — PR open, tagged Anas for review.
+
+**New ownership (2026-04-18):** You now handle ALL Supabase requests and db topics.
+Any migration that lands in `supabase/migrations/` is your responsibility to push.
+
+### PLZ-060 + PLZ-061 — Admin panel backend (2026-04-18)
+
+Branch: `plz-060-061-backend` (off main `12b3492`). Seven commits, all local, waiting on PM review before Anas merges via REST API.
+
+What shipped:
+- `admin_users` table + deny-all RLS + founder seed by email join.
+- `lib/admin-trust-cookie.ts` HMAC-signed trust cookie helpers
+  (30-day long / 10-min pending) using `ADMIN_TRUST_SECRET`.
+- `lib/admin-auth.ts` `requireAdmin()` helper (service role → `admin_users`).
+- Middleware admin guard requiring Supabase session + trust cookie on `/admin/**`
+  except `/admin/login` and `/admin/auth/callback`. Added `/admin` to `SKIP_INTL`.
+- Magic-link login: `app/admin/login/actions.ts` (`requestAdminMagicLink`) +
+  `app/admin/auth/callback/route.ts` (code exchange, admin recheck, trust-cookie mint).
+- `drivers` approval columns migration + backfill of `onboarding_status='active'`
+  rows → `approval_status='approved'`. Extended `onboarding_status` CHECK to
+  include `'rejected'`.
+- `app/admin/drivers/[id]/actions.ts` with `approveDriverAction`,
+  `resubmitDocumentAction`, `rejectDriverAction`, `getDocumentSignedUrl`
+  (60s TTL). All gate on `requireAdmin()`; all use service role.
+- **Testing-mode revert in `app/driver/onboarding/actions.ts`** —
+  `saveIdentityAndSubmitAction` + `submitOnboardingAction` now set
+  `pending_validation` + `approval_status='pending'` and redirect to
+  `/driver/onboarding/pending`. Commit hash `1eeced6`.
+- `types/supabase.ts` hand-updated for `admin_users` and new driver columns.
+  Run `supabase gen types typescript` after migrations land on remote to
+  replace the hand edit.
+- `.env.local.example` adds `ADMIN_TRUST_SECRET` + `NEXT_PUBLIC_SITE_URL`.
+
+### Pending migrations — NOT yet pushed to remote
+
+| File | What it does | Priority | Row impact |
+|---|---|---|---|
+| `20260416000001_plz059_drivers_phone_unique.sql` | UNIQUE on `drivers.phone` | **P0** | 0 — constraint only |
+| `20260416000002_plz059_drivers_city.sql` | `drivers.city text` + index | P1 | 0 — nullable column |
+| `20260418000001_plz060_admin_users.sql` | New `admin_users` table + RLS | **P0 for PLZ-060** | 0 — new table |
+| `20260418000002_plz060_seed_founder_admin.sql` | Seed founder by auth.users email join | P0 | 1 row (or 0 if founder hasn't magic-linked yet; idempotent) |
+| `20260418000003_plz061_driver_approvals.sql` | `drivers` approval columns + backfill | **P0 for PLZ-061** | Schema + UPDATE on all `onboarding_status='active'` drivers (currently 1-3 test drivers) |
+
+Push order: 059 files → 060 files (in order) → 061. Verify with:
+```sql
+SELECT conname FROM pg_constraint WHERE conrelid = 'drivers'::regclass AND contype = 'u';
+SELECT column_name FROM information_schema.columns WHERE table_name = 'drivers' AND column_name = 'city';
+SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='admin_users';
+SELECT column_name FROM information_schema.columns WHERE table_name='drivers' AND column_name LIKE '%approval%';
+SELECT email FROM public.admin_users WHERE is_active = true;
+```
+
+Hold: do NOT push to remote until Othmane ACKs the file list + row impact (per PM's brief).
+
+### Open questions for PM
+
+- The founder seed migration joins `auth.users` on email. If the founder hasn't
+  yet been magic-linked in, the migration is a silent no-op. Options:
+  (a) push migration now, have founder request magic link once (it will create
+      the auth.users row), then re-run the seed migration idempotently, OR
+  (b) manually insert the `auth.users` row via a second migration before the
+      seed. Recommend (a) — less coupling.
+- Should admins without the "trust this device" checkbox still get in for one
+  session? Current implementation sets a session-scoped trust cookie so they do
+  — otherwise middleware would immediately bounce them after login. Flag if
+  this needs tightening.
 
 ---
 
@@ -95,6 +160,11 @@ Post findings to Notion: "Backend Audit — [date]"
 | 2026-04-13 | terminal_enabled, phone_verified, cmi_enabled | ✅ Production | DROP COLUMN terminal_enabled, phone_verified, cmi_enabled |
 | 2026-04-13 | decrement_stock() function | ✅ Production | DROP FUNCTION decrement_stock(uuid) |
 | 2026-04-14 | PLZ-054: customers anon SELECT policy (storefront tracking) | ⏳ PR open | DROP POLICY "customers: public select by order" ON customers |
+| 2026-04-16 | PLZ-059: `drivers.phone` UNIQUE constraint | ⏳ Not pushed | DROP CONSTRAINT drivers_phone_unique |
+| 2026-04-16 | PLZ-059: `drivers.city` text column + index | ⏳ Not pushed | DROP COLUMN city; DROP INDEX drivers_city_idx |
+| 2026-04-18 | PLZ-060: `admin_users` table + deny-all RLS | ⏳ Not pushed | DROP TABLE admin_users CASCADE |
+| 2026-04-18 | PLZ-060: seed founder admin (idempotent) | ⏳ Not pushed | DELETE FROM admin_users WHERE email='m.benmansour2017@gmail.com' |
+| 2026-04-18 | PLZ-061: `drivers` approval columns + backfill | ⏳ Not pushed | DROP COLUMN approval_status, approved_at, approved_by, rejection_reason, license_approved, insurance_approved, id_front_approved, id_back_approved; restore old `onboarding_status` CHECK |
 
 ---
 
