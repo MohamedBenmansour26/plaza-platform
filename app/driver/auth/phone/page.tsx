@@ -9,8 +9,17 @@ export default function DriverPhonePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Strip leading 0 so '0611111111' → '+212611111111' (E.164 Morocco)
-  const formattedPhone = '+212' + phone.replace(/^\s*0/, '');
+  // Normalise raw digits to 9-digit local format:
+  // +212612345678 → 612345678, 0612345678 → 612345678, 612345678 → 612345678
+  function normalizeForDisplay(raw: string): string {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('212')) return digits.slice(3);
+    if (digits.startsWith('0')) return digits.slice(1);
+    return digits;
+  }
+
+  // Always prepend +212 for the server — phone state is the 9-digit local form
+  const formattedPhone = '+212' + phone;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,7 +35,9 @@ export default function DriverPhonePage() {
     }
   }
 
-  const isValid = phone.replace(/\D/g, '').length >= 9;
+  // phone is always the 9-digit normalised local format — valid if exactly 9
+  // digits starting with 6, 7, or 5 (Moroccan mobile prefixes)
+  const isValid = /^[567]\d{8}$/.test(phone);
 
   return (
     <main className="min-h-screen bg-[#FAFAF9] flex flex-col items-center pt-[72px] px-6">
@@ -50,9 +61,9 @@ export default function DriverPhonePage() {
             <input
               type="tel"
               inputMode="numeric"
-              placeholder="06 XX XX XX XX"
+              placeholder="6X XX XX XX XX"
               value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ''))}
+              onChange={(e) => setPhone(normalizeForDisplay(e.target.value))}
               className="flex-1 px-3 text-[15px] text-[#1C1917] outline-none bg-transparent"
               autoFocus
             />
