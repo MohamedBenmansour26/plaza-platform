@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import { createClient as createBrowserClient } from '@/lib/supabase/client';
-import { TRUST_COOKIE_NAME } from '@/lib/admin-trust-cookie';
 
 export type AdminRole = 'admin' | 'ops' | 'support';
 
@@ -52,22 +50,3 @@ export async function requireAdmin(): Promise<{
   };
 }
 
-/**
- * Sign out the current admin:
- * - Invalidates the Supabase session (browser client, clears sb-* cookies).
- * - Deletes the plaza_admin_trust HttpOnly cookie by setting max-age=0.
- *
- * This is a client-callable async function — import it in client components
- * that need a logout button.
- */
-export async function signOutAdmin(): Promise<void> {
-  const supabase = createBrowserClient();
-  await supabase.auth.signOut();
-
-  // Delete the trust cookie by setting it with max-age=0 via document.cookie
-  // (HttpOnly cookies set by the server cannot be deleted from JS, but the
-  // server middleware will reject any future requests once the Supabase session
-  // is gone.  For belt-and-suspenders we also hit the server logout route.)
-  // The cookie is scoped to /admin so this deletion is path-specific.
-  document.cookie = `${TRUST_COOKIE_NAME}=; Max-Age=0; path=/admin`;
-}

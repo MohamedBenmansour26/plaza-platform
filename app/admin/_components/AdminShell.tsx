@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { signOutAdmin } from '@/lib/admin-auth';
+import { signOutAdmin } from '@/lib/admin-auth-client';
 import { SidebarNav } from './SidebarNav';
 import { Topbar } from './Topbar';
 
