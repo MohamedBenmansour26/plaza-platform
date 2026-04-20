@@ -348,3 +348,178 @@ Screenshots saved: qa-phase5-01-phone-page.png, qa-phase5-02-historique-redirect
 **Checklist additions:**
 - On future driver PRs: verify OTP stub is replaced with real SMS provider before production deploy
 - On any photo upload flow: verify the stored value is a storage path (not a public URL) when bucket is private
+
+---
+
+## PLZ-065 — SAAD-021: returning driver OTP routing — PR #57 — 20 April 2026
+
+**Branch:** fix/PLZ-065-saad021-driver-otp-routing
+**Verdict: MERGE ✅ — merged** (squash SHA: 13363709968005c020ca5f0a2d154bf25a6a9f33)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR fixed:**
+- SAAD-021: `verifyDriverOtpAction` previously always redirected to `/driver/auth/pin-setup`. Now queries `drivers` table (service client, bypasses RLS) for `user_id` after OTP verification. `user_id` non-null → returning driver → `/driver/auth/pin?phone=…&name=…`. `user_id` null (or driver row not found) → new driver → `/driver/auth/pin-setup?phone=…`.
+- Two pre-existing `@typescript-eslint/no-explicit-any` eslint errors on `driver_schedules` table casts in `pin-setup/actions.ts` and `profil/horaires/actions.ts` — suppressed with `// eslint-disable-next-line` comments on correct lines.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0 (only pre-existing haversine.test.ts errors, unchanged)
+- lint: EXIT 0 (only pre-existing `<img>` storefront warnings, unchanged)
+- CI "Type check & Lint": success on HEAD SHA
+- No console.log in changed files. Redirects outside try/catch. eslint-disable on correct lines.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL: complete — `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"]`
+- No new routes added. `/driver/auth/pin` and `/driver/auth/pin-setup` both existed and return 200.
+
+**Phase 3 — Data Consistency: PASS (security audit)**
+- `createServiceClient()` used for drivers query — service role, bypasses RLS ✅
+- `phone` parameter: set by `checkDriverPhoneAction` redirect (normalized +212 format), then passed via URL query param to OTP page, then forwarded to `verifyDriverOtpAction`. Phone not user-injectable after normalization step ✅
+- If `drivers` row not found: `maybeSingle()` returns `data: null` → `driver?.user_id != null` = false → falls through to new driver path (no crash) ✅
+- `full_name` is `string` (non-nullable) in drivers schema — safe to use with `driver!.full_name` when `isReturning = true` ✅
+- `eslint-disable` comments: `driver_schedules` casts confirmed pre-existing on main before this PR — both service client and anon client use `as any` for this table. The comments are on the correct line immediately before the cast in both files ✅
+
+**Phase 4 — UI: PASS** (no UI changes in this PR)
+
+**Phase 5 — Browser Test: PASS** — 8/8 checks
+- `/store/boutique-test2`: loads, 2 Ajouter buttons ✅
+- Add to cart: ✅
+- Checkout: no Western Sahara label ✅
+- `/auth/login`: form loads ✅
+- `/driver/auth/phone`: input + content loads ✅
+- `/driver/auth/pin?phone=…&name=Test`: h1 "Saisissez votre code PIN", numpad present ✅
+- `/driver/auth/pin-setup?phone=…`: h1 "Créez votre code PIN", numpad present ✅
+- `/driver/livraisons` → redirect to `/driver/auth/phone` ✅
+Screenshots saved in .qa-screenshots/plz065-01 through plz065-08.
+
+Note: E2E CI check shows "failure" — confirmed pre-existing on every main commit (all 5 recent main SHAs show same failure). Not introduced by this PR.
+Note: Windows path-with-spaces webpack hot-reload race condition on `.next` — required clean server restart before Phase 5. Pre-existing env issue per PR brief.
+
+**Phase 6 — Flow Verification: PASS**
+- `/track` loads ✅
+- `/driver/livraisons`, `/driver/historique`, `/driver/profil` all redirect to `/driver/auth/phone` ✅
+- `verifyDriverPinAction` uses `supabase.auth.signInWithPassword` — PIN verified by Supabase Auth (bcrypt) ✅
+- `isReturning` branch passes `driver!.full_name` in URL params — PIN page displays driver name correctly ✅
+
+**Most interesting finding:** The `any` casts for `driver_schedules` exist despite the table being fully typed in `types/supabase.ts`. The reason: the typed Supabase client's `.from()` method has strict overloads and the `upsert` with `ignoreDuplicates` option likely hits a TypeScript overload that doesn't match the generated types properly. The cast is genuinely necessary — the eslint-disable comments are correct.
+
+**Patterns noticed:**
+- `maybeSingle()` is the correct choice for "0 or 1 rows" queries — returns `null` on no match (not error), which makes null-guard fallback clean and avoids the "PGRST116" error that `.single()` would throw on 0 rows.
+- Pre-existing CI E2E failures on main need a dedicated fix ticket. They are masking real regressions — every PR will show "E2E: failure" and the signal is worthless until fixed.
+
+**Checklist additions:**
+- On any `maybeSingle()` query used for auth routing: verify the null-fallback path leads to a safe destination (not a crash or leaked data).
+- Pre-existing CI E2E failures: before merging any future PR, confirm the E2E failure is pre-existing by checking the last 3 main branch CI runs. If main was clean before and PR broke it — block.
+- `driver_schedules` any-cast: if types are ever regenerated with proper upsert support, remove the casts and eslint-disable comments.
+
+---
+
+## PLZ-066 — Founder auth fixes (merchant phone + dashboard SC + driver phone) — PR #58 — 20 April 2026
+
+**Branch:** fix/PLZ-066-founder-auth-fixes → main
+**Verdict: MERGE ✅ — merged** (squash SHA: 3b8b723765f280b01a6cdd3f7f0252fea2bb72ed)
+**P0: 0 | P1: 0 | P2: 1 (pre-existing)**
+
+**What the PR fixed (3 bugs found by founder on manual test):**
+
+1. **Issue 1a** — Merchant login: `handlePhoneChange` strips leading `0` before storing → `0612345678` becomes `612345678` in state → `validatePhone` passes, button enables.
+2. **Issue 1b** — Merchant login: `formatPhoneDisplay` updated to 1-2-2-2-2 Moroccan grouping: `6 12 34 56 78` (was `61 23 45 67 8`).
+3. **Issue 2** — Dashboard `page.tsx` (Server Component): `onMouseEnter`/`onMouseLeave` removed from `<a>` tag. Replaced with `.btn-primary-outline-hover` CSS class in `globals.css`. Visual effect identical (color-mix hover). `next` + `eslint-config-next` bumped `14.2.29 → 14.2.35`.
+4. **Issue 4** — Driver phone: `normalizeForDisplay()` strips `+212`/`212`/`0` prefix so `phone` state is always 9-digit local form. `isValid` changed from `length >= 9` to `/^[567]\d{8}$/` (Moroccan mobile prefixes only).
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0, lint: EXIT 0 (7 pre-existing `<img>` storefront warnings)
+- CI "Type check & Lint": success on HEAD SHA ✅
+- No console.log, no hardcoded hex colors introduced
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete. No new routes.
+
+**Phase 3 — Data Consistency: PASS**
+- Issue 1a: `fullPhone = '+212' + phone` where phone is always 9-digit → `+212612345678` (no double-prepend) ✅
+- Issue 1b: browser-verified — types `612345678`, displays `6 12 34 56 78` ✅
+- Issue 4: all 4 normalizeForDisplay formats pass simulation + browser test ✅
+- Issue 2: zero event handlers in Server Component ✅
+
+**Phase 4 — UI Consistency: PASS**
+- All changed files use `var(--color-primary)`. CSS hover class uses `var(--color-primary)`. ✅
+- `BoutiqueForm.tsx` has pre-existing `onMouseEnter/Leave` — confirmed 'use client', not in scope ✅
+
+**Phase 5 — Browser Test: PASS (10/10)**
+NOTE: Initial run failed because dev server was running `fix/PLZ-067` (different branch).
+After restart on PLZ-066 code, all tests passed.
+- Issue 1a: `0612345678` → `6 12 34 56 78`, button enabled ✅
+- Issue 4: `+212612345678`, `0612345678`, `612345678`, `212612345678` → all `612345678`, button enabled ✅
+- Standard suite (store, cart, auth, dashboard, /track, driver routes): all ✅
+
+**Phase 6 — Flow Verification: PASS**
+- Dashboard no runtime error (onMouseEnter boundary fix confirmed) ✅
+- Issue 1b Moroccan phone format confirmed in live browser ✅
+- Issue 4 212-prefix normalization confirmed live ✅
+
+**P2-001 (pre-existing):** `validatePhone` in `app/auth/login/page.tsx` only accepts `startsWith('6')`. Moroccan 5XX/7XX numbers rejected. Not introduced by this PR — identical on main. Assign fix ticket next sprint.
+
+**Most interesting finding:** Dev server running a different branch caused false Phase 5 failures on first run. Added process: always verify which branch the server is running before Phase 5. `git branch --show-current` check is now mandatory before browser tests.
+
+**Patterns noticed:**
+- CSS class hover replacement for Server Component event handler is the correct pattern. Add to knowledge base: any `onMouseEnter/Leave` in a file without `'use client'` is a Server Component boundary violation.
+- React controlled inputs: `fill()` and even `keyboard.type()` can show stale DOM values if the dev server is on a different branch — always confirm branch before browser tests.
+
+**Checklist additions:**
+- Before Phase 5: run `git branch --show-current` to confirm the dev server is on the PR branch.
+- On any Server Component file: grep for `onMouse*`, `onClick`, `onChange` — any match is a P0 boundary violation unless the file has `'use client'`.
+- When next/eslint-config-next are bumped together: confirm both package.json and package-lock.json reflect the new version.
+
+---
+
+## PLZ-067 — Confirm order button sizing + router.refresh() — PR #59 — 20 April 2026
+
+**Branch:** fix/PLZ-067-confirm-order-button
+**Verdict: MERGE ✅ — merged** (squash SHA: e195a94d3cff9b70d954510a592f1502d0795a30)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR fixed:**
+1. Button sizing: `flex-1 h-10 text-sm` → `w-full h-12 text-[14px] font-semibold` on confirm button in `OrderDetailSheet.tsx` ActionBar. `flex-1` in a `flex-col` container stretches height not width — buttons were potentially clipped. Fixed to match `OrderDetailClient.tsx` exactly.
+2. Missing `router.refresh()` after confirmation: `useRouter` imported, instantiated in `OrderDetailSheet`, passed as prop to `ActionBar`. Called after `onClose()` so sheet closes first then order list re-renders with updated status.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0
+- lint: EXIT 0 (pre-existing `<img>` warnings in storefront, unrelated to this PR)
+- No console.log in changed code. No hardcoded colors introduced.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL: complete — `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"]`
+- No new routes added.
+
+**Phase 3 — Data Consistency: PASS**
+- `confirmOrderAction` in `actions.ts` correctly calls `createDispatchDelivery` via dynamic import in try/catch — dispatch failure is non-blocking (merchant confirm succeeds regardless). ✅
+- `revalidatePath('/dashboard/commandes')` + `router.refresh()` double-mechanism ensures server and client both update. ✅
+- No price/fee logic touched.
+
+**Phase 4 — UI Consistency: PASS**
+- Confirm button: `w-full h-12 text-[14px] font-semibold` + `var(--color-primary)` background. Matches `OrderDetailClient.tsx` line 334 exactly. ✅
+- Secondary button: `w-full h-12 border ... text-[14px] font-medium`. Matches `OrderDetailClient.tsx` line 344 exactly. ✅
+- Terminal status text ("Commande terminée" / "Commande annulée") intact. ✅
+- Error banner (`actionError`) intact. ✅
+- Two pre-existing `#2563EB` values in DELIVERY_STATUS_CONFIG data constants (badge colors, not buttons) — not introduced by this PR.
+
+**Phase 5 — Browser Test: PASS**
+- Store home: ✅, Add to cart: ✅, Checkout form fields + no WS label: ✅, Login: ✅, /track: ✅, /dashboard redirect: ✅
+- Note: Mapbox canvas absent in headless mode (WebGL not available) — pre-existing limitation, not a regression.
+- Note: `_next/static` 404s in headless browser — pre-existing hot-reload race condition on Windows path-with-spaces, documented in PLZ-065.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- `router.refresh()` called after `onClose()` — correct ordering: sheet closes first, list re-renders. ✅
+- `useRouter` from `next/navigation` correctly imported and propagated as prop to `ActionBar`. ✅
+- `ActionBar` shows "Commande terminée"/"Commande annulée" for terminal statuses. ✅
+- Error banner intact for confirmation failures. ✅
+- `confirmOrderAction` dispatch wiring verified in `actions.ts`. ✅
+
+**Most interesting finding:** The PR uses prop-drilling (`router` as prop to `ActionBar`) rather than calling `useRouter()` directly inside `ActionBar`. This is correct because `ActionBar` is a non-exported helper component inside the same `'use client'` file — either approach works, but the chosen approach avoids a second `useRouter()` call at a nested level. Clean.
+
+**Patterns noticed:**
+- When a Server Action uses `revalidatePath` but the client component is a drawer/sheet that closes on success, `revalidatePath` alone is insufficient to update the list (the page data is cached in RSC). Adding `router.refresh()` is the correct client-side complement.
+- `flex-1` in `flex-col` containers is a recurring sizing footgun — it stretches in the cross-axis (height) not the main-axis (width). Always prefer `w-full` for full-width buttons in column layouts.
+
+**Checklist additions:**
+- On any dashboard action button in a sheet/drawer: verify `router.refresh()` is called after the action succeeds (not just `revalidatePath` from the server action).
+- On button sizing in `flex-col` containers: flag `flex-1` on buttons — it affects height, not width. Use `w-full` instead.
