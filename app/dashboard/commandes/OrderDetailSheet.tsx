@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { X, User, Phone, MapPin, CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PaymentBadge } from '@/components/ui/PaymentBadge';
@@ -141,9 +142,11 @@ function DeliveryStatusCard({ delivery }: { delivery: NonNullable<OrderWithDetai
 function ActionBar({
   order,
   onClose,
+  router,
 }: {
   order: OrderWithDetails;
   onClose: () => void;
+  router: ReturnType<typeof useRouter>;
 }) {
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -154,6 +157,7 @@ function ActionBar({
       try {
         await action(order.id);
         onClose();
+        router.refresh();
       } catch (err) {
         if (err instanceof Error && err.message.includes('Stock insuffisant')) {
           setActionError(err.message);
@@ -191,7 +195,7 @@ function ActionBar({
         {!isPending && order.status === 'pending' && (
           <button
             onClick={() => run(confirmOrderAction)}
-            className="flex-1 h-10 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+            className="w-full h-12 text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Confirmer la commande
@@ -203,7 +207,7 @@ function ActionBar({
             onClick={() => {
               window.location.href = `mailto:support@plaza.ma?subject=Problème commande ${order.order_number}&body=Bonjour, je rencontre un problème avec la commande ${order.order_number}.`;
             }}
-            className="flex-1 h-10 border border-[#E2E8F0] text-[#78716C] rounded-lg text-sm font-medium hover:bg-[#F5F5F4] transition-colors"
+            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg text-[14px] font-medium hover:bg-[#F5F5F4] transition-colors"
           >
             Signaler un problème
           </button>
@@ -221,6 +225,7 @@ type Props = {
 };
 
 export function OrderDetailSheet({ order, onClose }: Props) {
+  const router = useRouter();
   return (
     <>
       {/* Backdrop */}
@@ -367,7 +372,7 @@ export function OrderDetailSheet({ order, onClose }: Props) {
 
         {/* Footer actions */}
         <div className="border-t border-[#E2E8F0] px-6 py-4 flex gap-3 flex-shrink-0 bg-white">
-          <ActionBar order={order} onClose={onClose} />
+          <ActionBar order={order} onClose={onClose} router={router} />
         </div>
       </div>
     </>
