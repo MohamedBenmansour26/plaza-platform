@@ -7,8 +7,9 @@ import { checkPhoneAction } from './actions';
 
 function formatPhoneDisplay(value: string): string {
   if (!value) return '';
-  const groups = value.match(/.{1,2}/g) ?? [];
-  return groups.join(' ');
+  const first = value[0];
+  const pairs = value.slice(1).match(/.{1,2}/g) ?? [];
+  return [first, ...pairs].join(' ');
 }
 
 function validatePhone(value: string): boolean {
@@ -24,9 +25,10 @@ export default function PhoneEntryPage() {
   const [loading, setLoading] = useState(false);
 
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 9) {
-      setPhone(value);
+    const raw = e.target.value.replace(/\D/g, '');
+    const stripped = raw.startsWith('0') ? raw.slice(1) : raw; // strip leading 0
+    if (stripped.length <= 9) {
+      setPhone(stripped);
       setError(false);
     }
   }
