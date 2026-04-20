@@ -24,6 +24,8 @@ export type CreateOrderPayload = {
   customerPhone: string;
   customerAddress: string | null;
   customerCity: string | null;
+  locationLat?: number | null;     // PLZ-068: customer map-pin latitude
+  locationLng?: number | null;     // PLZ-068: customer map-pin longitude
   deliveryDate?: string | null;    // ISO date string YYYY-MM-DD
   deliverySlot?: string | null;    // "09:00-10:00"
   paymentMethod: PaymentMethod;
@@ -162,6 +164,7 @@ export async function createOrder(
   const orderId = crypto.randomUUID();
 
   // 1. Insert customer
+  // PLZ-068: include location_lat/lng if the customer dropped a map pin at checkout.
   const { error: custError } = await supabase
     .from('customers')
     .insert({
@@ -170,6 +173,8 @@ export async function createOrder(
       phone: payload.customerPhone,
       address: payload.customerAddress,
       city: payload.customerCity,
+      ...(payload.locationLat != null ? { location_lat: payload.locationLat } : {}),
+      ...(payload.locationLng != null ? { location_lng: payload.locationLng } : {}),
     } as never);
   if (custError) {
     console.error('[createOrder] customer insert failed:', custError);
