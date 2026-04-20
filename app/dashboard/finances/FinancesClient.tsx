@@ -18,6 +18,7 @@ import {
   Cell,
 } from 'recharts';
 import type { MerchantMetrics, Period } from '@/lib/db/metrics';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -28,9 +29,9 @@ function formatMAD(centimes: number): string {
 function formatChartDate(iso: string, period: Period): string {
   const d = new Date(iso);
   if (period === 'week') {
-    return d.toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 3);
+    return d.toLocaleDateString('fr-FR', { weekday: 'short', timeZone: MOROCCO_TZ }).slice(0, 3);
   }
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: MOROCCO_TZ });
 }
 
 // ─── Payment colours ──────────────────────────────────────────────────────────

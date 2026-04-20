@@ -58,7 +58,9 @@ export async function requestAdminMagicLink(
     TRUST_PENDING_COOKIE_OPTIONS,
   );
 
-  const supabase = await createClient();
+  // PKCE flow: signInWithOtp sends a `code` query param (not a hash fragment)
+  // so /admin/auth/callback can call exchangeCodeForSession(code) successfully.
+  const supabase = await createClient({ flowType: 'pkce' });
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
