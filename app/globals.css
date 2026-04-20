@@ -93,6 +93,12 @@
   }
 }
 
+/* Hover link that tints with the tenant primary color — used by server
+   components that cannot pass onMouseEnter/onMouseLeave props.           */
+.btn-primary-outline-hover:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+}
+
 /* RTL support — applied when lang="ar" is set on <html> */
 [dir="rtl"] {
   text-align: right;

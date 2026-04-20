@@ -308,10 +308,8 @@ export default async function DashboardPage() {
                 href={`https://${storeUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                className="btn-primary-outline-hover w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 8%, white)')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <ExternalLink className="w-4 h-4" />
                 Voir la boutique
