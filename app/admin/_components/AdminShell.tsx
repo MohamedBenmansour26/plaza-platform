@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { signOutAdmin } from '@/lib/admin-auth';
 import { SidebarNav } from './SidebarNav';
 import { Topbar } from './Topbar';
 
@@ -26,10 +27,8 @@ export function AdminShell({
   const [pending, startTransition] = useTransition();
 
   const handleLogout = () => {
-    startTransition(() => {
-      // TODO (Youssef swap): replace with `signOutAdmin()` from
-      // `@/lib/admin-auth` once backend ships. For now we just
-      // redirect to login.
+    startTransition(async () => {
+      await signOutAdmin();
       router.push('/admin/login');
     });
   };

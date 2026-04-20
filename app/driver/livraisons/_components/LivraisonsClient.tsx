@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Power } from 'lucide-react';
+import { Package, Power, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { BottomNav } from '../../_components/BottomNav';
 import { OfflineBanner } from '../../_components/OfflineBanner';
@@ -34,6 +34,8 @@ function minutesUntilSlotEnd(slot: string | null): number {
 export function LivraisonsClient({ driver, initialDeliveries, initialPool, driverCity }: Props) {
   const router = useRouter();
   const [isAvailable, setIsAvailable] = useState(driver.is_available);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [deliveries, _setDeliveries] = useState(initialDeliveries);
   const [pool, setPool] = useState<PoolDelivery[]>(initialPool);
   const [pendingAssignment, setPendingAssignment] = useState<DriverDelivery | null>(null);
@@ -108,11 +110,23 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
   }, [driverCity]);
 
   async function toggleAvailability() {
+    if (availabilityLoading) return;
+    const prev = isAvailable;
     const next = !isAvailable;
-    setIsAvailable(next);
-    // Optimistic — update in background
+    setIsAvailable(next);           // Optimistic update
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
     const supabase = createClient();
-    await supabase.from('drivers').update({ is_available: next } as never).eq('id', driver.id);
+    const { error } = await supabase
+      .from('drivers')
+      .update({ is_available: next } as never)
+      .eq('id', driver.id);
+    setAvailabilityLoading(false);
+    if (error) {
+      setIsAvailable(prev);         // Revert on failure
+      setAvailabilityError('Impossible de mettre à jour votre disponibilité. Réessayez.');
+      setTimeout(() => setAvailabilityError(null), 4000);
+    }
   }
 
   const toCollect  = deliveries.filter(d => d.status === 'accepted');
@@ -128,16 +142,29 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
         </div>
         <button
           onClick={toggleAvailability}
-          className="flex items-center gap-2"
+          disabled={availabilityLoading}
+          className="flex items-center gap-2 disabled:opacity-60"
+          aria-label={isAvailable ? 'Passer hors ligne' : 'Passer en ligne'}
         >
-          <div className={`w-11 h-6 rounded-full transition-colors relative ${isAvailable ? 'bg-green-500' : 'bg-gray-300'}`}>
-            <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${isAvailable ? 'right-0.5' : 'left-0.5'}`} />
-          </div>
+          {availabilityLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin text-[#78716C]" />
+          ) : (
+            <div className={`w-11 h-6 rounded-full transition-colors relative ${isAvailable ? 'bg-green-500' : 'bg-gray-300'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${isAvailable ? 'right-0.5' : 'left-0.5'}`} />
+            </div>
+          )}
           <span className={`text-xs font-medium ${isAvailable ? 'text-green-600' : 'text-[#78716C]'}`}>
             {isAvailable ? 'En ligne' : 'Hors ligne'}
           </span>
         </button>
       </header>
+
+      {/* Availability update error */}
+      {availabilityError && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-[13px] text-red-700 text-center">
+          {availabilityError}
+        </div>
+      )}
 
       {/* Offline banner */}
       {!isAvailable && <OfflineBanner onGoOnline={toggleAvailability} />}
