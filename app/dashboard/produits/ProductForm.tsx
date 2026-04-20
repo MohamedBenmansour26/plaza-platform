@@ -85,7 +85,9 @@ export function ProductForm({ product }: Props) {
   const [price, setPrice] = useState(
     product ? String(product.price / 100) : ''
   );
-  const [stock, setStock] = useState(product?.stock ?? 0);
+  // New products default to stock=1 so they appear orderable immediately.
+  // Edited products keep their existing stock value.
+  const [stock, setStock] = useState(product?.stock ?? (isEdit ? 0 : 1));
   const [isVisible, setIsVisible] = useState(product?.is_visible ?? true);
   const [imageUrl, setImageUrl] = useState(product?.image_url ?? '');
   const [uploading, setUploading] = useState(false);
@@ -140,6 +142,13 @@ export function ProductForm({ product }: Props) {
 
   function handleSubmit() {
     if (!validate()) return;
+    // Warn the merchant if they are saving with stock = 0
+    if (stock === 0) {
+      const confirmed = window.confirm(
+        'Ce produit sera affiché comme épuisé et ne pourra pas être commandé. Continuer ?'
+      );
+      if (!confirmed) return;
+    }
     const fd = new FormData();
     fd.set('name_fr', nameFr);
     fd.set('name_ar', nameAr);
@@ -463,6 +472,9 @@ export function ProductForm({ product }: Props) {
               onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
               className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)]"
             />
+            <p className="text-xs text-[#78716C] mt-1">
+              Stock = 0 signifie rupture de stock — le produit sera visible mais non commandable.
+            </p>
           </div>
 
           {/* Visibility */}
@@ -645,6 +657,9 @@ export function ProductForm({ product }: Props) {
                       +
                     </button>
                   </div>
+                  <p className="text-xs text-[#78716C] mt-1.5">
+                    Stock = 0 signifie rupture de stock — le produit sera visible mais non commandable.
+                  </p>
                 </div>
               </div>
             </div>

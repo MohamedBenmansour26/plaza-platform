@@ -160,9 +160,27 @@ export default function ConfirmationPage() {
 
       // Guard: redirect to store if there is no order number — user landed here directly
       const resolvedOrderNumber = ssOrderNumber || parsedOrder.orderNumber || '';
-      if (!resolvedOrderNumber) {
+      const resolvedOrderId = ssOrderId || parsedOrder.orderId || '';
+
+      if (!resolvedOrderNumber && !resolvedOrderId) {
+        // Check if we have a durable redirect saved from a previous load (refresh case)
+        const durableRedirect = localStorage.getItem(`plaza_confirmed_${slug}`);
+        if (durableRedirect) {
+          router.replace(durableRedirect);
+          return;
+        }
         router.replace(`/store/${slug}`);
         return;
+      }
+
+      // Persist a durable redirect to localStorage so a page refresh can still
+      // navigate to the order status page (which shows the PIN from the DB).
+      // This key is intentionally never cleaned up — it's small and harmless.
+      if (resolvedOrderId) {
+        localStorage.setItem(
+          `plaza_confirmed_${slug}`,
+          `/store/${slug}/commande/${resolvedOrderId}`,
+        );
       }
 
       clearCart();
