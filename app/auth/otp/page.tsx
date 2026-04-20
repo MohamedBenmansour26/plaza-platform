@@ -30,9 +30,9 @@ function OTPContent() {
   useEffect(() => {
     if (otp.every((digit) => digit !== '') && !isChecking) {
       setIsChecking(true);
-      // TODO: [OTP stub — implement real verification via SMS provider]
+      // MVP stub — any 6-digit code is accepted until a real SMS provider is wired up
       setTimeout(() => {
-        const isCorrect = otp.join('') === '123456';
+        const isCorrect = otp.every(d => d !== '') && otp.join('').length === 6;
         if (isCorrect) {
           setIsSuccess(true);
           // Pass phone through to pin-setup so it can create the Supabase user
@@ -194,6 +194,12 @@ function OTPContent() {
         <button className="text-[13px] text-[#78716C] text-center mt-4 w-full">
           {t('wrongNumber')}
         </button>
+
+        <div className="mt-6 p-4 rounded-lg border" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
+          <p className="text-[13px] text-[#78716C] text-center">
+            Mode MVP — tout code à 6 chiffres est accepté.
+          </p>
+        </div>
       </div>
     </main>
   );

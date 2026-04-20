@@ -6,16 +6,30 @@ import { findDriverByPhone } from '@/lib/db/driver';
 type PhoneCheckResult = { error: string } | undefined;
 
 /**
+ * Normalise any Moroccan phone variant to E.164 +212 format.
+ *
+ * Handles:
+ *   0611223344      → +212611223344
+ *   +212611223344   → +212611223344  (no double prefix)
+ *   611223344       → +212611223344
+ */
+function normalizePhone(raw: string): string {
+  const digits = raw.trim().replace(/^\+212/, '').replace(/^0/, '');
+  return '+212' + digits;
+}
+
+/**
  * Check if phone belongs to an existing driver.
  * - Returning driver (onboarding_status = 'active'): redirect to PIN login
  * - Driver pending validation: redirect to pending screen (already submitted docs)
  * - New driver: redirect to OTP screen
  */
 export async function checkDriverPhoneAction(phone: string): Promise<PhoneCheckResult> {
-  const cleaned = phone.replace(/\s/g, '');
-  if (!cleaned.match(/^\+?[0-9]{9,15}$/)) {
+  const normalized = normalizePhone(phone.replace(/\s/g, ''));
+  if (!normalized.match(/^\+212[0-9]{9}$/)) {
     return { error: 'invalid_phone' };
   }
+  const cleaned = normalized;
 
   const driver = await findDriverByPhone(cleaned);
 
