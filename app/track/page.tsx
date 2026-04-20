@@ -21,9 +21,9 @@ export default function TrackOrderPage() {
       setErrorMessage('Veuillez entrer un numéro de commande.');
       return;
     }
-    if (!/^PLZ-\d{3}$/i.test(trimmed)) {
+    if (!/^PLZ-\d{3,}$/i.test(trimmed)) {
       setError(true);
-      setErrorMessage('Format invalide. Exemple : PLZ-042');
+      setErrorMessage('Format invalide. Exemple : PLZ-1042');
       return;
     }
     setError(false);
@@ -90,7 +90,7 @@ export default function TrackOrderPage() {
                     setOrderNumber(e.target.value.toUpperCase());
                     setError(false);
                   }}
-                  placeholder="PLZ-042"
+                  placeholder="PLZ-1042"
                   className={`w-full h-14 pl-4 pr-12 text-[17px] font-medium tracking-wide border-2 rounded-lg focus:outline-none transition-colors ${
                     error
                       ? 'border-[#DC2626] bg-red-50'
@@ -131,7 +131,7 @@ export default function TrackOrderPage() {
             <h3 className="font-medium text-[15px] mb-2">💡 Où trouver mon numéro ?</h3>
             <p className="text-[13px] text-[#78716C] leading-relaxed">
               Votre numéro de commande vous a été fourni lors de la confirmation. Il commence par{' '}
-              <span className="font-medium" style={{ color: 'var(--color-primary)' }}>PLZ-</span> suivi de 3 chiffres.
+              <span className="font-medium" style={{ color: 'var(--color-primary)' }}>PLZ-</span> suivi de chiffres (ex: PLZ-1042).
             </p>
           </div>
 

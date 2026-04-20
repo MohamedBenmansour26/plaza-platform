@@ -11,7 +11,7 @@ import type { CartItem } from '../_components/CartProvider';
 import { createClient } from '@/lib/supabase/client';
 import DateTimePicker from '../_components/DateTimePicker';
 import { MapLocationPicker } from '../_components/MapLocationPicker';
-import { getDeliveryFee, generateOrderNumber } from '../_lib/deliveryUtils';
+import { getDeliveryFee } from '../_lib/deliveryUtils';
 import { getMerchantBySlug } from '../actions';
 import type { Merchant } from '@/types/supabase';
 import type { PaymentMethod } from '@/types/supabase';
@@ -212,7 +212,8 @@ export default function CheckoutPage() {
     if (!isFormValid() || !merchant) return;
     setLoading(true);
 
-    const orderNumber = generateOrderNumber();
+    // SAAD-003: order_number is now generated server-side via DB sequence.
+    // No client-side order number generation here.
 
     // Build slot range "HH:MM-HH:MM" (start + 1 hour) so confirmation can split('-')
     const startTime = deliveryDateTime.time ?? '';
@@ -241,7 +242,6 @@ export default function CheckoutPage() {
         deliveryDisplaySlot: startTime,
         paymentMethod,
         paymentMethodDb: uiPaymentToDb(paymentMethod),
-        orderNumber,
         merchantId: merchant.id,
         merchantSlug: slug,
         deliveryFeeThreshold: threshold ?? null,
