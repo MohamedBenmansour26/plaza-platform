@@ -27,7 +27,7 @@ interface PendingOrder {
   paymentMethod: string;
   paymentMethodDb: 'cod' | 'terminal' | 'card';
   notes?: string | null;
-  orderNumber: string;
+  orderNumber?: string;               // Optional: generated server-side; may be absent on error path
   merchantId: string;
   merchantSlug: string;
   deliveryFeeThreshold?: number | null;
@@ -243,7 +243,7 @@ export default function VerificationPage() {
 
         // Also write order identity to confirm* keys (available after createOrder)
         sessionStorage.setItem('confirmOrderId', result.orderId ?? '');
-        sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? pendingOrder.orderNumber);
+        sessionStorage.setItem('confirmOrderNumber', result.orderNumber ?? pendingOrder.orderNumber ?? '');
         sessionStorage.setItem('confirmPin', String(result.customerPin ?? ''));
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Erreur inconnue';
@@ -273,7 +273,7 @@ export default function VerificationPage() {
 
         // Fallback confirm* identity keys (no orderId on DB failure)
         sessionStorage.setItem('confirmOrderId', '');
-        sessionStorage.setItem('confirmOrderNumber', pendingOrder.orderNumber);
+        sessionStorage.setItem('confirmOrderNumber', pendingOrder.orderNumber ?? '');
         sessionStorage.setItem('confirmPin', '');
       }
 

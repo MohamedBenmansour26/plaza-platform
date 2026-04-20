@@ -49,3 +49,4 @@ export async function requireAdmin(): Promise<{
     adminRow: adminRow as AdminRow,
   };
 }
+

@@ -40,10 +40,13 @@ export default function CheckoutPage() {
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [addressNotes, setAddressNotes] = useState('');
   const [city, setCity] = useState('');
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [locationTextFallback, setLocationTextFallback] = useState(false);
+  const [locationError, setLocationError] = useState(false);
   const [stockWarnings, setStockWarnings] = useState<string[]>([]);
   const [outOfZone, setOutOfZone] = useState(false);
 
@@ -198,18 +201,39 @@ export default function CheckoutPage() {
   const deliveryFee = getDeliveryFee(total, threshold);
   const finalTotal = total + deliveryFee;
 
+  // Normalize phone: strip +212 prefix → 0XXXXXXXXX
+  const normalizePhone = (raw: string): string => {
+    const trimmed = raw.trim().replace(/\s/g, '');
+    if (trimmed.startsWith('+212')) return '0' + trimmed.slice(4);
+    return trimmed;
+  };
+
+  const isPhoneValid = (raw: string): boolean =>
+    /^(\+212|0)[5-7]\d{8}$/.test(raw.trim().replace(/\s/g, ''));
+
+  // Location is valid when lat/lng are set OR when the text fallback is active
+  // (sentinel coords 0,0 are written by MapLocationPicker text mode)
+  const isLocationValid =
+    (locationLat !== null && locationLng !== null) ||
+    locationTextFallback;
+
   const isFormValid = (): boolean => {
     if (!fullName.trim()) return false;
-    if (!/^0[5-7]\d{8}$/.test(phone.trim())) return false;
+    if (!isPhoneValid(phone)) return false;
     if (!deliveryDateTime.date) return false;
     if (!deliveryDateTime.time) return false;
-    if (locationLat === null || locationLng === null) return false;
+    if (!isLocationValid) return false;
     return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Show explicit error if location is missing when user tries to submit
+    if (!isLocationValid && !locationTextFallback) {
+      setLocationError(true);
+    }
     if (!isFormValid() || !merchant) return;
+    setLocationError(false);
     setLoading(true);
 
     // SAAD-003: order_number is now generated server-side via DB sequence.
@@ -229,11 +253,11 @@ export default function CheckoutPage() {
       'plaza_pending_order',
       JSON.stringify({
         name: fullName.trim(),
-        phone,
+        phone: normalizePhone(phone),
         address: addressNotes,
         city,
-        locationLat,
-        locationLng,
+        locationLat: locationTextFallback ? null : locationLat,
+        locationLng: locationTextFallback ? null : locationLng,
         deliveryDate: deliveryDateTime.date?.toISOString().split('T')[0] ?? null,
         deliverySlot: slotRange,
         deliveryDisplayDate: deliveryDateTime.date
@@ -302,11 +326,21 @@ export default function CheckoutPage() {
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => { setPhone(e.target.value); }}
+              onBlur={() => setPhoneBlurred(true)}
               placeholder="06XXXXXXXX"
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
+              className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px] ${
+                phoneBlurred && phone.trim() && !isPhoneValid(phone)
+                  ? 'border-[#DC2626]'
+                  : 'border-[#E2E8F0]'
+              }`}
               required
             />
+            {phoneBlurred && phone.trim() && !isPhoneValid(phone) && (
+              <p className="text-xs text-[#DC2626] mt-1">
+                Numéro invalide. Exemple : 0612345678
+              </p>
+            )}
           </div>
         </div>
 
@@ -316,19 +350,39 @@ export default function CheckoutPage() {
 
           <MapLocationPicker
             onLocationSelect={(lat, lng, cityGuess) => {
-              setLocationLat(lat);
-              setLocationLng(lng);
-              if (cityGuess) {
-                setCity(cityGuess);
-                // Soft zone check — case-insensitive, partial match
-                const inZone = DELIVERY_CITIES.some(c =>
-                  cityGuess.toLowerCase().includes(c.toLowerCase()) ||
-                  c.toLowerCase().includes(cityGuess.toLowerCase())
-                )
-                setOutOfZone(!inZone)
+              // Detect text-fallback mode: MapLocationPicker uses sentinel (0, 0)
+              // when the map is unavailable and the user types a text address.
+              const isTextFallback = lat === 0 && lng === 0;
+              if (isTextFallback) {
+                setLocationTextFallback(true);
+                setLocationLat(null);
+                setLocationLng(null);
+                // cityGuess carries the full address text in text-fallback mode
+                if (cityGuess) setAddressNotes(cityGuess);
+              } else {
+                setLocationTextFallback(false);
+                setLocationLat(lat);
+                setLocationLng(lng);
+                if (cityGuess) {
+                  setCity(cityGuess);
+                  // Soft zone check — case-insensitive, partial match
+                  const inZone = DELIVERY_CITIES.some(c =>
+                    cityGuess.toLowerCase().includes(c.toLowerCase()) ||
+                    c.toLowerCase().includes(cityGuess.toLowerCase())
+                  );
+                  setOutOfZone(!inZone);
+                }
               }
+              setLocationError(false);
             }}
           />
+
+          {/* Show error when user tried to submit without selecting a location */}
+          {locationError && (
+            <p className="text-sm text-[#DC2626] font-medium mt-1">
+              Veuillez sélectionner votre adresse sur la carte
+            </p>
+          )}
 
           {/* Delivery zone info chip */}
           <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">

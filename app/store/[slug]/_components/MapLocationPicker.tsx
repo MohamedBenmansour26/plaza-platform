@@ -16,6 +16,8 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   const onLocationSelectRef = useRef(onLocationSelect);
   const [picked, setPicked] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [mapError, setMapError] = useState(false);
+  const [textAddress, setTextAddress] = useState('');
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
 
   // Keep ref up-to-date without triggering effect
@@ -65,13 +67,26 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   useEffect(() => {
     if (!mapContainer.current || mapRef.current || !token) return;
     mapboxgl.accessToken = token;
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-6.0, 31.5] as [number, number],
-      zoom: 5,
-    });
+    let map: mapboxgl.Map;
+    try {
+      map = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-6.0, 31.5] as [number, number],
+        zoom: 5,
+      });
+    } catch {
+      setMapError(true);
+      return;
+    }
     mapRef.current = map;
+
+    map.on('error', () => {
+      setMapError(true);
+      map.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    });
 
     map.on('load', () => {
       map.jumpTo({ center: [-6.0, 31.5], zoom: 5 });
@@ -108,10 +123,41 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
     };
   }, [token]); // ONLY token — never re-initialize when parent re-renders
 
-  if (!token) {
+  // Text-address fallback: shown when token is missing OR map failed to load
+  if (!token || mapError) {
     return (
-      <div className="w-full h-[260px] rounded-xl bg-[#F5F5F4] flex items-center justify-center border border-[#E2E8F0]">
-        <p className="text-[13px] text-[#78716C]">Carte non disponible</p>
+      <div className="space-y-3">
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          <svg className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          <p className="text-xs text-amber-700">
+            La carte interactive n&apos;est pas disponible. Veuillez saisir votre adresse manuellement.
+          </p>
+        </div>
+        <div>
+          <label className="block text-[14px] font-medium text-[#1C1917] mb-1.5">
+            Adresse complète <span className="text-[#DC2626] ml-0.5">*</span>
+          </label>
+          <input
+            type="text"
+            value={textAddress}
+            onChange={(e) => {
+              setTextAddress(e.target.value);
+              // Signal a valid text address by using sentinel coords (0, 0) and passing the
+              // address via cityGuess so commande/page.tsx can store it as delivery_notes.
+              // Actual lat/lng will be null — the checkout page handles text-only fallback.
+              if (e.target.value.trim()) {
+                onLocationSelectRef.current(0, 0, e.target.value.trim());
+              }
+            }}
+            placeholder="Ex : 12 rue Mohamed V, Casablanca"
+            className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
+          />
+        </div>
+        {textAddress.trim() && (
+          <p className="text-[13px] text-[#16A34A] font-medium">Adresse saisie ✓</p>
+        )}
       </div>
     );
   }
