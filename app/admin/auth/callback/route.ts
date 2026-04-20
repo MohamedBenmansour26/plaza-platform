@@ -80,14 +80,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const response = NextResponse.redirect(redirectUrl);
 
   if (trustPending === '1') {
-    const signed = signTrustCookie(user.id);
+    const signed = await signTrustCookie(user.id);
     response.cookies.set(TRUST_COOKIE_NAME, signed, TRUST_COOKIE_OPTIONS);
   } else {
     // v1 behaviour: the middleware requires a trust cookie on /admin/**.
     // If the user did not opt in to trust-device, we still set a short-lived
     // trust cookie (session-scoped: no maxAge) so they can use this session.
     // On next visit without the long cookie, they'll log in again.
-    const signed = signTrustCookie(user.id);
+    const signed = await signTrustCookie(user.id);
     response.cookies.set(TRUST_COOKIE_NAME, signed, {
       ...TRUST_COOKIE_OPTIONS,
       maxAge: undefined, // session cookie
