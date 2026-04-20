@@ -71,6 +71,7 @@ export async function completeDriverPinSetupAction(
       start_time: '08:00:00',
       end_time: '18:00:00',
     }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (service as any)
       .from('driver_schedules')
       .upsert(defaultSchedule, { onConflict: 'driver_id,day_of_week', ignoreDuplicates: true });

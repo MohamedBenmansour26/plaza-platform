@@ -37,6 +37,7 @@ export async function saveScheduleAction(
     end_time:    day.end_time   + ':00',
   }))
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('driver_schedules')
     .upsert(rows, { onConflict: 'driver_id,day_of_week' }) as { error: { message: string } | null }
@@ -55,6 +56,7 @@ export async function getScheduleAction(): Promise<DaySchedule[]> {
   const driver = await getDriverProfile(user.id)
   if (!driver) return defaultSchedule()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from('driver_schedules')
     .select('day_of_week, is_active, start_time, end_time')
