@@ -523,3 +523,57 @@ After restart on PLZ-066 code, all tests passed.
 **Checklist additions:**
 - On any dashboard action button in a sheet/drawer: verify `router.refresh()` is called after the action succeeds (not just `revalidatePath` from the server action).
 - On button sizing in `flex-col` containers: flag `flex-1` on buttons — it affects height, not width. Use `w-full` instead.
+
+---
+
+## PLZ-068 — Dispatch DB fix + customer location columns — PR #60 — 20 April 2026
+
+**Branch:** feat/PLZ-068-dispatch-db-fix → main
+**Verdict: MERGE ✅ — merged** (squash SHA: 139addfabd04ac543e21d0f1a74429c996d8426c)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR shipped:**
+1. Applied PLZ-058 dispatch engine migration that was committed but never applied to production DB — fixing SAAD-032 (order confirm silently returning `{ success: false }` because `dispatch_config` and `dispatch_errors` tables didn't exist). Tables: `dispatch_config` (seeded with base_fee=10, per_km=3, timeout=15), `dispatch_errors`, `driver_schedules`. Columns added to `deliveries`: `pickup_city`, `distance_km`, `estimated_duration_min`, `driver_earnings_mad`, `merchant_pickup_code`, `pool_created_at`, `pool_expires_at`, `accepted_at`. `accept_delivery()` SECURITY DEFINER function applied.
+2. New migration `20260420000002_plz068_customer_location.sql`: `ALTER TABLE customers ADD COLUMN IF NOT EXISTS location_lat numeric(10,7)` and `location_lng`. Idempotent. Correct precision for Morocco coordinates (lat 27-36, lng -14 to -1, all fit in 3 integer digits + 7 decimal).
+3. `CreateOrderPayload` + `createOrder` (`app/store/[slug]/actions.ts`): optional `locationLat?/locationLng?` fields, conditional spread `payload.locationLat != null ? { location_lat: ... } : {}` — uses `!= null` which guards both null and undefined. Clean.
+4. `PendingOrder` interface + `createOrder` call (`app/store/[slug]/verification/page.tsx`): location threaded from sessionStorage with `?? null` fallback. Non-breaking — optional fields, all existing call sites unaffected.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0 (stash applied — working tree had MOROCCO_TZ from unrelated next branch, confirmed not part of PR HEAD)
+- lint: EXIT 0 (only pre-existing `<img>` storefront warnings)
+- No console.log in changed files. No hardcoded colors introduced.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete: `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"]`
+- No new routes added.
+
+**Phase 3 — Data Consistency: PASS**
+- Full chain verified: checkout writes `locationLat/locationLng` to `plaza_pending_order` → PendingOrder interface typed correctly → verification page reads with `?? null` → payload built with optional fields → conditional spread into customer insert → `customers` table. Every link confirmed.
+- No-pin path (text fallback): `locationTextFallback = true` → `locationLat: null` in sessionStorage → `?? null` in payload → `!= null` guard is false → spread omits columns → DB default null. No INSERT error. ✓
+- Price chain unaffected by this PR. Delivery fee still from `getDeliveryFee()` only. SessionStorage keys unchanged.
+
+**Phase 4 — UI Consistency: PASS (no UI changes in this PR)**
+
+**Phase 5 — Browser Test: PASS**
+- Store home: products visible, TopNavBar, no bottom tabs ✅
+- Add to cart: Ajouter clicked ✅
+- Checkout (`/commande`): Mapbox Map region present, no Western Sahara, subtotal 999 MAD (not 0), MapLocationPicker visible, no COD checkbox, delivery fee "Gratuit" ✅
+- Login `/auth/login`: loads with "téléphone" field ✅
+- Driver auth phone: loads ✅
+- `/driver/livraisons` → redirect to `/driver/auth/phone` ✅
+- `/track`: loads, PLZ-XXX input visible ✅
+- Note: "missing required error components, refreshing..." on first `/commande` load — pre-existing Windows hot-reload race condition, clears on second load. Pre-existing since PLZ-065.
+- Screenshots: .qa-screenshots/plz068-01 through plz068-07.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- `!= null` guard on conditional spread is correct — guards both `null` and `undefined`. ✓
+- `numeric(10,7)` precision verified for Morocco coordinates — 3 integer digits fits lat 27-36 and lng -1 to -14. ✓
+- `IF NOT EXISTS` on ALTER TABLE — idempotent, production-safe. ✓
+- `STOREFRONT_ORDER_SELECT` deliberately excludes `customers.location_lat/lng` — correct, these are internal dispatch fields not for display. ✓
+
+**Most interesting finding:** The `!= null` guard on the conditional spread (`payload.locationLat != null`) is subtly important. `locationLat` is typed as `number | null | undefined` in the payload type. Using `!= null` (loose equality) catches both `null` and `undefined` in one check, preventing either from being spread as `{ location_lat: undefined }` into the insert object. If `!== null` (strict) had been used instead, `undefined` could pass through and cause a Supabase insert type error. The dev got this right.
+
+**Checklist additions:**
+- On any PR that adds optional columns to a DB insert: verify the conditional spread uses `!= null` (not `!== null`) to handle both null and undefined.
+- On any new migration: verify `ADD COLUMN IF NOT EXISTS` for idempotency AND verify column type precision fits the expected data range (esp. coordinates — check lat/lng range for target geography).
+- When tsc passes but lint fails on local run: stash working tree changes and re-run lint. Local working tree may have changes from other branches that contaminate lint results.

@@ -1,13 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Loader2, Info, X } from 'lucide-react';
 import { checkDriverPhoneAction } from './actions';
+import { createClient } from '@/lib/supabase/client';
 
 export default function DriverPhonePage() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showMerchantWarning, setShowMerchantWarning] = useState(false);
+
+  // Check on mount whether the browser already has an active Supabase session
+  // that belongs to a merchant (not a driver). If so, warn the user that
+  // completing driver login will replace their current session (SAAD-034).
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return;
+      const { data: driverRecord } = await supabase
+        .from('drivers')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      // No drivers record → existing session belongs to a merchant or admin
+      if (!driverRecord) {
+        setShowMerchantWarning(true);
+      }
+    });
+  }, []);
 
   // Normalise raw digits to 9-digit local format:
   // +212612345678 → 612345678, 0612345678 → 612345678, 612345678 → 612345678
@@ -47,6 +68,25 @@ export default function DriverPhonePage() {
         <div className="text-[22px] font-bold text-[#1C1917] mt-1">Espace Livreur</div>
         <div className="text-sm text-[#78716C] mt-2">Connectez-vous pour voir vos livraisons</div>
       </div>
+
+      {/* Merchant session warning banner (SAAD-034) */}
+      {showMerchantWarning && (
+        <div className="w-full mt-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+          <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+          <p className="flex-1 text-[13px] text-blue-800 leading-snug">
+            <span className="font-semibold">Connexion en tant que livreur</span>
+            <br />
+            Si vous êtes connecté en tant que marchand, votre session marchande sera remplacée.
+          </p>
+          <button
+            onClick={() => setShowMerchantWarning(false)}
+            aria-label="Fermer"
+            className="shrink-0 text-blue-500 hover:text-blue-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Form card */}
       <div className="w-full bg-white rounded-2xl shadow-md mt-10 p-6">
