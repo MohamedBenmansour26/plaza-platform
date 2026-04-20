@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
       const trustCookie = request.cookies.get(TRUST_COOKIE_NAME)?.value;
       const trustOk = user && trustCookie
-        ? verifyTrustCookie(trustCookie, user.id)
+        ? await verifyTrustCookie(trustCookie, user.id)
         : false;
 
       if (!user || !trustOk) {

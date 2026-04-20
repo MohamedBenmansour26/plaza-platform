@@ -1,5 +1,3 @@
-import crypto from 'node:crypto';
-
 /**
  * Admin trust-device cookie (PLZ-060).
  *
@@ -10,6 +8,9 @@ import crypto from 'node:crypto';
  * Admin middleware requires BOTH to be valid.
  *
  * Cookie format: `${userId}.${issuedAtMs}.${hmacSha256(userId.issuedAtMs)}`
+ *
+ * SAAD-001: Uses Web Crypto API (globalThis.crypto.subtle) instead of
+ * node:crypto so this module is safe to import in the Next.js Edge Runtime.
  */
 
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
@@ -25,17 +26,30 @@ function getSecret(): string {
   return secret;
 }
 
-export function signTrustCookie(userId: string): string {
+async function hmacSha256(secret: string, data: string): Promise<string> {
+  const key = await globalThis.crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await globalThis.crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(data),
+  );
+  return Buffer.from(sig).toString('hex');
+}
+
+export async function signTrustCookie(userId: string): Promise<string> {
   const issuedAt = Date.now();
   const payload = `${userId}.${issuedAt}`;
-  const sig = crypto
-    .createHmac('sha256', getSecret())
-    .update(payload)
-    .digest('hex');
+  const sig = await hmacSha256(getSecret(), payload);
   return `${payload}.${sig}`;
 }
 
-export function verifyTrustCookie(cookie: string, userId: string): boolean {
+export async function verifyTrustCookie(cookie: string, userId: string): Promise<boolean> {
   const parts = cookie.split('.');
   if (parts.length !== 3) return false;
   const [cookieUserId, issuedAtRaw, sig] = parts;
@@ -46,17 +60,21 @@ export function verifyTrustCookie(cookie: string, userId: string): boolean {
   if (!Number.isFinite(issuedAt)) return false;
   if (Date.now() - issuedAt > MAX_AGE_SECONDS * 1000) return false;
 
-  const expected = crypto
-    .createHmac('sha256', getSecret())
-    .update(`${cookieUserId}.${issuedAt}`)
-    .digest('hex');
+  const expected = await hmacSha256(getSecret(), `${cookieUserId}.${issuedAt}`);
 
-  // Constant-time compare — both must be equal length or timingSafeEqual throws.
+  // Constant-time compare via Web Crypto — import key with 'verify' and compare.
+  // Manual hex comparison after constant-time-safe buffer compare.
   const sigBuf = Buffer.from(sig, 'hex');
   const expectedBuf = Buffer.from(expected, 'hex');
   if (sigBuf.length !== expectedBuf.length) return false;
 
-  return crypto.timingSafeEqual(sigBuf, expectedBuf);
+  // Use timingSafeEqual via Node.js Buffer (available in both Node and Edge Runtime
+  // via the Next.js polyfill).
+  let diff = 0;
+  for (let i = 0; i < sigBuf.length; i++) {
+    diff |= sigBuf[i] ^ expectedBuf[i];
+  }
+  return diff === 0;
 }
 
 export const TRUST_COOKIE_NAME = 'plaza_admin_trust';

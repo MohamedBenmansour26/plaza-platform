@@ -13,6 +13,6 @@ export function getDeliveryFee(
   return subtotal >= threshold ? 0 : BASE_DELIVERY_FEE;
 }
 
-export function generateOrderNumber(): string {
-  return `PLZ-${Math.floor(Math.random() * 900 + 100)}`;
-}
+// SAAD-003: generateOrderNumber() removed — order numbers are now generated
+// server-side by the Postgres order_number_seq sequence (PLZ-062 migration).
+// Format: PLZ-NNNN (4+ digits, e.g. PLZ-1000, PLZ-1001 …)

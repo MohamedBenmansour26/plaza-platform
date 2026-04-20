@@ -43,23 +43,27 @@ export async function signupAction(formData: FormData): Promise<SignupResult> {
   }
 
   // Insert merchant row using the service role client to bypass RLS.
-  try {
-    const service = createServiceClient();
-    const storeSlug = slugify(storeName) || `merchant-${data.user.id.slice(0, 8)}`;
+  // SAAD-002: if the insert fails we roll back by deleting the auth account
+  // so the system never ends up with an orphaned auth user and no merchant row.
+  const service = createServiceClient();
+  const storeSlug = slugify(storeName) || `merchant-${data.user.id.slice(0, 8)}`;
 
-    const { error: merchantError } = await service.from('merchants').insert({
-      user_id: data.user.id,
-      store_name: storeName,
-      store_slug: storeSlug,
-    });
+  const { error: merchantError } = await service.from('merchants').insert({
+    user_id: data.user.id,
+    store_name: storeName,
+    store_slug: storeSlug,
+  });
 
-    if (merchantError) {
-      // Log server-side — don't block sign-up if schema isn't deployed yet.
-      console.error('[signup] merchant insert failed:', merchantError.message);
+  if (merchantError) {
+    console.error('[signup] merchant insert failed — rolling back auth account:', merchantError.message);
+
+    // Delete the just-created auth user so we don't leave an orphaned account.
+    const { error: deleteError } = await service.auth.admin.deleteUser(data.user.id);
+    if (deleteError) {
+      console.error('[signup] failed to delete orphaned auth user:', deleteError.message);
     }
-  } catch (err) {
-    // Service key not configured or table doesn't exist yet — non-blocking.
-    console.error('[signup] service client error:', err);
+
+    return { error: 'merchant_insert_failed' };
   }
 
   return { error: null };
