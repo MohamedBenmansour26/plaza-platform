@@ -631,3 +631,57 @@ After restart on PLZ-066 code, all tests passed.
 - On any server action that calls `signInWithPassword` and then `redirect()`: flag as P0 — session cookies will be dropped. Must use return-url pattern instead.
 - On any new shared helper in `lib/`: verify it is actually imported and called in all the files the JSDoc claims it must be applied to.
 - Before creating PR branches: always branch from latest main to avoid memory.md merge conflicts.
+
+---
+
+## PLZ-069 — Cart persistence, WhatsApp URL, Morocco timezone, admin PKCE — PR #61 — 20 April 2026
+
+**Branch:** feat/PLZ-069-frontend-fixes → main
+**Verdict: MERGE ✅ — merged** (squash SHA: 072158205d18d4bebce3db3ebe6981457f5f7d27)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR shipped (4 fixes):**
+1. SAAD-028/035 — CartProvider `isHydrated` ref: persist effect skips before hydrate effect sets `isHydrated.current = true`. Prevents `[]` being written to localStorage in React Strict Mode double-invocation and concurrent mode edge cases.
+2. SAAD-037 — WhatsApp URL: `replace(/^(\+212|00212|212|0)/, '')` applied to merchantPhone before building `wa.me` URL. Old code only stripped leading `0`, leaving `+212` phones double-prefixed as `https://wa.me/212+212...`.
+3. SAAD-038 — Timezone: new `lib/timezone.ts` exports `MOROCCO_TZ = 'Africa/Casablanca' as const`. Applied to all 11 date formatting call sites across storefront, dashboard, admin, and driver routes.
+4. Admin PKCE: `createClient()` accepts optional `{ flowType: 'pkce' | 'implicit' }`. `signInWithOtp` in `app/admin/login/actions.ts` now uses PKCE flow so the magic-link sends `?code=` query param, which the callback route reads via `exchangeCodeForSession(code)`.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0, lint: EXIT 0 (7 pre-existing `<img>` warnings only)
+- No console.log. No hardcoded #2563EB. Vercel CI: 2/2 success.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL: complete (8 prefixes). No new routes. All routes return 200 on clean dev server.
+
+**Phase 3 — Data Consistency: PASS**
+- Cart isHydrated: effect ordering confirmed (hydrate 1st, persist 2nd). Guard prevents persist before `isHydrated.current=true` is set.
+- WhatsApp: all 5 phone formats verified via node simulation — all produce `https://wa.me/212XXXXXXXXX`.
+- Timezone: 11 consumer files all confirmed with `timeZone: MOROCCO_TZ` in date formatting calls. Spot-checked OrderStatusClient, FinancesClient, OrdersClient, Topbar, historique/page.
+- PKCE chain: actions → `createClient({ flowType: 'pkce' })` → `signInWithOtp` → `?code=` param → callback `exchangeCodeForSession(code)` → session. Complete. Backward-compatible (no-arg callers unaffected).
+
+**Phase 4 — UI Consistency: PASS**
+- No new hardcoded colors. No nav/cart UI changes.
+
+**Phase 5 — Browser Test: PASS**
+- Store home ✅, add to cart ✅ (browser-test.js confirmed)
+- All 8 routes return 200 via curl: /, /auth/login, /auth/signup, /store/boutique-test2, /track, /driver/auth/phone, /admin/login, /driver/livraisons (redirect)
+- Checkout headless timeout: pre-existing WebGL/Mapbox headless limitation. Not a regression.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- CartProvider: 3 isHydrated occurrences, `isHydrated.current = true` after `setItems`, guard before `localStorage.setItem` — all confirmed.
+- WhatsApp: node simulation all 5 formats ✅
+- Timezone: grep confirmed 12 files (1 definition + 11 consumers) ✅
+- PKCE: end-to-end chain verified in source ✅
+
+**Merge note:** PR branch was behind main (PLZ-070 had been merged). One conflict in `.agents/qa/memory.md` — resolved by keeping both PLZ-068 and PLZ-070 memory entries. Branch pushed and squash-merged.
+
+**Most interesting finding:** The `isHydrated` ref fix is sometimes described as preventing a first-mount `[]` write. In practice, the guard fires when `isHydrated.current = false` — which is only possible if persist runs BEFORE hydrate sets the ref. React runs effects in declaration order, so hydrate (declared 1st) sets `isHydrated.current = true` BEFORE persist checks it. The guard's real value is in React Strict Mode's double-invocation: on the artificially repeated effect calls in dev, `isHydrated.current` is already `true` from the first real invocation, so the pattern works correctly there too. The fix is safe and defensively correct.
+
+**Patterns noticed:**
+- PRs opened against a stale base cause memory.md merge conflicts on every merge. Pattern: always branch from latest main.
+- The WhatsApp regex fix covers a broad class of phone format normalization bugs. The pattern `replace(/^(\+212|00212|212|0)/, '')` is the standard for Moroccan phone numbers — use it everywhere a raw phone is used to build a URL or international dial string.
+
+**Checklist additions:**
+- On any PR that builds a `wa.me` or international phone URL: verify the phone is normalized with `replace(/^(\+212|00212|212|0)/, '')` before prepending the country code.
+- On CartProvider or any localStorage hydration pattern: verify isHydrated ref (or equivalent) is used to prevent persist from running before hydration is complete.
+- On any new `lib/*.ts` constant (like `MOROCCO_TZ`): grep all consumer files to confirm every date formatting call in the relevant scope includes the constant.
