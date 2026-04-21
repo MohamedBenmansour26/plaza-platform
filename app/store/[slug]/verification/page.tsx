@@ -20,6 +20,8 @@ interface PendingOrder {
   phone: string;
   address: string;
   city: string;
+  locationLat?: number | null;        // PLZ-068: customer map-pin latitude
+  locationLng?: number | null;        // PLZ-068: customer map-pin longitude
   deliveryDate?: string | null;       // YYYY-MM-DD
   deliverySlot?: string | null;       // "09:00-10:00"
   deliveryDisplayDate?: string | null;
@@ -174,6 +176,8 @@ export default function VerificationPage() {
         customerPhone: pendingOrder.phone,
         customerAddress: pendingOrder.address || null,
         customerCity: pendingOrder.city || null,
+        locationLat: pendingOrder.locationLat ?? null,    // PLZ-068: map pin coordinates
+        locationLng: pendingOrder.locationLng ?? null,    // PLZ-068: for dispatch distance calc
         deliveryDate: pendingOrder.deliveryDate ?? null,
         deliverySlot: pendingOrder.deliverySlot ?? null,
         paymentMethod: pendingOrder.paymentMethodDb,

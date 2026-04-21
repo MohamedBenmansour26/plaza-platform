@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Key, Delete } from 'lucide-react';
 import { PinBoxes } from '../../_components/PinBoxes';
 import { verifyDriverPinAction } from './actions';
@@ -9,6 +9,7 @@ import { verifyDriverPinAction } from './actions';
 const NUMPAD = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
 function PinLoginContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const phone = params.get('phone') ?? '';
   const name  = params.get('name') ?? 'Livreur';
@@ -23,7 +24,7 @@ function PinLoginContent() {
     if (pin.length === 4 && !submitting) {
       setSubmitting(true);
       verifyDriverPinAction(phone, pin).then(res => {
-        if (res?.error) {
+        if ('error' in res) {
           const left = attempts - 1;
           setAttempts(left);
           setError(true);
@@ -31,8 +32,9 @@ function PinLoginContent() {
           setSubmitting(false);
           if (left === 0) setLocked(true);
           setTimeout(() => setError(false), 3000);
+          return;
         }
-        // On success, action redirects — no client code needed
+        router.push(res.redirect);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
