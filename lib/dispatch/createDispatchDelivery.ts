@@ -47,10 +47,6 @@ export async function createDispatchDelivery(orderId: string): Promise<DispatchR
     const merchant = order.merchants
     const customer = order.customers
 
-    if (!merchant.city) {
-      throw new Error('Merchant city missing — cannot match drivers')
-    }
-
     // ── 2. Distance + duration ────────────────────────────────
     const hasCoordinates =
       merchant.location_lat != null &&

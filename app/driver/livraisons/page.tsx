@@ -13,10 +13,10 @@ export default async function LivraisonsPage() {
   if (driver.onboarding_status !== 'active') redirect('/driver/onboarding/pending')
 
   // Parallel fetch: pool + active deliveries
-  // Pool only fetched if driver is eligible: city set, available, active
+  // Pool fetched for any available, active driver — city gate removed for MVP
   const [poolDeliveries, activeDeliveries] = await Promise.all([
-    driver.city && driver.is_available && driver.onboarding_status === 'active'
-      ? getPoolDeliveries(driver.city)
+    driver.is_available && driver.onboarding_status === 'active'
+      ? getPoolDeliveries()
       : Promise.resolve([]),
     getActiveDeliveries(driver.id),
   ])
@@ -26,7 +26,6 @@ export default async function LivraisonsPage() {
       driver={driver}
       initialDeliveries={activeDeliveries}
       initialPool={poolDeliveries}
-      driverCity={driver.city ?? ''}
     />
   )
 }
