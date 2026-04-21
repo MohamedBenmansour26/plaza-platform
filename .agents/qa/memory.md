@@ -685,3 +685,64 @@ After restart on PLZ-066 code, all tests passed.
 - On any PR that builds a `wa.me` or international phone URL: verify the phone is normalized with `replace(/^(\+212|00212|212|0)/, '')` before prepending the country code.
 - On CartProvider or any localStorage hydration pattern: verify isHydrated ref (or equivalent) is used to prevent persist from running before hydration is complete.
 - On any new `lib/*.ts` constant (like `MOROCCO_TZ`): grep all consumer files to confirm every date formatting call in the relevant scope includes the constant.
+
+---
+
+## PLZ-072 — Cart hydration race + dispatch null-coordinate fallback — PR #64 — 21 April 2026
+
+**Branch:** fix/PLZ-072-cart-hydration-dispatch-coords → main
+**Verdict: MERGE ✅ — merged** (squash SHA: 90a8597c9a2501ab369d4ccca91d7fb6eb954efb)
+**P0: 0 | P1: 0 | P2: 1 (pre-existing hydration warning on commande page, not introduced by PR)**
+
+**What the PR shipped (2 fixes):**
+1. Fix A — CartProvider: `isHydrated` changed from `useRef(false)` to `useState(false)`. `setIsHydrated(true)` triggers a re-render, ensuring persist effect only fires after a render where both `isHydrated=true` AND `items=stored` are committed together. `isHydrated` added to persist effect deps array: `[items, slug, isHydrated]`. `useRef` import removed.
+2. Fix B — `createDispatchDelivery.ts`: Replaced hard throws on null merchant/customer coordinates with `hasCoordinates` boolean. When absent: `distanceKm=0`, `estimatedDurationMin=0`, `driverEarnings(base_fee, per_km, 0) = base_fee`. Delivery still created in pool. Hard throw retained only for missing `merchant.city`.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0
+- lint: EXIT 0 (7 pre-existing `<img>` storefront warnings only)
+- `useRef` correctly removed from CartProvider imports
+- `isHydrated` correctly in persist effect deps: `[items, slug, isHydrated]`
+- Hard throw for missing `merchant.city` retained ✓
+- No console.log in either changed file (console.error in catch block is intentional)
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete: `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"]`
+- No new routes added.
+
+**Phase 3 — Data Consistency: PASS**
+- CartProvider effect order: Effect 1 (hydrate) runs first → `setItems(stored)` + `setIsHydrated(true)` batch → single re-render. Persist effect guard `!isHydrated` is `false` on first run → returns early. After re-render: `isHydrated=true`, `items=stored` → persist writes correctly. Logic verified. ✓
+- Dispatch `hasCoordinates` uses `!= null` (catches both null and undefined) ✓
+- `distanceKm=0` path: `driverEarnings(base_fee_mad, per_km_rate_mad, 0) = base_fee_mad + 0 = base_fee_mad` — confirmed via haversine.ts formula ✓
+- `merchant_pickup_code`, `pool_created_at`, `pool_expires_at` all present and unchanged in insert block ✓
+
+**Phase 4 — UI Consistency: PASS** (no UI changes in this PR)
+
+**Phase 5 — Browser Test: PASS**
+- Store home `/store/boutique-test2`: loads, TopNavBar, products visible, StoreFooter ✓
+- Cart persistence test: seeded item in localStorage → hard refresh (full page navigate) → cart badge shows "1", drawer shows "1 article", checkout button shows "1099 MAD" — PASS ✓
+- `/store/boutique-test2/commande`: loads, Morocco map present, subtotal 1099 MAD (not 0), no WS label ✓
+- All 5 standard routes return HTTP 200: /, /auth/login, /track, /driver/auth/phone, /admin/login ✓
+- `/driver/livraisons` → redirects to `/driver/auth/phone` ✓
+- Screenshots: qa-plz072-01-store-home-cart-hydrated.png, qa-plz072-commande.png
+
+**Phase 6 — Flow Verification: PASS (code-level + route checks)**
+- Dispatch null-coordinate path: code-level verified — `hasCoordinates=false` → `distanceKm=0` → `driverEarnings(base_fee, per_km, 0) = base_fee` → delivery insert succeeds with `distance_km=0`, `estimated_duration_min=0` ✓
+- `/driver/livraisons` auth guard: unauthenticated access redirects to `/driver/auth/phone` ✓
+
+**Note on Phase 5 environment:** Worktree runs on a non-standard port (3003) because multiple dev servers were active. The worktree does not inherit `.env.local` — must be copied manually from project root. Added to process: always `cp .env.local` to worktree before starting dev server, and always verify which port the correct server starts on before running browser tests.
+
+**P2-001 (pre-existing):** Hydration warning on `/store/boutique-test2/commande` — server renders `items=[]`, client hydrates with stored items. React recovers with client rendering. Not introduced by this PR. Cart subtotal displays correctly after recovery.
+
+**Most interesting finding:** The `useRef` vs `useState` distinction for the `isHydrated` guard is subtle. `useRef` is synchronous (value is set immediately in the same effect run), so the persist effect in the next position reads `isHydrated.current=true` but `items` is still `[]` from the pending `setItems`. `useState` introduces a re-render gate — persist will only re-run after a commit where both new state values are stable and consistent. This is the correct React pattern for effects that must wait for sibling state to settle. The fix is confirmed working in dev (cart badge persists across hard refresh).
+
+**Patterns noticed:**
+- `useRef` as a guard in persist effects is a footgun when the guarded value needs to be consistent with other state. Use `useState` to force a re-render gate.
+- Multiple dev servers can accumulate on consecutive ports if processes are not cleanly killed between sessions. Always verify port and .env.local before Phase 5.
+- Playwright MCP browser tests on wrong dev server (no env) produce misleading results — Supabase errors cause React error boundaries to fire abnormally, masking what the real component behavior would be.
+
+**Checklist additions:**
+- Before Phase 5 in any worktree: confirm `.env.local` is present in the worktree directory, not just the main project root.
+- Before Phase 5: run `curl http://localhost:3000/store/boutique-test2` to verify the server has Supabase credentials (if Supabase URL error appears → wrong server or missing env).
+- On any `useRef` used as an effect guard alongside sibling `useState`: flag as potential race condition — the ref update is synchronous but the state update is async. Switch to `useState` so the guard is consistent with the render cycle.
+- On dispatch PRs: verify `hasCoordinates` uses `!= null` (not `!== null`) to guard both null and undefined coordinates.
