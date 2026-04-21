@@ -47,22 +47,27 @@ export async function createDispatchDelivery(orderId: string): Promise<DispatchR
     const merchant = order.merchants
     const customer = order.customers
 
-    if (!merchant.location_lat || !merchant.location_lng) {
-      throw new Error('Merchant location coordinates missing — cannot dispatch')
-    }
-    if (!customer?.location_lat || !customer?.location_lng) {
-      throw new Error('Customer location coordinates missing — cannot dispatch')
-    }
     if (!merchant.city) {
       throw new Error('Merchant city missing — cannot match drivers')
     }
 
     // ── 2. Distance + duration ────────────────────────────────
-    const distanceKm = dispatchDistance(
-      merchant.location_lat, merchant.location_lng,
-      customer.location_lat, customer.location_lng,
-    )
-    const estimatedDurationMin = Math.ceil(distanceKm / 0.5) // ~30 km/h
+    const hasCoordinates =
+      merchant.location_lat != null &&
+      merchant.location_lng != null &&
+      customer?.location_lat != null &&
+      customer?.location_lng != null
+
+    const distanceKm = hasCoordinates
+      ? dispatchDistance(
+          merchant.location_lat!,
+          merchant.location_lng!,
+          customer!.location_lat!,
+          customer!.location_lng!,
+        )
+      : 0
+
+    const estimatedDurationMin = hasCoordinates ? Math.ceil(distanceKm / 0.5) : 0 // ~30 km/h
 
     // ── 3. Fetch dispatch config ──────────────────────────────
     const { data: config, error: configErr } = await service

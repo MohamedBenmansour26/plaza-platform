@@ -5,7 +5,6 @@ import {
   useContext,
   useState,
   useEffect,
-  useRef,
   type ReactNode,
 } from 'react';
 
@@ -39,7 +38,7 @@ export function CartProvider({
   slug: string;
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const isHydrated = useRef(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -51,16 +50,16 @@ export function CartProvider({
         // ignore malformed data
       }
     }
-    isHydrated.current = true;
+    setIsHydrated(true);
   }, [slug]);
 
   // Persist to localStorage whenever items change — skip until after hydration
   // to prevent the persist effect from overwriting localStorage with [] on the
   // initial render before the hydrate effect's setItems has propagated.
   useEffect(() => {
-    if (!isHydrated.current) return;
+    if (!isHydrated) return;
     localStorage.setItem(`plaza_cart_${slug}`, JSON.stringify(items));
-  }, [items, slug]);
+  }, [items, slug, isHydrated]);
 
   const addItem = (
     newItem: Omit<CartItem, 'quantity'> & { stock?: number | null },
