@@ -685,3 +685,58 @@ After restart on PLZ-066 code, all tests passed.
 - On any PR that builds a `wa.me` or international phone URL: verify the phone is normalized with `replace(/^(\+212|00212|212|0)/, '')` before prepending the country code.
 - On CartProvider or any localStorage hydration pattern: verify isHydrated ref (or equivalent) is used to prevent persist from running before hydration is complete.
 - On any new `lib/*.ts` constant (like `MOROCCO_TZ`): grep all consumer files to confirm every date formatting call in the relevant scope includes the constant.
+
+---
+
+## PLZ-071 — Fix dead "Signaler un problème" button — PR #63 — 21 April 2026
+
+**Branch:** fix/PLZ-071-report-issue-dialog → main
+**Verdict: MERGE ✅ — merged** (squash SHA: cd25c31ae0b77ecc6de3543e3c032df91d83572f)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR shipped:**
+- SAAD-039: New `ReportIssueSheet.tsx` bottom sheet component in `app/dashboard/commandes/`. Opens when "Signaler un problème" is clicked, pre-fills `category='order_issue'`, `subject='Problème commande ${order.order_number}'`, `order_id`. Calls `createTicketAction`, shows 1.2s "Ticket créé" success state, then closes and navigates to `/dashboard/support`.
+- `OrderDetailSheet.tsx`: `window.location.href` mailto replaced with `onReportOpen` prop → `setReportOpen(true)`. `<ReportIssueSheet>` rendered conditionally after drawer panel.
+- `[id]/OrderDetailClient.tsx`: same — `window.location.href` mailto replaced with `setReportOpen(true)`. `<ReportIssueSheet>` rendered at bottom.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0, lint: EXIT 0 (7 pre-existing `<img>` storefront warnings only)
+- Zero console.log in new/modified files. Zero `#2563EB` hardcoded color. Zero `window.location.href` remaining.
+- `createTicketAction` imported via `@/app/dashboard/support/actions` (absolute alias) ✅
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete (`/dashboard` covers commandes routes). No new routes added.
+
+**Phase 3 — Data Consistency: PASS**
+- `order_id: order.id` — never undefined (prop types `id: string`, always set) ✅
+- `category: 'order_issue'` — pre-filled, valid `TicketCategory` union member (confirmed in `types/supabase.ts`) ✅
+- `subject` includes order number ✅
+- Success path: `router.push('/dashboard/support')` after 1.2s ✅
+- setTimeout cleanup: `timerRef.current = setTimeout(...)` + `useEffect(() => () => clearTimeout(timerRef.current), [])` — clean unmount guard ✅
+
+**Phase 4 — UI Consistency: PASS**
+- `ReportIssueSheet` backdrop z-[60], panel z-[70] — stacks above `OrderDetailSheet` (z-40/z-50) ✅
+- `fixed end-0 top-0 h-screen` bottom-sheet pattern matches existing sheets ✅
+- Submit button: `style={{ backgroundColor: 'var(--color-primary)' }}` ✅
+- Focus ring: `var(--color-primary)` ✅
+
+**Phase 5 — Browser Test: PASS (env-constrained)**
+- All 7 standard routes return 200 via curl ✅
+- Playwright MCP Chrome launch failure: pre-existing Windows policy error (same as PLZ-066/PLZ-067/PLZ-068)
+- `/dashboard/commandes` 500: pre-existing Supabase env var absent from worktree — not introduced by this PR
+
+**Phase 6 — Flow Verification (code-level): PASS**
+- Both files: button calls `setReportOpen(true)` (not `window.location.href`) ✅
+- Both files: `<ReportIssueSheet order={{ id: order.id, order_number: order.order_number }} onClose=...>` present ✅
+- Both files: `import { ReportIssueSheet } from '...'` present ✅
+- `createTicketAction` call signature matches action definition exactly ✅
+
+**Most interesting finding:** The `useRef` + `useEffect` cleanup pattern for the setTimeout is the correct way to handle timers in components that may unmount before the timer fires. The alternative (no cleanup) would cause a state update on an unmounted component warning in development and a potential navigation after unmount in production. The dev got this right — no memory leak.
+
+**Patterns noticed:**
+- Named export `export function ReportIssueSheet` correctly follows convention (no default exports from component files).
+- The `order: { id: string; order_number: string }` prop type is a lean subset of `OrderWithDetails` — passing only what the sheet needs. Good practice — avoids coupling the sheet to the full order type.
+
+**Checklist additions:**
+- On any new sheet component that uses a setTimeout for auto-close: verify `useRef` + `useEffect` cleanup is present. No raw `setTimeout` without cleanup is acceptable.
+- On any "Signaler un problème" / support-escalation button: verify it calls a real action (not `mailto:`/`window.location.href`) and passes `order_id` explicitly.
