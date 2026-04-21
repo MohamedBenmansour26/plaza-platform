@@ -523,3 +523,111 @@ After restart on PLZ-066 code, all tests passed.
 **Checklist additions:**
 - On any dashboard action button in a sheet/drawer: verify `router.refresh()` is called after the action succeeds (not just `revalidatePath` from the server action).
 - On button sizing in `flex-col` containers: flag `flex-1` on buttons — it affects height, not width. Use `w-full` instead.
+
+---
+
+## PLZ-068 — Dispatch DB fix + customer location columns — PR #60 — 20 April 2026
+
+**Branch:** feat/PLZ-068-dispatch-db-fix → main
+**Verdict: MERGE ✅ — merged** (squash SHA: 139addfabd04ac543e21d0f1a74429c996d8426c)
+**P0: 0 | P1: 0 | P2: 0**
+
+**What the PR shipped:**
+1. Applied PLZ-058 dispatch engine migration that was committed but never applied to production DB — fixing SAAD-032 (order confirm silently returning `{ success: false }` because `dispatch_config` and `dispatch_errors` tables didn't exist). Tables: `dispatch_config` (seeded with base_fee=10, per_km=3, timeout=15), `dispatch_errors`, `driver_schedules`. Columns added to `deliveries`: `pickup_city`, `distance_km`, `estimated_duration_min`, `driver_earnings_mad`, `merchant_pickup_code`, `pool_created_at`, `pool_expires_at`, `accepted_at`. `accept_delivery()` SECURITY DEFINER function applied.
+2. New migration `20260420000002_plz068_customer_location.sql`: `ALTER TABLE customers ADD COLUMN IF NOT EXISTS location_lat numeric(10,7)` and `location_lng`. Idempotent. Correct precision for Morocco coordinates (lat 27-36, lng -14 to -1, all fit in 3 integer digits + 7 decimal).
+3. `CreateOrderPayload` + `createOrder` (`app/store/[slug]/actions.ts`): optional `locationLat?/locationLng?` fields, conditional spread `payload.locationLat != null ? { location_lat: ... } : {}` — uses `!= null` which guards both null and undefined. Clean.
+4. `PendingOrder` interface + `createOrder` call (`app/store/[slug]/verification/page.tsx`): location threaded from sessionStorage with `?? null` fallback. Non-breaking — optional fields, all existing call sites unaffected.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0 (stash applied — working tree had MOROCCO_TZ from unrelated next branch, confirmed not part of PR HEAD)
+- lint: EXIT 0 (only pre-existing `<img>` storefront warnings)
+- No console.log in changed files. No hardcoded colors introduced.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete: `["/", "/auth", "/onboarding", "/dashboard", "/store", "/driver", "/track", "/admin"]`
+- No new routes added.
+
+**Phase 3 — Data Consistency: PASS**
+- Full chain verified: checkout writes `locationLat/locationLng` to `plaza_pending_order` → PendingOrder interface typed correctly → verification page reads with `?? null` → payload built with optional fields → conditional spread into customer insert → `customers` table. Every link confirmed.
+- No-pin path (text fallback): `locationTextFallback = true` → `locationLat: null` in sessionStorage → `?? null` in payload → `!= null` guard is false → spread omits columns → DB default null. No INSERT error. ✓
+- Price chain unaffected by this PR. Delivery fee still from `getDeliveryFee()` only. SessionStorage keys unchanged.
+
+**Phase 4 — UI Consistency: PASS (no UI changes in this PR)**
+
+**Phase 5 — Browser Test: PASS**
+- Store home: products visible, TopNavBar, no bottom tabs ✅
+- Add to cart: Ajouter clicked ✅
+- Checkout (`/commande`): Mapbox Map region present, no Western Sahara, subtotal 999 MAD (not 0), MapLocationPicker visible, no COD checkbox, delivery fee "Gratuit" ✅
+- Login `/auth/login`: loads with "téléphone" field ✅
+- Driver auth phone: loads ✅
+- `/driver/livraisons` → redirect to `/driver/auth/phone` ✅
+- `/track`: loads, PLZ-XXX input visible ✅
+- Note: "missing required error components, refreshing..." on first `/commande` load — pre-existing Windows hot-reload race condition, clears on second load. Pre-existing since PLZ-065.
+- Screenshots: .qa-screenshots/plz068-01 through plz068-07.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- `!= null` guard on conditional spread is correct — guards both `null` and `undefined`. ✓
+- `numeric(10,7)` precision verified for Morocco coordinates — 3 integer digits fits lat 27-36 and lng -1 to -14. ✓
+- `IF NOT EXISTS` on ALTER TABLE — idempotent, production-safe. ✓
+- `STOREFRONT_ORDER_SELECT` deliberately excludes `customers.location_lat/lng` — correct, these are internal dispatch fields not for display. ✓
+
+**Most interesting finding:** The `!= null` guard on the conditional spread (`payload.locationLat != null`) is subtly important. `locationLat` is typed as `number | null | undefined` in the payload type. Using `!= null` (loose equality) catches both `null` and `undefined` in one check, preventing either from being spread as `{ location_lat: undefined }` into the insert object. If `!== null` (strict) had been used instead, `undefined` could pass through and cause a Supabase insert type error. The dev got this right.
+
+**Checklist additions:**
+- On any PR that adds optional columns to a DB insert: verify the conditional spread uses `!= null` (not `!== null`) to handle both null and undefined.
+- On any new migration: verify `ADD COLUMN IF NOT EXISTS` for idempotency AND verify column type precision fits the expected data range (esp. coordinates — check lat/lng range for target geography).
+- When tsc passes but lint fails on local run: stash working tree changes and re-run lint. Local working tree may have changes from other branches that contaminate lint results.
+
+---
+
+## PLZ-070 — Driver PIN session fix + session collision warning — PR #62 — 20 April 2026
+
+**Branch:** feat/PLZ-070-driver-session-fix → main
+**Verdict: MERGE ✅ — merged**
+**P0: 0 | P1: 0 | P2: 1 (new) | pre-existing P1: 1 (carry forward)**
+
+**What the PR shipped:**
+1. SAAD-033: `verifyDriverPinAction` and `completeDriverPinSetupAction` now return `{ redirect: string }` instead of calling `redirect()` directly inside the server action. `redirect()` inside a server action that also calls `signInWithPassword` drops the Set-Cookie header before navigation, causing the session to never persist. Fix: return URL, client does `router.push(res.redirect)`.
+2. SAAD-034: `phone/page.tsx` now checks on mount for an existing non-driver Supabase session. If found, shows a dismissable info banner warning the merchant session will be replaced. Non-blocking.
+3. `lib/driver-auth.ts`: new shared `driverSyntheticEmail(phone)` helper used by both pin and pin-setup actions.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0, lint: EXIT 0 (7 pre-existing `<img>` storefront warnings)
+- No console.log in changed files. No hardcoded colors.
+- Vercel CI: 2/2 checks success.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete. No new routes.
+- All driver routes return correct status codes.
+
+**Phase 3 — Data Consistency: PASS**
+- Type union `{error:string}|{redirect:string}` — client uses `'error' in res` discriminant, all union members handled, server never returns undefined. Correct.
+- No `redirect()` calls remaining in either pin action. ✅
+- `driverSyntheticEmail` imported and called in both actions. ✅
+- Merchant session banner: `maybeSingle()` null guard — no driver row → warn. ✅
+
+**Phase 4 — UI Consistency: PASS**
+- Banner uses Tailwind semantic classes (no hardcoded hex). Dismissable. Non-blocking. ✅
+
+**Phase 5 — Browser Test: PASS (10/10)**
+- Store home, cart, checkout (no WS), auth login, driver phone (zero console errors), banner absent without session, PIN page, PIN-setup page, livraisons redirect, /track. All pass.
+- Screenshots: .qa-screenshots/plz070-01 through plz070-09.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- Session-return-url pattern verified for both pin and pin-setup. ✅
+- Banner session check + null guard correct. ✅
+
+**P2-001 (new in this PR):** `pinToPassword()` exported from `lib/driver-auth.ts` with "MUST be applied" JSDoc but never imported or called by either action. Both actions pass raw 4-digit `pin` to Supabase Auth. Verified: 11 driver auth users exist with raw 4-digit PINs (admin.createUser bypasses client-side min). System works. But misleading comment is a maintenance hazard. Fix next sprint: wire up consistently or remove with updated JSDoc.
+
+**Pre-existing P1 (carry forward):** Stale closure in `pin-setup/page.tsx` — `pin` missing from confirm useEffect deps. Documented in p2-backlog Bug A. Not introduced here. Assign to Hamza.
+
+**Most interesting finding:** GitHub merge conflict in `.agents/qa/memory.md` — PR branch was created before PLZ-068 squash merged to main, causing divergence. Resolved by keeping PR branch version (more complete). Pattern: always create feature branches from the latest main, not from a prior commit.
+
+**Patterns noticed:**
+- `redirect()` inside Next.js server actions that set cookies is a systemic anti-pattern in the driver auth flow. The return-url pattern is the correct fix — document for future auth actions.
+- `admin.createUser` bypasses Supabase's client-side `password_min_length` config. Dead code like `pinToPassword` that was meant to address this but was never wired up is dangerous.
+
+**Checklist additions:**
+- On any server action that calls `signInWithPassword` and then `redirect()`: flag as P0 — session cookies will be dropped. Must use return-url pattern instead.
+- On any new shared helper in `lib/`: verify it is actually imported and called in all the files the JSDoc claims it must be applied to.
+- Before creating PR branches: always branch from latest main to avoid memory.md merge conflicts.

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Key, Delete, Loader2 } from 'lucide-react';
 import { PinBoxes } from '../../_components/PinBoxes';
 import { completeDriverPinSetupAction } from './actions';
@@ -9,6 +9,7 @@ import { completeDriverPinSetupAction } from './actions';
 const NUMPAD = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
 function PinSetupContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const phone = params.get('phone') ?? '';
 
@@ -30,7 +31,13 @@ function PinSetupContent() {
       if (confirm === pin) {
         setLoading(true);
         completeDriverPinSetupAction({ phone, pin }).then(res => {
-          if (res?.error) { setLoading(false); setError(true); setConfirm(''); }
+          if ('error' in res) {
+            setLoading(false);
+            setError(true);
+            setConfirm('');
+            return;
+          }
+          router.push(res.redirect);
         });
       } else {
         setError(true);

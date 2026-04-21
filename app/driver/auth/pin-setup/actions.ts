@@ -1,18 +1,19 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { driverSyntheticEmail } from '@/lib/driver-auth';
 
 type PinSetupInput = { phone: string; pin: string; fullName?: string };
-type PinSetupResult = { error: string } | undefined;
+export type PinSetupResult = { error: string } | { redirect: string };
 
 /**
  * Register a new driver:
- * 1. Create Supabase auth user (phone@plaza-driver.internal + PIN)
+ * 1. Create Supabase auth user (synthetic email + PIN)
  * 2. Upsert drivers record with user_id + phone
- * 3. Sign in to establish session
- * 4. Redirect to /driver/onboarding/vehicle
+ * 3. Sign in to establish session — returns { redirect } so the client uses
+ *    router.push() and Set-Cookie headers reach the browser before navigation.
+ * 4. Return redirect to /driver/onboarding/vehicle
  */
 export async function completeDriverPinSetupAction(
   input: PinSetupInput,
@@ -20,7 +21,7 @@ export async function completeDriverPinSetupAction(
   const { phone, pin, fullName = 'Livreur' } = input;
   if (!phone || pin.length !== 4) return { error: 'invalid_input' };
 
-  const syntheticEmail = `${phone.replace('+', '')}@plaza-driver.internal`;
+  const syntheticEmail = driverSyntheticEmail(phone);
   const service = createServiceClient();
 
   const { data: signUpData, error: signUpError } = await service.auth.admin.createUser({
@@ -85,6 +86,5 @@ export async function completeDriverPinSetupAction(
   });
   if (signInError) return { error: signInError.message };
 
-  // redirect() throws NEXT_REDIRECT — must be outside try/catch
-  redirect('/driver/onboarding/vehicle');
+  return { redirect: '/driver/onboarding/vehicle' };
 }
