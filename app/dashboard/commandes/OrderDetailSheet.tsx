@@ -9,6 +9,7 @@ import {
   confirmOrderAction,
 } from './actions';
 import { formatMAD } from './OrdersClient';
+import { ReportIssueSheet } from './ReportIssueSheet';
 import type { OrderWithDetails } from '@/lib/db/orders';
 import type { OrderStatus, PaymentMethod, DeliveryStatus } from '@/types/supabase';
 import { MOROCCO_TZ } from '@/lib/timezone';
@@ -143,10 +144,12 @@ function DeliveryStatusCard({ delivery }: { delivery: NonNullable<OrderWithDetai
 function ActionBar({
   order,
   onClose,
+  onReportOpen,
   router,
 }: {
   order: OrderWithDetails;
   onClose: () => void;
+  onReportOpen: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -205,9 +208,7 @@ function ActionBar({
 
         {!isPending && (
           <button
-            onClick={() => {
-              window.location.href = `mailto:support@plaza.ma?subject=Problème commande ${order.order_number}&body=Bonjour, je rencontre un problème avec la commande ${order.order_number}.`;
-            }}
+            onClick={onReportOpen}
             className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg text-[14px] font-medium hover:bg-[#F5F5F4] transition-colors"
           >
             Signaler un problème
@@ -227,6 +228,7 @@ type Props = {
 
 export function OrderDetailSheet({ order, onClose }: Props) {
   const router = useRouter();
+  const [reportOpen, setReportOpen] = useState(false);
   return (
     <>
       {/* Backdrop */}
@@ -373,9 +375,21 @@ export function OrderDetailSheet({ order, onClose }: Props) {
 
         {/* Footer actions */}
         <div className="border-t border-[#E2E8F0] px-6 py-4 flex gap-3 flex-shrink-0 bg-white">
-          <ActionBar order={order} onClose={onClose} router={router} />
+          <ActionBar
+            order={order}
+            onClose={onClose}
+            onReportOpen={() => setReportOpen(true)}
+            router={router}
+          />
         </div>
       </div>
+
+      {reportOpen && (
+        <ReportIssueSheet
+          order={{ id: order.id, order_number: order.order_number }}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, User, Phone, MapPin, Check, Loader2 } from 'lucide-react';
@@ -10,6 +10,7 @@ import {
   confirmOrderAction,
 } from '../actions';
 import { formatMAD, formatDate } from '../OrdersClient';
+import { ReportIssueSheet } from '../ReportIssueSheet';
 import type { OrderWithDetails } from '@/lib/db/orders';
 import type { OrderStatus, PaymentMethod } from '@/types/supabase';
 
@@ -106,6 +107,7 @@ export function OrderDetailClient({ order }: Props) {
   const router = useRouter();
   const t = useTranslations('orders');
   const [isPending, startTransition] = useTransition();
+  const [reportOpen, setReportOpen] = useState(false);
 
   // User-facing string arrays MUST be inside the component after t() — see memory.md BUG-013–016
   const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
@@ -338,9 +340,7 @@ export function OrderDetailClient({ order }: Props) {
                 </button>
               )}
               <button
-                onClick={() => {
-                  window.location.href = `mailto:support@plaza.ma?subject=Problème commande ${order.order_number}&body=Bonjour, je rencontre un problème avec la commande ${order.order_number}.`;
-                }}
+                onClick={() => setReportOpen(true)}
                 className="w-full h-12 border border-[#E2E8F0] text-[#78716C] text-[14px] font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
               >
                 Signaler un problème
@@ -348,6 +348,13 @@ export function OrderDetailClient({ order }: Props) {
             </div>
           )}
         </div>
+      )}
+
+      {reportOpen && (
+        <ReportIssueSheet
+          order={{ id: order.id, order_number: order.order_number }}
+          onClose={() => setReportOpen(false)}
+        />
       )}
     </div>
   );
