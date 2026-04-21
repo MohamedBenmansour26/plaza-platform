@@ -243,3 +243,35 @@ All 3 platform layers are on main and regression-clean:
 3. Driver app (Part 3) — auth, onboarding, deliveries, confirmation, history, profil
 
 **Next milestone:** Part 4 TBD — likely merchant dispatch UI (assign deliveries to drivers) or real OTP integration.
+
+---
+
+## Pre-launch test cycle — 2026-04-20
+
+### Cycle structure (as executed)
+
+1. ✅ Saad baseline → Wave 1 fix (PLZ-062) → Wave 1 retest
+2. ✅ Wave 2 fix (PRs #54–57) → Wave 2 retest
+3. ✅ Saad final pre-launch test → 6 criticals found (SAAD-028/032/033/034/035 + admin PKCE)
+4. ✅ Fix cycle: PLZ-068 (dispatch DB), PLZ-069 (cart/WA/TZ/PKCE), PLZ-070 (driver session)
+5. ✅ PLZ-071 through PLZ-074 (Signaler un problème + dispatch pipeline + cart hydration + nav fix) — all merged
+6. ✅ Saad definitive 6-point retest — ALL CLEAR (SHA 6a382c2, 2026-04-20)
+7. ⏳ Phase 3 — Founder manual test (admin PKCE magic link, end-to-end)
+8. ⏳ Phase 4 — Admin panel guide for founder
+
+### Founder decisions — 2026-04-20
+
+- **SAAD-039** — Launch blocker. Fix before retest. PLZ-071 dispatched to Hamza.
+- **SAAD-029** — Post-launch backlog. Toggle visual state stuck; underlying state correct; page refresh resolves. Logged in `.agents/qa/p2-backlog.md`.
+- **SAAD-034** — Session collision. Warning banner shipped (PLZ-070) is sufficient for MVP. Full session isolation is post-launch architectural item.
+- **Admin PKCE verification** — Founder handles manually at Phase 3 (one magic link click). No mail stub needed.
+- **Phase 3 + Phase 4** — Run in parallel once Saad signs off.
+
+### Saad 6-point post-fix verification checklist (when dispatched)
+
+1. SAAD-032 — Confirm merchant order → delivery appears in driver pool at `/driver/livraisons`
+2. SAAD-033 — Driver PIN login persists session → lands on `/driver/livraisons`
+3. SAAD-028 — Cart survives page reload; checkout loads with zero hydration errors (SAAD-035)
+4. SAAD-037 — WhatsApp URL is correctly formed (`wa.me/212XXXXXXXXX` not double-prefixed)
+5. SAAD-038 — Timestamps show Morocco time, not browser local time
+6. SAAD-039 — "Signaler un problème" opens dialog, ticket is created, appears in support hub
