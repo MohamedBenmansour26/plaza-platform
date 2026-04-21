@@ -29,6 +29,7 @@ import {
   type DocumentKey,
 } from './actions';
 import type { DriverDetail } from './page';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 type DocStatus = 'pending' | 'approved' | 'rejected' | 'resubmit';
 
@@ -188,7 +189,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
 
   const formattedSubmittedAt = new Date(driver.submittedAt).toLocaleDateString(
     'fr-FR',
-    { day: '2-digit', month: 'short', year: 'numeric' },
+    { day: '2-digit', month: 'short', year: 'numeric', timeZone: MOROCCO_TZ },
   );
 
   const VehicleIcon = VEHICLE_ICONS[driver.vehicleType];
@@ -546,7 +547,7 @@ function MobileDetail({
   const VehicleIcon = VEHICLE_ICONS[driver.vehicleType];
   const formattedSubmittedAt = new Date(driver.submittedAt).toLocaleDateString(
     'fr-FR',
-    { day: '2-digit', month: 'short', year: 'numeric' },
+    { day: '2-digit', month: 'short', year: 'numeric', timeZone: MOROCCO_TZ },
   );
 
   return (

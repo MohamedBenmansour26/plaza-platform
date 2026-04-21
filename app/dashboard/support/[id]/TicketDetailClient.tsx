@@ -7,6 +7,7 @@ import { ArrowLeft, Send, Paperclip, Loader2 } from 'lucide-react';
 import { sendMessageAction } from '../actions';
 import type { SupportTicket, SupportMessage, TicketStatus } from '@/lib/db/support';
 import Link from 'next/link';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -101,6 +102,7 @@ export function TicketDetailClient({ ticket }: Props) {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
+                  timeZone: MOROCCO_TZ,
                 })}
               </div>
             </div>
@@ -116,6 +118,7 @@ export function TicketDetailClient({ ticket }: Props) {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
+                timeZone: MOROCCO_TZ,
               })}
             </span>
           </div>
@@ -131,6 +134,7 @@ export function TicketDetailClient({ ticket }: Props) {
             const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', {
               hour: '2-digit',
               minute: '2-digit',
+              timeZone: MOROCCO_TZ,
             });
 
             if (isMe) {

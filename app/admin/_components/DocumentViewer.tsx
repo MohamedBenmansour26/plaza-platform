@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 export type ViewerDoc = {
   id: string;
@@ -92,6 +93,7 @@ export function DocumentViewer({
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: MOROCCO_TZ,
       })
     : null;
 

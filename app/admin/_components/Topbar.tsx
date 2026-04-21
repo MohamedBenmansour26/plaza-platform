@@ -2,6 +2,7 @@
 
 import { LogOut } from 'lucide-react';
 import { useMemo } from 'react';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 type Props = {
   adminEmail: string;
@@ -20,6 +21,7 @@ export function Topbar({ adminEmail, trustedUntil, onLogout }: Props) {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
+        timeZone: MOROCCO_TZ,
       });
       return `Poste de confiance jusqu'au ${formatted}`;
     } catch {
