@@ -577,3 +577,57 @@ After restart on PLZ-066 code, all tests passed.
 - On any PR that adds optional columns to a DB insert: verify the conditional spread uses `!= null` (not `!== null`) to handle both null and undefined.
 - On any new migration: verify `ADD COLUMN IF NOT EXISTS` for idempotency AND verify column type precision fits the expected data range (esp. coordinates — check lat/lng range for target geography).
 - When tsc passes but lint fails on local run: stash working tree changes and re-run lint. Local working tree may have changes from other branches that contaminate lint results.
+
+---
+
+## PLZ-070 — Driver PIN session fix + session collision warning — PR #62 — 20 April 2026
+
+**Branch:** feat/PLZ-070-driver-session-fix → main
+**Verdict: MERGE ✅ — merged**
+**P0: 0 | P1: 0 | P2: 1 (new) | pre-existing P1: 1 (carry forward)**
+
+**What the PR shipped:**
+1. SAAD-033: `verifyDriverPinAction` and `completeDriverPinSetupAction` now return `{ redirect: string }` instead of calling `redirect()` directly inside the server action. `redirect()` inside a server action that also calls `signInWithPassword` drops the Set-Cookie header before navigation, causing the session to never persist. Fix: return URL, client does `router.push(res.redirect)`.
+2. SAAD-034: `phone/page.tsx` now checks on mount for an existing non-driver Supabase session. If found, shows a dismissable info banner warning the merchant session will be replaced. Non-blocking.
+3. `lib/driver-auth.ts`: new shared `driverSyntheticEmail(phone)` helper used by both pin and pin-setup actions.
+
+**Phase 1 — Code Quality: PASS**
+- tsc: EXIT 0, lint: EXIT 0 (7 pre-existing `<img>` storefront warnings)
+- No console.log in changed files. No hardcoded colors.
+- Vercel CI: 2/2 checks success.
+
+**Phase 2 — Routes: PASS**
+- SKIP_INTL complete. No new routes.
+- All driver routes return correct status codes.
+
+**Phase 3 — Data Consistency: PASS**
+- Type union `{error:string}|{redirect:string}` — client uses `'error' in res` discriminant, all union members handled, server never returns undefined. Correct.
+- No `redirect()` calls remaining in either pin action. ✅
+- `driverSyntheticEmail` imported and called in both actions. ✅
+- Merchant session banner: `maybeSingle()` null guard — no driver row → warn. ✅
+
+**Phase 4 — UI Consistency: PASS**
+- Banner uses Tailwind semantic classes (no hardcoded hex). Dismissable. Non-blocking. ✅
+
+**Phase 5 — Browser Test: PASS (10/10)**
+- Store home, cart, checkout (no WS), auth login, driver phone (zero console errors), banner absent without session, PIN page, PIN-setup page, livraisons redirect, /track. All pass.
+- Screenshots: .qa-screenshots/plz070-01 through plz070-09.
+
+**Phase 6 — Flow Verification: PASS (code-level)**
+- Session-return-url pattern verified for both pin and pin-setup. ✅
+- Banner session check + null guard correct. ✅
+
+**P2-001 (new in this PR):** `pinToPassword()` exported from `lib/driver-auth.ts` with "MUST be applied" JSDoc but never imported or called by either action. Both actions pass raw 4-digit `pin` to Supabase Auth. Verified: 11 driver auth users exist with raw 4-digit PINs (admin.createUser bypasses client-side min). System works. But misleading comment is a maintenance hazard. Fix next sprint: wire up consistently or remove with updated JSDoc.
+
+**Pre-existing P1 (carry forward):** Stale closure in `pin-setup/page.tsx` — `pin` missing from confirm useEffect deps. Documented in p2-backlog Bug A. Not introduced here. Assign to Hamza.
+
+**Most interesting finding:** GitHub merge conflict in `.agents/qa/memory.md` — PR branch was created before PLZ-068 squash merged to main, causing divergence. Resolved by keeping PR branch version (more complete). Pattern: always create feature branches from the latest main, not from a prior commit.
+
+**Patterns noticed:**
+- `redirect()` inside Next.js server actions that set cookies is a systemic anti-pattern in the driver auth flow. The return-url pattern is the correct fix — document for future auth actions.
+- `admin.createUser` bypasses Supabase's client-side `password_min_length` config. Dead code like `pinToPassword` that was meant to address this but was never wired up is dangerous.
+
+**Checklist additions:**
+- On any server action that calls `signInWithPassword` and then `redirect()`: flag as P0 — session cookies will be dropped. Must use return-url pattern instead.
+- On any new shared helper in `lib/`: verify it is actually imported and called in all the files the JSDoc claims it must be applied to.
+- Before creating PR branches: always branch from latest main to avoid memory.md merge conflicts.
