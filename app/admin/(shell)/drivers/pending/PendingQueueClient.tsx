@@ -6,6 +6,7 @@ import { Bike, Car, ChevronRight, Inbox, RefreshCw, Truck } from 'lucide-react';
 import { DataTable, type DataTableColumn } from '../../../_components/DataTable';
 import { FilterBar } from '../../../_components/FilterBar';
 import { StatusChip } from '../../../_components/StatusChip';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 type PendingDriver = {
   id: string;
@@ -133,7 +134,7 @@ export function PendingQueueClient({
       width: '140px',
       render: (row) => (
         <span
-          title={new Date(row.submittedAt).toLocaleString('fr-FR')}
+          title={new Date(row.submittedAt).toLocaleString('fr-FR', { timeZone: MOROCCO_TZ })}
           className="text-[13px] text-[#78716C]"
         >
           {relativeTime(row.submittedAt)}

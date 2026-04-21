@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, Check, RefreshCw, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Order, OrderItem, Customer } from '@/types/supabase';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 type OrderItemWithProduct = OrderItem & {
   products: { name_fr: string; image_url: string | null; price: number } | null;
@@ -33,13 +34,13 @@ function formatDeliverySlot(slot: string | null): string {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: MOROCCO_TZ });
 }
 
 function formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
-  return d.toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: MOROCCO_TZ });
 }
 
 function formatSlot(slot: string): string {
@@ -132,7 +133,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
   };
 
   const whatsappHref = merchantPhone
-    ? `https://wa.me/212${merchantPhone.replace(/^0/, '')}`
+    ? `https://wa.me/212${merchantPhone.replace(/^(\+212|00212|212|0)/, '')}`
     : null;
 
   return (

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getDriverProfile, getDeliveryHistory } from '@/lib/db/driver';
 import { redirect } from 'next/navigation';
 import { BottomNav } from '../_components/BottomNav';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 export default async function HistoriquePage() {
   const supabase = await createClient();
@@ -21,7 +22,7 @@ export default async function HistoriquePage() {
   const grouped: Record<string, typeof history> = {};
   history.forEach(d => {
     const dateKey = d.delivered_at
-      ? new Date(d.delivered_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+      ? new Date(d.delivered_at).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: MOROCCO_TZ })
       : 'Date inconnue';
     if (!grouped[dateKey]) grouped[dateKey] = [];
     grouped[dateKey].push(d);

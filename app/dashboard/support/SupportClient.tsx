@@ -7,6 +7,7 @@ import { MessageCircle, Send, Paperclip, Loader2, Plus } from 'lucide-react';
 import { sendMessageAction, fetchTicketMessagesAction } from './actions';
 import { NewTicketSheet } from './NewTicketSheet';
 import type { SupportTicket, SupportMessage, TicketStatus } from '@/lib/db/support';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 // ─── Ticket status badge ──────────────────────────────────────────────────────
 
@@ -28,6 +29,7 @@ function MessageBubble({ msg, plazaLabel }: { msg: SupportMessage; plazaLabel: s
   const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: MOROCCO_TZ,
   });
 
   if (isMe) {
@@ -122,6 +124,7 @@ function ChatPanel({
               day: 'numeric',
               month: 'long',
               year: 'numeric',
+              timeZone: MOROCCO_TZ,
             })}
           </span>
         </div>
@@ -135,6 +138,7 @@ function ChatPanel({
               weekday: 'long',
               day: 'numeric',
               month: 'long',
+              timeZone: MOROCCO_TZ,
             })}
           </span>
         </div>
@@ -304,6 +308,7 @@ export function SupportClient({ tickets }: Props) {
                       {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
+                        timeZone: MOROCCO_TZ,
                       })}
                     </div>
                   </div>
@@ -391,6 +396,7 @@ export function SupportClient({ tickets }: Props) {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
+                    timeZone: MOROCCO_TZ,
                   })}
                 </div>
               </Link>

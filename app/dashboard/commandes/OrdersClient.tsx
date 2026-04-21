@@ -8,6 +8,7 @@ import { PaymentBadge } from '@/components/ui/PaymentBadge';
 import { OrderDetailSheet } from './OrderDetailSheet';
 import type { OrderWithDetails } from '@/lib/db/orders';
 import type { OrderStatus } from '@/types/supabase';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -20,6 +21,7 @@ export function formatDate(iso: string): string {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: MOROCCO_TZ,
   });
 }
 

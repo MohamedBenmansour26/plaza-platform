@@ -11,6 +11,7 @@ import {
 import { formatMAD } from './OrdersClient';
 import type { OrderWithDetails } from '@/lib/db/orders';
 import type { OrderStatus, PaymentMethod, DeliveryStatus } from '@/types/supabase';
+import { MOROCCO_TZ } from '@/lib/timezone';
 
 // ─── Delivery timeline ───────────────────────────────────────────────────────
 
@@ -130,7 +131,7 @@ function DeliveryStatusCard({ delivery }: { delivery: NonNullable<OrderWithDetai
       </span>
       {delivery.pickup_time && (
         <p className="text-[12px] text-[#78716C] mt-2">
-          Récupéré à {new Date(delivery.pickup_time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
+          Récupéré à {new Date(delivery.pickup_time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', timeZone: MOROCCO_TZ })}
         </p>
       )}
     </div>
