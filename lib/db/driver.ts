@@ -239,20 +239,20 @@ export async function getDeliveryHistory(driverId: string): Promise<HistoryDeliv
   });
 }
 
-// ─── Fetch available pool deliveries for a city ───────────────────────────
+// ─── Fetch available pool deliveries ──────────────────────────────────────
 
 /**
- * Returns available pool deliveries for the driver's city.
+ * Returns all available pool deliveries regardless of city.
+ * City-based routing is a v1.1 concern — MVP has a single city.
  * Ordered oldest-first (fairest distribution).
  */
-export async function getPoolDeliveries(city: string): Promise<PoolDelivery[]> {
+export async function getPoolDeliveries(): Promise<PoolDelivery[]> {
   const supabase = await createClient()
   const now = new Date().toISOString()
   const { data, error } = await supabase
     .from('deliveries')
     .select('id, pickup_city, distance_km, estimated_duration_min, driver_earnings_mad, pool_created_at, pool_expires_at')
     .eq('status', 'available')
-    .eq('pickup_city', city)
     .gt('pool_expires_at', now)
     .order('pool_created_at', { ascending: true })
     .returns<PoolDelivery[]>()

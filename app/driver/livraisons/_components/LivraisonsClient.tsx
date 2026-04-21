@@ -15,8 +15,7 @@ import type { PoolDelivery } from '@/lib/dispatch/types';
 type Props = {
   driver: DriverProfile;
   initialDeliveries: DriverDelivery[];
-  initialPool:  PoolDelivery[];
-  driverCity:   string;
+  initialPool: PoolDelivery[];
 };
 
 function minutesUntilSlotEnd(slot: string | null): number {
@@ -31,7 +30,7 @@ function minutesUntilSlotEnd(slot: string | null): number {
   return Math.max(0, Math.round((slotEnd.getTime() - now.getTime()) / 60000));
 }
 
-export function LivraisonsClient({ driver, initialDeliveries, initialPool, driverCity }: Props) {
+export function LivraisonsClient({ driver, initialDeliveries, initialPool }: Props) {
   const router = useRouter();
   const [isAvailable, setIsAvailable] = useState(driver.is_available);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
@@ -73,21 +72,21 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
     return () => { supabase.removeChannel(channel); };
   }, [driver.id]);
 
-  // Real-time subscription for pool deliveries in the driver's city
+  // Real-time subscription for pool deliveries — all cities for MVP
   useEffect(() => {
-    if (!driverCity) return;
-
     const supabase = createClient();
 
     const channel = supabase
-      .channel(`deliveries:pool:${driverCity}`)
+      .channel('deliveries:pool')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'deliveries',
-          filter: `pickup_city=eq.${driverCity}`,
+          // No server-side filter: UPDATE events for accepted deliveries would not match
+          // a status=eq.available filter, so removal from pool would silently fail.
+          // The callback already handles status-based filtering client-side.
         },
         (payload) => {
           if (payload.eventType === 'INSERT' && payload.new.status === 'available') {
@@ -107,7 +106,7 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool, drive
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [driverCity]);
+  }, []);
 
   async function toggleAvailability() {
     if (availabilityLoading) return;

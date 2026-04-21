@@ -32,8 +32,8 @@ export function ReportIssueSheet({ order, onClose }: Props) {
       );
       setSubmitted(true);
       timerRef.current = setTimeout(() => {
-        onClose();
         router.push('/dashboard/support');
+        onClose();
       }, 1200);
     });
   };
