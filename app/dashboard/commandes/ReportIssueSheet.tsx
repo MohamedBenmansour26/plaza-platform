@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition, useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { createTicketAction } from '@/app/dashboard/support/actions';
 
@@ -13,7 +12,6 @@ type Props = {
 const MAX_DESC = 1000;
 
 export function ReportIssueSheet({ order, onClose }: Props) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -32,8 +30,8 @@ export function ReportIssueSheet({ order, onClose }: Props) {
       );
       setSubmitted(true);
       timerRef.current = setTimeout(() => {
-        router.push('/dashboard/support');
         onClose();
+        window.location.assign('/dashboard/support');
       }, 1200);
     });
   };
@@ -105,7 +103,7 @@ export function ReportIssueSheet({ order, onClose }: Props) {
         {!submitted && (
           <div className="border-t border-[#E2E8F0] px-6 py-4 flex-shrink-0">
             <button
-              disabled={isPending}
+              disabled={isPending || submitted}
               onClick={handleSubmit}
               className="w-full h-11 text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
