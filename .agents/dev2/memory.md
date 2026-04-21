@@ -141,3 +141,33 @@ Comment added in FinancesClient.tsx to document this.
 `onMouseEnter`/`onMouseLeave` handlers used in BoutiqueForm.tsx (view store button) and
 dashboard/page.tsx (view store button) — required because Tailwind v3 cannot express
 `hover:bg-[color-mix(...)]` for dynamic CSS variable tints.
+
+---
+
+## PLZ-071 — Fix dead "Signaler un problème" button — 20 April 2026
+
+**Branch:** `fix/PLZ-071-report-issue-dialog`
+**PR:** https://github.com/MohamedBenmansour26/plaza-platform/pull/63
+**Status:** PR open, awaiting Anas QA review
+
+### What was built:
+- **New component** `app/dashboard/commandes/ReportIssueSheet.tsx`
+  - Bottom sheet, same pattern as `NewTicketSheet` (z-[60]/z-[70] to stack above parent `OrderDetailSheet` which is z-50)
+  - Pre-fills `category='order_issue'`, `subject='Problème commande ${order.order_number}'`, `order_id`
+  - Description textarea (optional, MAX_DESC=1000)
+  - Calls `createTicketAction` from `app/dashboard/support/actions.ts`
+  - On success: 1.2s "Ticket créé" state → `onClose()` + `router.push('/dashboard/support')`
+  - Timer stored in `useRef` and cancelled on unmount via `useEffect` cleanup
+
+- **Wired in `OrderDetailSheet.tsx`** (desktop drawer): `reportOpen` state, `onReportOpen` prop on `ActionBar`, `<ReportIssueSheet>` rendered conditionally after the drawer panel
+
+- **Wired in `[id]/OrderDetailClient.tsx`** (mobile full-page): same pattern — `reportOpen` state, `setReportOpen(true)` on button click, `<ReportIssueSheet>` rendered at bottom of component
+
+### Bugs fixed by simplify review:
+1. **z-index conflict**: `ReportIssueSheet` was z-40/z-50 (same as parent `OrderDetailSheet`). Raised to z-[60]/z-[70] so nested sheet always renders on top.
+2. **Unguarded setTimeout**: Timer in `handleSubmit` was not cancelled on unmount. Fixed with `useRef<ReturnType<typeof setTimeout>>` + `useEffect` cleanup.
+
+### Notes:
+- No i18n keys needed — support flow is FR-only at MVP per spec
+- No new dependencies
+- `tsc --noEmit` exits 0, `npm run lint` exits 0
