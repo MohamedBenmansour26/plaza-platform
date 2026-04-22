@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Circle, Clock, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
@@ -8,15 +8,15 @@ export const dynamic = 'force-dynamic';
 /**
  * Driver "your file is being reviewed" screen.
  *
- * - `approval_status = 'pending'` → default waiting-room copy.
+ * - `approval_status = 'pending'`  → default waiting-room copy.
  * - `approval_status = 'resubmit'` → show rejection reason + CTA back to
  *   /driver/onboarding/identity so the driver can re-upload.
+ * - `approval_status = 'rejected'` → show outright-refusal copy + reason
+ *   + support CTA. No resubmit path (reject is final per the admin
+ *   action contract — see app/admin/drivers/[id]/actions.ts).
  *
- * TODO (Youssef swap): when the backend adds an `approval_status` column
- * + `rejection_reason` column to the `drivers` table (PLZ-061 backend),
- * the `approvalStatus` + `rejectionReason` below will come from that row
- * automatically. Until then, we fall back to the legacy
- * `onboarding_status` field.
+ * Schema verified 2026-04-22: `drivers.approval_status` and
+ * `drivers.rejection_reason` are both live columns.
  */
 export default async function PendingPage() {
   const t = await getTranslations('driver.onboarding.pending');
@@ -30,29 +30,63 @@ export default async function PendingPage() {
   if (user) {
     const { data: driver } = await supabase
       .from('drivers')
-      // `approval_status` and `rejection_reason` land with Youssef's PR;
-      // select defensively so this compiles today.
-      .select('onboarding_status')
+      .select('onboarding_status, approval_status, rejection_reason')
       .eq('user_id', user.id)
-      .maybeSingle<{ onboarding_status: string | null }>();
+      .maybeSingle<{
+        onboarding_status: string | null;
+        approval_status: string | null;
+        rejection_reason: string | null;
+      }>();
     if (driver) {
-      // Best-effort mapping while `approval_status` isn't live.
-      const row = driver as unknown as {
-        approval_status?: string | null;
-        rejection_reason?: string | null;
-      };
-      if (row.approval_status === 'resubmit') {
+      if (driver.approval_status === 'resubmit') {
         approvalStatus = 'resubmit';
-        rejectionReason = row.rejection_reason ?? null;
-      } else if (row.approval_status === 'rejected') {
+        rejectionReason = driver.rejection_reason ?? null;
+      } else if (driver.approval_status === 'rejected') {
         approvalStatus = 'rejected';
-        rejectionReason = row.rejection_reason ?? null;
-      } else if (row.approval_status === 'approved') {
+        rejectionReason = driver.rejection_reason ?? null;
+      } else if (driver.approval_status === 'approved') {
         approvalStatus = 'approved';
       } else {
         approvalStatus = 'pending';
       }
     }
+  }
+
+  if (approvalStatus === 'rejected') {
+    return (
+      <main className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-6 py-10">
+        <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-[#FEE2E2]">
+          <XCircle className="w-10 h-10 text-[#DC2626]" />
+        </div>
+        <h1 className="text-[22px] font-bold text-[#1C1917] mt-5 text-center">
+          {t('rejected.title')}
+        </h1>
+        <p className="text-[14px] text-[#78716C] mt-2 text-center max-w-[420px]">
+          {t('rejected.body')}
+        </p>
+        {rejectionReason ? (
+          <div className="mt-5 w-full max-w-[420px] rounded-[12px] border border-[#FEE2E2] bg-[#FEE2E2]/30 p-4">
+            <div className="text-[12px] font-semibold uppercase tracking-wider text-[#991B1B]">
+              {t('rejected.reasonLabel')}
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-[#78716C] whitespace-pre-line">
+              {rejectionReason}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-5 w-full max-w-[420px] text-[13px] leading-relaxed text-[#78716C] text-center">
+            {t('rejected.fallbackReason')}
+          </p>
+        )}
+        <Link
+          href="#"
+          className="mt-6 inline-flex h-12 items-center justify-center rounded-[12px] bg-[#DC2626] px-6 text-[14px] font-semibold text-white hover:bg-[#B91C1C]"
+          data-testid="driver-onboarding-pending-rejected-support-link"
+        >
+          {t('rejected.ctaSupport')}
+        </Link>
+      </main>
+    );
   }
 
   if (approvalStatus === 'resubmit') {

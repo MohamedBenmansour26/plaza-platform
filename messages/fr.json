@@ -517,6 +517,10 @@
     "paperclip_tooltip": "Pièces jointes — bientôt disponible"
   },
   "driver": {
+    "pinSetup": {
+      "errorMismatch": "Les codes ne correspondent pas. Réessayez.",
+      "errorServer": "Erreur technique. Veuillez réessayer dans un instant."
+    },
     "onboarding": {
       "pending": {
         "pending": {
@@ -529,6 +533,13 @@
           "body": "L'équipe Plaza a examiné votre dossier et souhaite que vous re-soumettiez certains documents.",
           "reasonLabel": "Motif",
           "cta": "Mettre à jour mes documents"
+        },
+        "rejected": {
+          "title": "Dossier refusé",
+          "body": "L'équipe Plaza a examiné votre dossier et n'a pas pu valider votre inscription.",
+          "reasonLabel": "Motif du refus",
+          "fallbackReason": "Votre dossier a été refusé. Contactez le support pour plus d'informations.",
+          "ctaSupport": "Contacter le support"
         },
         "step": {
           "phoneVerified": "Téléphone vérifié",
