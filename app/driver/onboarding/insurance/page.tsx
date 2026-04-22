@@ -40,12 +40,12 @@ export default function InsurancePage() {
         </div>
 
         <div className="mt-4">
-          <DocumentUpload label="Attestation d'assurance" sublabel="Vérifiez que la date d'expiration est visible" value={file} onChange={setFile} />
+          <DocumentUpload label="Attestation d'assurance" sublabel="Vérifiez que la date d'expiration est visible" value={file} onChange={setFile} testId="driver-onboarding-insurance-upload-input" />
         </div>
         <p className="text-xs text-[#78716C] mt-2">Votre assurance doit être en cours de validité</p>
       </div>
 
-      <StickyCTA label="Continuer" disabled={!file} loading={loading} onClick={handleContinue} />
+      <StickyCTA label="Continuer" disabled={!file} loading={loading} onClick={handleContinue} testId="driver-onboarding-insurance-continue-btn" />
     </main>
   );
 }

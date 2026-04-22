@@ -11,9 +11,10 @@ type Props = {
   onChange: (val: string[]) => void;
   state?: State;
   disabled?: boolean;
+  testIdPrefix?: string;    // if set, each box gets `${testIdPrefix}-digit-${i+1}-input`
 };
 
-export function OtpBoxes({ value, onChange, state = 'default', disabled = false }: Props) {
+export function OtpBoxes({ value, onChange, state = 'default', disabled = false, testIdPrefix }: Props) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   function handleChange(index: number, raw: string) {
@@ -70,6 +71,7 @@ export function OtpBoxes({ value, onChange, state = 'default', disabled = false 
             handleChange(i, e.clipboardData.getData('text'));
           }}
           className={boxClass(i)}
+          data-testid={testIdPrefix ? `${testIdPrefix}-digit-${i + 1}-input` : undefined}
         />
       ))}
     </div>

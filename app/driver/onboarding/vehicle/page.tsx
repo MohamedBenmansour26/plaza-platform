@@ -42,6 +42,7 @@ export default function VehiclePage() {
                   borderColor: active ? 'var(--color-primary)' : '#E2E8F0',
                   background: active ? 'color-mix(in srgb, var(--color-primary) 5%, white)' : 'white',
                 }}
+                data-testid={`driver-onboarding-vehicle-${type}-btn`}
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                   style={active ? { backgroundColor: 'var(--color-primary)' } : { backgroundColor: '#F5F5F4' }}>
@@ -67,6 +68,7 @@ export default function VehiclePage() {
         disabled={!selected}
         loading={loading}
         onClick={() => { if (selected) { setLoading(true); saveVehicleTypeAction(selected); } }}
+        testId="driver-onboarding-vehicle-continue-btn"
       />
     </main>
   );

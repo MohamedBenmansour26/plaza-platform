@@ -27,6 +27,7 @@ export default function IssueSuccessPage({ params }: { params: { id: string } })
         href="/driver/livraisons"
         className="mt-8 block w-full h-[52px] rounded-xl text-base font-bold text-white flex items-center justify-center"
         style={{ backgroundColor: 'var(--color-primary)' }}
+        data-testid="driver-issue-success-return-link"
       >
         Retour aux livraisons
       </Link>

@@ -9,9 +9,10 @@ type Props = {
   value: File | null;
   onChange: (file: File | null) => void;
   height?: number;   // px, default 160
+  testId?: string;
 };
 
-export function PhotoCapture({ value, onChange, height = 160 }: Props) {
+export function PhotoCapture({ value, onChange, height = 160, testId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = value ? URL.createObjectURL(value) : null;
 
@@ -41,6 +42,7 @@ export function PhotoCapture({ value, onChange, height = 160 }: Props) {
         accept="image/*"
         capture="environment"
         className="hidden"
+        data-testid={testId}
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
           if (!file) { onChange(null); return; }

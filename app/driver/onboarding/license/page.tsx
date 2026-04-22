@@ -45,13 +45,13 @@ export default function LicensePage() {
         </div>
 
         <div className="mt-4">
-          <DocumentUpload label="Permis de conduire" sublabel="Recto uniquement" value={file} onChange={setFile} />
+          <DocumentUpload label="Permis de conduire" sublabel="Recto uniquement" value={file} onChange={setFile} testId="driver-onboarding-license-upload-input" />
         </div>
         <p className="text-xs text-[#78716C] mt-2">Conseils: bonne lumière, texte lisible, pas de reflet</p>
         {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
       </div>
 
-      <StickyCTA label="Continuer" disabled={!file} loading={loading} onClick={handleContinue} />
+      <StickyCTA label="Continuer" disabled={!file} loading={loading} onClick={handleContinue} testId="driver-onboarding-license-continue-btn" />
     </main>
   );
 }

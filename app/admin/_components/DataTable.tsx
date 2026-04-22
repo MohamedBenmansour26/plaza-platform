@@ -22,6 +22,8 @@ type Props<T extends { id: string }> = {
   emptyState?: React.ReactNode;
   skeletonRows?: number;
   ariaLabel?: string;
+  /** If set, each row gets `data-testid={rowTestId}` and `data-id={row.id}`. */
+  rowTestId?: string;
 };
 
 /**
@@ -40,6 +42,7 @@ export function DataTable<T extends { id: string }>({
   emptyState,
   skeletonRows = 6,
   ariaLabel,
+  rowTestId,
 }: Props<T>) {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -137,6 +140,8 @@ export function DataTable<T extends { id: string }>({
                         selected && 'bg-[#F5F5F4] relative',
                       )}
                       style={{ height: rowHeight }}
+                      data-testid={rowTestId}
+                      data-id={rowTestId ? row.id : undefined}
                     >
                       {columns.map((col, colIndex) => (
                         <td

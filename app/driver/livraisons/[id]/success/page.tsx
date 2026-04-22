@@ -37,6 +37,7 @@ export default function SuccessPage() {
           href="/driver/livraisons"
           className="block w-full h-[52px] rounded-xl text-base font-bold text-white flex items-center justify-center"
           style={{ backgroundColor: 'var(--color-primary)' }}
+          data-testid="driver-delivery-success-return-link"
         >
           Retour aux livraisons
         </Link>

@@ -88,6 +88,7 @@ function DeliverContent() {
                   borderColor: '#E8632A',
                   backgroundColor: codChecked ? '#E8632A' : 'white',
                 }}
+                data-testid="driver-delivery-confirm-cod-checkbox"
               >
                 {codChecked && <span className="text-white text-sm font-bold">✓</span>}
               </div>
@@ -108,7 +109,7 @@ function DeliverContent() {
               ? `Demandez le code à ${delivery.order.customer.full_name}`
               : 'Demandez le code à 4 chiffres au client'}
           </p>
-          <PinBoxes value={pin} onChange={setPin} state={pinState === 'error' ? 'error' : pinState === 'valid' ? 'valid' : 'default'} />
+          <PinBoxes value={pin} onChange={setPin} state={pinState === 'error' ? 'error' : pinState === 'valid' ? 'valid' : 'default'} testIdPrefix="driver-delivery-customer-pin" />
           {pinState === 'error' && (
             <p className="text-[13px] text-red-600 text-center mt-3">
               Code incorrect — {pinAttempts > 0 ? `${pinAttempts} tentative${pinAttempts > 1 ? 's' : ''} restante${pinAttempts > 1 ? 's' : ''}` : 'contactez le support'}
@@ -120,17 +121,18 @@ function DeliverContent() {
         <div className="bg-white rounded-2xl shadow-sm p-4">
           <p className="text-sm font-bold text-[#1C1917] mb-1">Photo de livraison</p>
           <p className="text-xs text-red-600 mb-3">Obligatoire — colis remis au client</p>
-          <PhotoCapture value={photo} onChange={setPhoto} height={160} />
+          <PhotoCapture value={photo} onChange={setPhoto} height={160} testId="driver-delivery-deliver-photo-input" />
         </div>
 
         <button
           onClick={() => router.push(`/driver/livraisons/${id}/issue`)}
-          className="w-full h-11 rounded-xl border border-red-200 text-red-600 text-sm">
+          className="w-full h-11 rounded-xl border border-red-200 text-red-600 text-sm"
+          data-testid="driver-delivery-report-issue-btn">
           Signaler un problème →
         </button>
       </div>
 
-      <StickyCTA label="Confirmer la livraison" disabled={!canConfirm} loading={loading} onClick={handleConfirm} />
+      <StickyCTA label="Confirmer la livraison" disabled={!canConfirm} loading={loading} onClick={handleConfirm} testId="driver-delivery-deliver-submit-btn" />
     </div>
   );
 }

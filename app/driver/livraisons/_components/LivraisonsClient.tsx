@@ -144,6 +144,7 @@ export function LivraisonsClient({ driver, initialDeliveries, initialPool }: Pro
           disabled={availabilityLoading}
           className="flex items-center gap-2 disabled:opacity-60"
           aria-label={isAvailable ? 'Passer hors ligne' : 'Passer en ligne'}
+          data-testid="driver-livraisons-online-toggle-btn"
         >
           {availabilityLoading ? (
             <Loader2 className="w-5 h-5 animate-spin text-[#78716C]" />
@@ -241,7 +242,12 @@ function DeliveryCard({ delivery, onClick }: { delivery: DriverDelivery; onClick
   const earnings = delivery.driver_earnings_mad ?? 0;
 
   return (
-    <button onClick={onClick} className="w-full bg-white rounded-2xl shadow-sm p-4 mb-3 text-left">
+    <button
+      onClick={onClick}
+      className="w-full bg-white rounded-2xl shadow-sm p-4 mb-3 text-left"
+      data-testid="driver-livraisons-delivery-card"
+      data-id={delivery.id}
+    >
       <div className="flex items-center justify-between mb-2">
         <span className="text-[15px] font-bold text-[#1C1917]">{delivery.order.order_number}</span>
         <div className="flex items-center gap-2">

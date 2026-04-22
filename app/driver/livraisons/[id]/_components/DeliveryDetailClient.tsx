@@ -149,6 +149,7 @@ export function DeliveryDetailClient({ delivery }: { delivery: DriverDelivery })
       <StickyCTA
         label={ctaLabel}
         onClick={() => router.push(ctaHref)}
+        testId={isToCollect ? 'driver-delivery-confirm-collect-btn' : 'driver-delivery-confirm-deliver-btn'}
       />
     </div>
   );

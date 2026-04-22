@@ -50,16 +50,16 @@ export default function IdentityPage() {
 
         <div className="mt-4 flex gap-3">
           <div className="flex-1">
-            <DocumentUpload label="Recto" value={front} onChange={setFront} height={140} />
+            <DocumentUpload label="Recto" value={front} onChange={setFront} height={140} testId="driver-onboarding-cine-front-upload-input" />
           </div>
           <div className="flex-1">
-            <DocumentUpload label="Verso" value={back} onChange={setBack} height={140} />
+            <DocumentUpload label="Verso" value={back} onChange={setBack} height={140} testId="driver-onboarding-cine-back-upload-input" />
           </div>
         </div>
         <p className="text-xs text-[#78716C] mt-2">Assurez-vous que les 4 coins de la carte sont visibles</p>
       </div>
 
-      <StickyCTA label="Soumettre mon dossier" disabled={!bothReady} loading={loading} onClick={handleSubmit} />
+      <StickyCTA label="Soumettre mon dossier" disabled={!bothReady} loading={loading} onClick={handleSubmit} testId="driver-onboarding-identity-submit-btn" />
     </main>
   );
 }

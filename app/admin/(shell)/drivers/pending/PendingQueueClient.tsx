@@ -218,6 +218,7 @@ export function PendingQueueClient({
               type="button"
               onClick={handleRefresh}
               className="flex h-9 items-center gap-1.5 rounded-[6px] border border-[#E7E5E4] bg-white px-3 text-[13px] font-medium text-[#1C1917] hover:bg-[#F5F5F4]"
+              data-testid="admin-drivers-pending-refresh-btn"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`}
@@ -231,6 +232,7 @@ export function PendingQueueClient({
                 value: search,
                 onChange: setSearch,
                 placeholder: 'Rechercher par nom ou téléphone',
+                testId: 'admin-drivers-pending-search-input',
               }}
               chips={[
                 { key: 'all', label: 'Toutes les villes', active: cityFilter === 'all' },
@@ -249,6 +251,7 @@ export function PendingQueueClient({
             onRowClick={handleRowClick}
             emptyState={emptyState}
             ariaLabel="File d'attente des livreurs"
+            rowTestId="admin-drivers-pending-row"
           />
           <p className="mt-3 text-right text-[12px] text-[#78716C]">
             ↑↓ naviguer · Entrée ouvrir
@@ -320,6 +323,8 @@ function MobilePendingQueue({
                 type="button"
                 onClick={() => onRowClick(driver)}
                 className="flex w-full flex-col gap-3 rounded-[12px] border border-[#E7E5E4] bg-white p-4 text-left hover:bg-[#FAFAF9]"
+                data-testid="admin-drivers-pending-card"
+                data-id={driver.id}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-[13px] font-semibold text-[#2563EB]">

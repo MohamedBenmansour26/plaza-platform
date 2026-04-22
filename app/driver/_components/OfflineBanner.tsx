@@ -13,6 +13,7 @@ export function OfflineBanner({ onGoOnline }: Props) {
         onClick={onGoOnline}
         className="text-[13px] font-semibold flex-shrink-0"
         style={{ color: 'var(--color-primary)' }}
+        data-testid="driver-livraisons-go-online-btn"
       >
         Aller en ligne
       </button>

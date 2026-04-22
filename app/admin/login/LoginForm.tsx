@@ -88,6 +88,7 @@ export function LoginForm() {
         aria-invalid={state.kind === 'error'}
         aria-describedby={state.kind === 'error' ? 'admin-email-error' : undefined}
         className="mt-2 h-10 w-full rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
+        data-testid="admin-login-email-input"
       />
       {usePassword && (
         <>
@@ -104,6 +105,7 @@ export function LoginForm() {
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             className="mt-2 h-10 w-full rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] text-[#1C1917] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
+            data-testid="admin-login-password-input"
           />
         </>
       )}
@@ -122,6 +124,7 @@ export function LoginForm() {
           checked={trustDevice}
           onChange={(event) => setTrustDevice(event.target.checked)}
           className="mt-0.5 h-4 w-4 rounded-[4px] border border-[#D6D3D1] text-[#2563EB] focus:ring-2 focus:ring-[#EFF6FF]"
+          data-testid="admin-login-trust-device-checkbox"
         />
         <div>
           <label
@@ -140,6 +143,7 @@ export function LoginForm() {
         disabled={pending}
         aria-disabled={pending}
         className="mt-5 h-10 w-full rounded-[6px] bg-[#2563EB] text-[14px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:bg-[#E7E5E4] disabled:text-[#A8A29E]"
+        data-testid="admin-login-submit-btn"
       >
         {pending
           ? usePassword ? 'Connexion…' : 'Envoi en cours…'
@@ -149,6 +153,7 @@ export function LoginForm() {
         type="button"
         onClick={() => { setUsePassword((v) => !v); setState({ kind: 'idle' }); }}
         className="mt-3 text-center text-[12px] text-[#78716C] hover:text-[#2563EB] hover:underline"
+        data-testid="admin-login-toggle-mode-btn"
       >
         {usePassword ? 'Revenir au lien magique' : 'Connexion par mot de passe'}
       </button>

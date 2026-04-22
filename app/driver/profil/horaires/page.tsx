@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { saveScheduleAction, getScheduleAction } from './actions'
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const DAY_SLUGS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 type DaySchedule = {
   day_of_week: number
@@ -74,6 +75,7 @@ export default function HorairesPage() {
                 <button
                   onClick={() => updateDay(i, { is_active: !day.is_active })}
                   className={`relative h-5 w-9 rounded-full transition-colors ${day.is_active ? 'bg-[var(--color-primary)]' : 'bg-gray-300'}`}
+                  data-testid={`driver-horaires-${DAY_SLUGS[i]}-toggle-btn`}
                 >
                   <span
                     className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${day.is_active ? 'translate-x-4' : 'translate-x-0.5'}`}
@@ -88,6 +90,7 @@ export default function HorairesPage() {
                       value={day.start_time}
                       onChange={e => updateDay(i, { start_time: e.target.value })}
                       className="rounded-lg border border-gray-300 px-2 py-1 text-[13px] text-gray-900"
+                      data-testid={`driver-horaires-${DAY_SLUGS[i]}-start-input`}
                     />
                     <span className="text-gray-400">—</span>
                     <input
@@ -95,6 +98,7 @@ export default function HorairesPage() {
                       value={day.end_time}
                       onChange={e => updateDay(i, { end_time: e.target.value })}
                       className="rounded-lg border border-gray-300 px-2 py-1 text-[13px] text-gray-900"
+                      data-testid={`driver-horaires-${DAY_SLUGS[i]}-end-input`}
                     />
                   </div>
                 ) : (
@@ -109,6 +113,7 @@ export default function HorairesPage() {
           onClick={handleSave}
           disabled={isPending}
           className="mt-6 flex h-13 w-full items-center justify-center rounded-xl bg-[var(--color-primary)] font-semibold text-white disabled:opacity-60"
+          data-testid="driver-horaires-save-btn"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? 'Enregistré ✓' : 'Enregistrer'}
         </button>

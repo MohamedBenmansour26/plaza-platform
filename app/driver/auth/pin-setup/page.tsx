@@ -73,7 +73,13 @@ function PinSetupContent() {
       </p>
 
       <div className={`mt-8 ${error ? 'animate-bounce' : ''}`}>
-        <PinBoxes value={current} onChange={step === 1 ? setPin : setConfirm} state={error ? 'error' : 'default'} disabled={loading} />
+        <PinBoxes
+          value={current}
+          onChange={step === 1 ? setPin : setConfirm}
+          state={error ? 'error' : 'default'}
+          disabled={loading}
+          testIdPrefix={step === 1 ? 'driver-pin-setup-create' : 'driver-pin-setup-confirm'}
+        />
       </div>
 
       {error && <p className="text-[13px] text-red-600 mt-3">Les codes ne correspondent pas</p>}

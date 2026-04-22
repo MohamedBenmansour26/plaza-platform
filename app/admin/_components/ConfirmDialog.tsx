@@ -11,6 +11,8 @@ type BaseProps = {
   body?: React.ReactNode;
   cancelLabel?: string;
   confirmLabel: string;
+  /** When set, dialog root gets `${testIdPrefix}-dialog`, textarea gets `${testIdPrefix}-reason-textarea`, buttons get `${testIdPrefix}-cancel-btn` / `${testIdPrefix}-confirm-btn`. */
+  testIdPrefix?: string;
 };
 
 type NeutralProps = BaseProps & {
@@ -46,6 +48,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     cancelLabel = 'Annuler',
     confirmLabel,
     variant,
+    testIdPrefix,
   } = props;
 
   const [reason, setReason] = useState('');
@@ -97,6 +100,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
+      data-testid={testIdPrefix ? `${testIdPrefix}-dialog` : undefined}
     >
       <div className="w-full max-w-[480px] rounded-[8px] bg-white p-6 shadow-[0_20px_40px_rgba(0,0,0,0.15)]">
         <div className="flex items-start justify-between gap-4">
@@ -146,6 +150,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                   ? 'border-[#DC2626]'
                   : 'border-[#E7E5E4] focus:border-[#2563EB]',
               )}
+              data-testid={testIdPrefix ? `${testIdPrefix}-reason-textarea` : undefined}
             />
             <div className="mt-1 flex items-center justify-between text-[12px]">
               <span
@@ -168,6 +173,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
             type="button"
             onClick={onClose}
             className="h-10 rounded-[6px] border border-[#E7E5E4] bg-white px-4 text-[14px] font-medium text-[#1C1917] hover:bg-[#F5F5F4]"
+            data-testid={testIdPrefix ? `${testIdPrefix}-cancel-btn` : undefined}
           >
             {cancelLabel}
           </button>
@@ -181,6 +187,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                 ? 'bg-[#DC2626] hover:bg-[#B91C1C] disabled:cursor-not-allowed disabled:bg-[#F5F5F4] disabled:text-[#A8A29E]'
                 : 'bg-[#2563EB] hover:bg-[#1D4ED8]',
             )}
+            data-testid={testIdPrefix ? `${testIdPrefix}-confirm-btn` : undefined}
           >
             {confirmLabel}
           </button>

@@ -71,7 +71,7 @@ function CollectContent() {
             <span className="text-sm font-semibold text-[#1C1917]">Code de collecte</span>
           </div>
           <p className="text-[13px] text-[#78716C] mb-4">Saisissez le code à 6 chiffres</p>
-          <OtpBoxes value={code} onChange={handleCodeChange} state={codeState} />
+          <OtpBoxes value={code} onChange={handleCodeChange} state={codeState} testIdPrefix="driver-delivery-merchant-code" />
           {codeState === 'valid' && (
             <p className="text-[13px] text-green-600 text-center mt-3">✓ Code validé</p>
           )}
@@ -87,11 +87,11 @@ function CollectContent() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <PhotoCapture value={photo} onChange={setPhoto} height={160} />
+          <PhotoCapture value={photo} onChange={setPhoto} height={160} testId="driver-delivery-collect-photo-input" />
         </div>
       </div>
 
-      <StickyCTA label="Confirmer la collecte" disabled={!canConfirm} loading={loading} onClick={handleConfirm} />
+      <StickyCTA label="Confirmer la collecte" disabled={!canConfirm} loading={loading} onClick={handleConfirm} testId="driver-delivery-collect-submit-btn" />
     </div>
   );
 }

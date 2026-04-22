@@ -11,9 +11,10 @@ type Props = {
   value: File | null;
   onChange: (file: File | null) => void;
   height?: number;
+  testId?: string;
 };
 
-export function DocumentUpload({ label, sublabel, value, onChange, height = 140 }: Props) {
+export function DocumentUpload({ label, sublabel, value, onChange, height = 140, testId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = value ? URL.createObjectURL(value) : null;
 
@@ -54,6 +55,7 @@ export function DocumentUpload({ label, sublabel, value, onChange, height = 140 
         capture="environment"
         className="hidden"
         onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        data-testid={testId}
       />
     </div>
   );
