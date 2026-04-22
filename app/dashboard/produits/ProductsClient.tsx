@@ -69,18 +69,6 @@ export function ProductsClient({ products: initialProducts }: Props) {
 
   return (
     <>
-      {/* Mobile top bar */}
-      <div className="md:hidden bg-white h-14 px-4 flex items-center justify-between shadow-sm border-b border-[#E2E8F0]">
-        <h1 className="text-[18px] font-semibold text-[#1C1917]">{t('title')}</h1>
-        <Link
-          href="/dashboard/produits/nouveau"
-          className="h-9 px-4 text-white text-sm rounded-lg hover:opacity-90 transition-opacity flex items-center"
-          style={{ backgroundColor: 'var(--color-primary)' }}
-        >
-          {t('add')}
-        </Link>
-      </div>
-
       {/* Search */}
       <div className="px-4 py-3 md:px-0 md:pt-0 md:pb-4">
         <div className="relative w-full md:w-[280px]">

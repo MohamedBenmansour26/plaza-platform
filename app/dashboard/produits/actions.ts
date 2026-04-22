@@ -57,6 +57,7 @@ export async function createProduct(formData: FormData): Promise<void> {
   } as never);
 
   revalidatePath('/dashboard/produits');
+  revalidatePath('/dashboard');
   redirect('/dashboard/produits');
 }
 
@@ -99,6 +100,7 @@ export async function updateProduct(productId: string, formData: FormData): Prom
 
   revalidatePath('/dashboard/produits');
   revalidatePath(`/dashboard/produits/${productId}`);
+  revalidatePath('/dashboard');
   redirect('/dashboard/produits');
 }
 
@@ -113,6 +115,7 @@ export async function toggleProductVisibility(productId: string, isVisible: bool
     .eq('merchant_id', merchantId);
 
   revalidatePath('/dashboard/produits');
+  revalidatePath('/dashboard');
 }
 
 export async function deleteProduct(productId: string): Promise<void> {
@@ -126,5 +129,6 @@ export async function deleteProduct(productId: string): Promise<void> {
     .eq('merchant_id', merchantId);
 
   revalidatePath('/dashboard/produits');
+  revalidatePath('/dashboard');
   redirect('/dashboard/produits');
 }

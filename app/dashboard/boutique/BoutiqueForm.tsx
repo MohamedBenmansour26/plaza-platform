@@ -53,6 +53,7 @@ type Props = { merchant: Merchant; deliveryZones: DeliveryZone[] };
 export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   const t = useTranslations('boutique');
   const [isPending, startTransition] = useTransition();
+  const [savedIndicator, setSavedIndicator] = useState(false);
 
   // Identity
   const [storeName, setStoreName] = useState(merchant.store_name);
@@ -210,6 +211,8 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     }
     startTransition(async () => {
       await updateBoutique(fd);
+      setSavedIndicator(true);
+      setTimeout(() => setSavedIndicator(false), 2000);
     });
   }
 
@@ -742,6 +745,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       </div>
 
       <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
+        {savedIndicator && (
+          <p className="text-center text-sm font-medium text-[#16A34A] mb-2">Enregistré ✓</p>
+        )}
         <button
           type="button"
           onClick={handleSave}
@@ -786,7 +792,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             {workingHoursSection}
             {paymentModesSection}
 
-            <div className="pt-2">
+            <div className="pt-2 flex items-center gap-4">
               <button
                 type="button"
                 onClick={handleSave}
@@ -796,6 +802,9 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               >
                 {isPending ? t('saving') : t('save')}
               </button>
+              {savedIndicator && (
+                <span className="text-sm font-medium text-[#16A34A]">Enregistré ✓</span>
+              )}
             </div>
           </div>
 

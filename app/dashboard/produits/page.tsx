@@ -32,8 +32,8 @@ export default async function ProduitsPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="max-w-[1040px] mx-auto px-4 py-6 md:p-8">
-        {/* Desktop page header */}
-        <div className="hidden md:flex items-center justify-between mb-6">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-[#1C1917]">Mes produits</h1>
           <Link
             href="/dashboard/produits/nouveau"
