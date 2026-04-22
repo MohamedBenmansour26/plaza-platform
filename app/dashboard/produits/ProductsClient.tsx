@@ -79,6 +79,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full h-10 ps-10 pe-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+            data-testid="merchant-products-search-input"
           />
         </div>
       </div>
@@ -94,6 +95,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 ? 'bg-[var(--color-primary)] text-white'
                 : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
             }`}
+            data-testid={`merchant-products-filter-${f.id}-btn`}
           >
             {f.label}
           </button>
@@ -106,7 +108,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
           <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
           filtered.map((product) => (
-            <Link key={product.id} href={`/dashboard/produits/${product.id}`}>
+            <Link key={product.id} href={`/dashboard/produits/${product.id}`} data-testid="merchant-products-row" data-id={product.id}>
               <div className="bg-white rounded-xl p-3 shadow-sm flex gap-3 hover:shadow-md transition-shadow">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -169,6 +171,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
             <div
               key={product.id}
               className="min-h-16 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] transition-colors"
+              data-testid="merchant-products-row"
+              data-id={product.id}
             >
               <div className="w-16">
                 {product.image_url ? (
@@ -219,6 +223,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-60 ${
                     product.is_visible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
                   }`}
+                  data-testid="merchant-products-visibility-toggle-checkbox"
+                  data-id={product.id}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
@@ -233,6 +239,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                   href={`/dashboard/produits/${product.id}`}
                   className="p-1 text-[#78716C] hover:text-[var(--color-primary)] transition-colors"
                   title={t('editButton')}
+                  data-testid="merchant-products-edit-link"
+                  data-id={product.id}
                 >
                   <Edit2 className="w-5 h-5" />
                 </Link>
@@ -241,6 +249,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                   onClick={() => setDeleteModal({ id: product.id, name: product.name_fr })}
                   className="p-1 text-[#78716C] hover:text-[#DC2626] transition-colors"
                   title={t('formDelete')}
+                  data-testid="merchant-products-delete-btn"
+                  data-id={product.id}
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -252,7 +262,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
 
       {/* Delete confirmation modal */}
       {deleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="merchant-products-delete-dialog">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
             <p className="text-sm text-[#78716C] mb-6">
@@ -264,6 +274,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 onClick={() => setDeleteModal(null)}
                 disabled={isPending}
                 className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+                data-testid="merchant-products-delete-cancel-btn"
               >
                 {t('formDeleteCancel')}
               </button>
@@ -272,6 +283,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 onClick={() => handleDeleteConfirm(deleteModal.id)}
                 disabled={isPending}
                 className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+                data-testid="merchant-products-delete-confirm-btn"
               >
                 {isPending ? '…' : t('formDeleteConfirm')}
               </button>
@@ -306,6 +318,7 @@ function EmptyState({ hasProducts }: { hasProducts: boolean }) {
         href="/dashboard/produits/nouveau"
         className="inline-flex items-center gap-2 h-9 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         style={{ backgroundColor: 'var(--color-primary)' }}
+        data-testid="merchant-products-empty-add-btn"
       >
         <Plus className="w-4 h-4" />
         {t('addButton')}

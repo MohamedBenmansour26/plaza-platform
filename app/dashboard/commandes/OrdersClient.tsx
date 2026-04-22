@@ -77,6 +77,7 @@ export function OrdersClient({ orders }: Props) {
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
               }`}
+              data-testid={`merchant-orders-filter-${f.id}-btn`}
             >
               {f.label} ({countFor(f.id)})
             </button>
@@ -102,6 +103,8 @@ export function OrdersClient({ orders }: Props) {
               key={order.id}
               onClick={() => setSelectedOrder(order)}
               className="h-14 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] cursor-pointer transition-colors last:border-b-0"
+              data-testid="merchant-orders-row"
+              data-id={order.id}
             >
               <div className="w-[130px] text-sm font-medium text-[#1C1917]">
                 {order.order_number}
@@ -149,6 +152,8 @@ export function OrdersClient({ orders }: Props) {
               key={order.id}
               href={`/dashboard/commandes/${order.id}`}
               className="block bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow"
+              data-testid="merchant-orders-row"
+              data-id={order.id}
             >
               <div className="flex items-start justify-between mb-2">
                 <div>

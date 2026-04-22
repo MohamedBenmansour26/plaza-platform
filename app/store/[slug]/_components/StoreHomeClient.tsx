@@ -103,6 +103,8 @@ export function StoreHomeClient({
                     ? { backgroundColor: 'var(--color-primary)' }
                     : {}
                 }
+                data-testid="customer-store-category-btn"
+                data-category={category}
               >
                 {category}
               </button>

@@ -91,6 +91,7 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] flex items-center justify-between hover:border-[var(--color-primary)] transition-colors"
+        data-testid="customer-checkout-datetime-open-btn"
       >
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-[#78716C]" />
@@ -165,6 +166,8 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                         style={selectedTime === time ? { backgroundColor: 'var(--color-primary)' } : {}}
+                        data-testid="customer-checkout-datetime-slot-btn"
+                        data-slot={time}
                       >
                         {time}
                       </button>
@@ -188,6 +191,7 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 text-white rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: 'var(--color-primary)' }}
+                    data-testid="customer-checkout-datetime-confirm-btn"
                   >
                     Confirmer
                   </button>

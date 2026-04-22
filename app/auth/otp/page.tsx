@@ -108,6 +108,7 @@ function OTPContent() {
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors -ms-2 mb-4"
           aria-label="Retour"
+          data-testid="merchant-otp-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
         </button>
@@ -143,6 +144,7 @@ function OTPContent() {
                   ? 'bg-[#F8FAFC] border border-[#E2E8F0]'
                   : 'border-2 border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20'
               } ${isLocked ? 'bg-[#F5F5F4] text-[#A8A29E]' : 'text-[#1C1917]'}`}
+              data-testid={`merchant-otp-digit-${index + 1}-input`}
             />
           ))}
         </div>
@@ -184,6 +186,7 @@ function OTPContent() {
                 onClick={handleResend}
                 className="text-[13px] underline"
                 style={{ color: 'var(--color-primary)' }}
+                data-testid="merchant-otp-resend-btn"
               >
                 {t('resend')}
               </button>
@@ -191,7 +194,7 @@ function OTPContent() {
           </div>
         )}
 
-        <button className="text-[13px] text-[#78716C] text-center mt-4 w-full">
+        <button className="text-[13px] text-[#78716C] text-center mt-4 w-full" data-testid="merchant-otp-wrong-number-btn">
           {t('wrongNumber')}
         </button>
 

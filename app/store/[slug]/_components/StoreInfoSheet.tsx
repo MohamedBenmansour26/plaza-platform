@@ -165,6 +165,7 @@ export function StoreInfoSheet({
                 href={`tel:${merchant.phone}`}
                 className="w-full h-12 border-2 rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                 style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+                data-testid="customer-store-info-call-link"
               >
                 <Phone className="w-4 h-4" />
                 Appeler la boutique

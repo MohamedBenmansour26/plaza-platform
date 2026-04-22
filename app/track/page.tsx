@@ -96,6 +96,7 @@ export default function TrackOrderPage() {
                       ? 'border-[#DC2626] bg-red-50'
                       : 'border-[#E2E8F0] bg-white focus:border-[var(--color-primary)]'
                   }`}
+                  data-testid="customer-track-order-number-input"
                 />
                 <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8A29E]" />
               </div>
@@ -115,6 +116,7 @@ export default function TrackOrderPage() {
               disabled={loading}
               className="w-full h-14 text-white rounded-lg font-medium text-[16px] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
+              data-testid="customer-track-submit-btn"
             >
               {loading ? (
                 <>
@@ -140,6 +142,7 @@ export default function TrackOrderPage() {
               onClick={() => router.back()}
               className="text-[14px] hover:underline"
               style={{ color: 'var(--color-primary)' }}
+              data-testid="customer-track-back-btn"
             >
               ← Retour
             </button>

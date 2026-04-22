@@ -130,6 +130,7 @@ function PINLoginContent() {
                 className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
                   isLocked ? 'border-[#E2E8F0] bg-[#F5F5F4]' : error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
+                data-testid={`merchant-pin-login-digit-${index + 1}-input`}
               />
             ))}
           </div>
@@ -157,6 +158,7 @@ function PINLoginContent() {
                   className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
                     isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
+                  data-testid={`merchant-pin-login-numpad-${num}-btn`}
                 >
                   {num}
                 </button>
@@ -168,6 +170,7 @@ function PINLoginContent() {
                 className={`h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all ${
                   isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
+                data-testid="merchant-pin-login-numpad-0-btn"
               >
                 0
               </button>
@@ -179,6 +182,7 @@ function PINLoginContent() {
                   isLocked || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
                 aria-label="Effacer"
+                data-testid="merchant-pin-login-backspace-btn"
               >
                 <Delete className="w-5 h-5 text-[#1C1917]" />
               </button>
@@ -189,6 +193,7 @@ function PINLoginContent() {
             onClick={() => router.push('/auth/forgot-pin')}
             className="text-[13px] text-center mt-4 w-full"
             style={{ color: 'var(--color-primary)' }}
+            data-testid="merchant-pin-login-forgot-pin-btn"
           >
             {t('forgotPin')}
           </button>
@@ -201,6 +206,7 @@ function PINLoginContent() {
               href="/auth/login"
               className="text-sm font-medium hover:underline"
               style={{ color: 'var(--color-primary)' }}
+              data-testid="merchant-pin-login-signup-link"
             >
               S&apos;inscrire
             </a>
@@ -208,6 +214,7 @@ function PINLoginContent() {
           <button
             onClick={() => router.push('/auth/login')}
             className="text-xs text-[#A8A29E]"
+            data-testid="merchant-pin-login-switch-account-btn"
           >
             {t('switchAccount')}
           </button>

@@ -240,6 +240,7 @@ export function OnboardingChecklist({ data }: Props) {
             <button
               onClick={handleShare}
               className="h-9 px-4 bg-[#2563EB] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors"
+              data-testid="merchant-onboarding-share-link-btn"
             >
               {t('published_share_cta')}
             </button>
@@ -340,6 +341,7 @@ export function OnboardingChecklist({ data }: Props) {
                         <button
                           onClick={handleShare}
                           className="h-8 px-3 rounded-lg text-xs font-medium border border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] transition-colors"
+                          data-testid={`merchant-checklist-step-${step.id}-btn`}
                         >
                           {step.cta}
                         </button>
@@ -347,6 +349,7 @@ export function OnboardingChecklist({ data }: Props) {
                         <Link
                           href={step.href}
                           className="inline-flex h-8 px-3 items-center rounded-lg text-xs font-medium border border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] transition-colors"
+                          data-testid={`merchant-checklist-step-${step.id}-link`}
                         >
                           {step.cta}
                         </Link>
@@ -370,6 +373,7 @@ export function OnboardingChecklist({ data }: Props) {
                 ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]'
                 : 'bg-[#F0F0EF] text-[#A8A29E] cursor-not-allowed'
             }`}
+            data-testid="merchant-onboarding-publish-btn"
           >
             {isPending ? t('publishing') : t('publish_cta')}
           </button>

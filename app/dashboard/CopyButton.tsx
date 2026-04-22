@@ -25,6 +25,7 @@ export function CopyButton({ url }: Props) {
       type="button"
       onClick={handleCopy}
       className="w-full h-9 border border-[#E2E8F0] text-[#1C1917] rounded-lg text-sm font-medium hover:bg-[#F8FAFC] transition-colors flex items-center justify-center gap-2"
+      data-testid="merchant-dashboard-copy-link-btn"
     >
       {copied ? (
         <>

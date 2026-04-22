@@ -94,6 +94,7 @@ export default function PhoneEntryPage() {
               className="flex-1 h-full px-4 text-base bg-transparent outline-none text-[#1C1917]"
               inputMode="numeric"
               autoComplete="tel"
+              data-testid="merchant-login-phone-input"
             />
           </div>
           <div className={`text-xs mt-2 ${error ? 'text-[#DC2626]' : 'text-[#78716C]'}`}>
@@ -112,6 +113,7 @@ export default function PhoneEntryPage() {
                 : 'bg-[#E2E8F0] text-[#A8A29E] cursor-not-allowed'
             }`}
             style={isValid && !loading ? { backgroundColor: 'var(--color-primary)' } : undefined}
+            data-testid="merchant-login-continue-btn"
           >
             {t('continue')}
           </button>
@@ -126,6 +128,7 @@ export default function PhoneEntryPage() {
             href="/auth/pin-login"
             className="text-sm font-medium hover:underline"
             style={{ color: 'var(--color-primary)' }}
+            data-testid="merchant-login-signin-link"
           >
             Se connecter
           </a>

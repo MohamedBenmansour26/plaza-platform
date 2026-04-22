@@ -21,10 +21,10 @@ export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarPro
   const handleInfo = onInfoClick ?? (() => {});
 
   const tabs = [
-    { name: 'Accueil', icon: Home, href: `/store/${slug}` as const, onClick: undefined as (() => void) | undefined, badge: 0 },
-    { name: 'Produits', icon: Grid3X3, href: `/store/${slug}#produits` as const, onClick: undefined as (() => void) | undefined, badge: 0 },
-    { name: 'Panier', icon: ShoppingBag, href: null, onClick: handleCart, badge: cartCount },
-    { name: 'Infos', icon: Info, href: null, onClick: handleInfo, badge: 0 },
+    { name: 'Accueil', icon: Home, href: `/store/${slug}` as const, onClick: undefined as (() => void) | undefined, badge: 0, testId: 'customer-store-tab-home-link' },
+    { name: 'Produits', icon: Grid3X3, href: `/store/${slug}#produits` as const, onClick: undefined as (() => void) | undefined, badge: 0, testId: 'customer-store-tab-products-link' },
+    { name: 'Panier', icon: ShoppingBag, href: null, onClick: handleCart, badge: cartCount, testId: 'customer-store-tab-cart-btn' },
+    { name: 'Infos', icon: Info, href: null, onClick: handleInfo, badge: 0, testId: 'customer-store-tab-info-btn' },
   ];
 
   return (
@@ -73,6 +73,7 @@ export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarPro
               key={tab.name}
               onClick={tab.onClick}
               className="flex flex-col items-center justify-center gap-1 relative flex-1"
+              data-testid={tab.testId}
             >
               {content}
               {label}
@@ -85,6 +86,7 @@ export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarPro
             key={tab.name}
             href={tab.href!}
             className="flex flex-col items-center justify-center gap-1 relative flex-1"
+            data-testid={tab.testId}
           >
             {content}
             {label}

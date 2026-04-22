@@ -53,7 +53,10 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-50 flex flex-col">
+      <div
+        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-50 flex flex-col"
+        data-testid="merchant-support-new-ticket-sheet"
+      >
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
@@ -88,6 +91,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   value={category}
                   onChange={(e) => setCategory(e.target.value as TicketCategory)}
                   className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+                  data-testid="merchant-support-new-ticket-category-select"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
@@ -106,6 +110,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder={t('sheet_subject_placeholder')}
                   className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  data-testid="merchant-support-new-ticket-subject-input"
                 />
               </div>
 
@@ -121,6 +126,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                     onChange={(e) => setOrderId(e.target.value)}
                     placeholder="PLZ-042"
                     className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                    data-testid="merchant-support-new-ticket-order-id-input"
                   />
                 </div>
               )}
@@ -136,6 +142,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   placeholder={t('sheet_description_placeholder')}
                   rows={5}
                   className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  data-testid="merchant-support-new-ticket-description-textarea"
                 />
                 <div className="text-xs text-[#A8A29E] text-end mt-1">
                   {description.length}/{MAX_DESC}
@@ -168,6 +175,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               onClick={handleSubmit}
               className="w-full h-11 text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
+              data-testid="merchant-support-new-ticket-submit-btn"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               {t('sheet_submit')}

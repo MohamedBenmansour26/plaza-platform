@@ -147,6 +147,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
         <button
           onClick={() => router.back()}
           className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100"
+          data-testid="customer-order-status-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
         </button>
@@ -157,6 +158,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           onClick={handleRefresh}
           disabled={refreshing}
           className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50"
+          data-testid="customer-order-status-refresh-btn"
         >
           <RefreshCw className={`w-5 h-5 text-[#78716C] ${refreshing ? 'animate-spin' : ''}`} />
         </button>
@@ -400,6 +402,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
               rel="noopener noreferrer"
               className="w-full py-3.5 border-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
               style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+              data-testid="customer-order-status-whatsapp-link"
             >
               <Phone className="w-4 h-4" />
               Contacter la boutique
@@ -420,6 +423,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
           <a
             href="mailto:support@plaza.ma"
             className="text-[13px] text-[#78716C] underline mt-2 block"
+            data-testid="customer-order-status-support-link"
           >
             Besoin d&apos;aide ? Contacter Plaza
           </a>

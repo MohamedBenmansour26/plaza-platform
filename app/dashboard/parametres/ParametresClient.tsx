@@ -21,11 +21,11 @@ export function ParametresClient() {
   const [twoFactor, _setTwoFactor] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const notifItems: { id: NotifKey; label: string }[] = [
-    { id: 'newOrders', label: t('notifNewOrders') },
-    { id: 'delivered', label: t('notifDelivered') },
-    { id: 'support', label: t('notifSupport') },
-    { id: 'promotions', label: t('notifPromotions') },
+  const notifItems: { id: NotifKey; slug: string; label: string }[] = [
+    { id: 'newOrders', slug: 'new-orders', label: t('notifNewOrders') },
+    { id: 'delivered', slug: 'delivered', label: t('notifDelivered') },
+    { id: 'support', slug: 'support', label: t('notifSupport') },
+    { id: 'promotions', slug: 'promotions', label: t('notifPromotions') },
   ];
 
   function handleDeleteAccount() {
@@ -36,13 +36,14 @@ export function ParametresClient() {
     });
   }
 
-  const Toggle = ({ checked, onChange, disabled = false }: { checked: boolean; onChange: () => void; disabled?: boolean }) => (
+  const Toggle = ({ checked, onChange, disabled = false, testId }: { checked: boolean; onChange: () => void; disabled?: boolean; testId?: string }) => (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={onChange}
       disabled={disabled}
+      data-testid={testId}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
         checked ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
       }`}
@@ -86,6 +87,7 @@ export function ParametresClient() {
                   onChange={() =>
                     setNotifications((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
                   }
+                  testId={`merchant-settings-notif-${item.slug}-toggle-checkbox`}
                 />
               </div>
             ))}
@@ -147,6 +149,7 @@ export function ParametresClient() {
             type="button"
             onClick={() => setShowDeleteModal(true)}
             className="w-full h-11 bg-white border-[1.5px] border-[#DC2626] text-[#DC2626] rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
+            data-testid="merchant-settings-delete-account-btn"
           >
             {t('deleteAccount')}
           </button>
@@ -156,7 +159,7 @@ export function ParametresClient() {
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="merchant-settings-delete-dialog">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('deleteAccountTitle')}</h3>
             <p className="text-sm text-[#78716C] mb-6">{t('deleteAccountBody')}</p>
@@ -166,6 +169,7 @@ export function ParametresClient() {
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
                 className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+                data-testid="merchant-settings-delete-cancel-btn"
               >
                 {t('deleteCancel')}
               </button>
@@ -174,6 +178,7 @@ export function ParametresClient() {
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
                 className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+                data-testid="merchant-settings-delete-confirm-btn"
               >
                 {isDeleting ? '…' : t('deleteConfirm')}
               </button>

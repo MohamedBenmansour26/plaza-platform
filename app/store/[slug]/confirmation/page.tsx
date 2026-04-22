@@ -276,6 +276,7 @@ export default function ConfirmationPage() {
             <button
               onClick={handleCopy}
               className="p-2 rounded-lg transition-colors hover:opacity-80"
+              data-testid="customer-confirmation-copy-order-btn"
             >
               {copied ? (
                 <CheckCheck className="w-5 h-5 text-[#16A34A]" />
@@ -461,6 +462,7 @@ export default function ConfirmationPage() {
               href={`/store/${slug}/commande/${order.orderId}`}
               className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
               style={{ backgroundColor: 'var(--color-primary)' }}
+              data-testid="customer-confirmation-track-link"
             >
               Suivre ma commande
             </Link>
@@ -469,6 +471,7 @@ export default function ConfirmationPage() {
               href={`/track?order=${orderNumber}`}
               className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
               style={{ backgroundColor: 'var(--color-primary)' }}
+              data-testid="customer-confirmation-track-link"
             >
               Suivre ma commande
             </Link>
@@ -476,6 +479,7 @@ export default function ConfirmationPage() {
           <Link
             href={`/store/${slug}`}
             className="w-full h-12 rounded-xl border-2 border-[#E2E8F0] text-[#78716C] font-semibold text-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+            data-testid="customer-confirmation-return-link"
           >
             Retour à la boutique
           </Link>

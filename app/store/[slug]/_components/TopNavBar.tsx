@@ -30,9 +30,9 @@ export function TopNavBar({
   const initials = merchant.store_name.slice(0, 2).toUpperCase();
 
   const navLinks = [
-    { name: 'Accueil', path: `/store/${slug}`, onClick: undefined as (() => void) | undefined },
-    { name: 'Suivre ma commande', path: '/track', onClick: undefined as (() => void) | undefined },
-    { name: 'Infos', path: '#', onClick: onInfoClick },
+    { name: 'Accueil', path: `/store/${slug}`, onClick: undefined as (() => void) | undefined, testId: 'customer-store-nav-home-link' },
+    { name: 'Suivre ma commande', path: '/track', onClick: undefined as (() => void) | undefined, testId: 'customer-store-nav-track-link' },
+    { name: 'Infos', path: '#', onClick: onInfoClick, testId: 'customer-store-nav-info-btn' },
   ];
 
   return (
@@ -66,6 +66,7 @@ export function TopNavBar({
                           : 'text-[#78716C] hover:text-[#1C1917]'
                       }`}
                       style={isActive ? { color: 'var(--color-primary)' } : {}}
+                      data-testid={link.testId}
                     >
                       {link.name}
                       {isActive && (
@@ -87,6 +88,7 @@ export function TopNavBar({
                         : 'text-[#78716C] hover:text-[#1C1917]'
                     }`}
                     style={isActive ? { color: 'var(--color-primary)' } : {}}
+                    data-testid={link.testId}
                   >
                     {link.name}
                     {isActive && (
@@ -111,6 +113,7 @@ export function TopNavBar({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="w-full h-9 bg-[#F5F5F4] rounded-full pl-10 pr-10 text-sm placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                data-testid="customer-store-search-input"
               />
               {searchQuery && (
                 <button
@@ -128,6 +131,7 @@ export function TopNavBar({
             <button
               onClick={onCartClick}
               className="relative hover:opacity-70 transition-opacity"
+              data-testid="customer-store-cart-btn"
             >
               <ShoppingBag className="w-[22px] h-[22px] text-[#1C1917]" />
               {cartCount > 0 && (

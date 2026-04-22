@@ -153,6 +153,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
             }}
             placeholder="Ex : 12 rue Mohamed V, Casablanca"
             className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
+            data-testid="customer-checkout-address-input"
           />
         </div>
         {textAddress.trim() && (
@@ -172,6 +173,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
           disabled={locating}
           className="absolute top-3 right-3 z-10 bg-white rounded-lg shadow-md p-2 hover:bg-stone-50 disabled:opacity-60"
           title="Ma position"
+          data-testid="customer-checkout-locate-btn"
         >
           {locating ? (
             <div className="w-5 h-5 border-2 border-stone-400 border-t-transparent rounded-full animate-spin" />

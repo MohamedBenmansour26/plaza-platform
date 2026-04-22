@@ -145,6 +145,7 @@ export function OrderDetailClient({ order }: Props) {
           <button
             onClick={() => router.back()}
             className="absolute start-4 p-2 -ms-2"
+            data-testid="merchant-order-detail-back-btn"
           >
             <ArrowLeft size={20} className="text-[#1C1917]" />
           </button>
@@ -335,6 +336,7 @@ export function OrderDetailClient({ order }: Props) {
                   onClick={() => run(confirmOrderAction)}
                   className="w-full h-12 text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: 'var(--color-primary)' }}
+                  data-testid="merchant-order-confirm-btn"
                 >
                   Confirmer la commande
                 </button>
@@ -342,6 +344,7 @@ export function OrderDetailClient({ order }: Props) {
               <button
                 onClick={() => setReportOpen(true)}
                 className="w-full h-12 border border-[#E2E8F0] text-[#78716C] text-[14px] font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
+                data-testid="merchant-order-report-issue-btn"
               >
                 Signaler un problème
               </button>
