@@ -16,7 +16,10 @@ function PinSetupContent() {
   const [step, setStep] = useState<1 | 2>(1);
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState(false);
+  // 'mismatch'  → digits typed in confirm step did not match the pin
+  // 'server'    → completeDriverPinSetupAction returned { error }
+  // false       → no error
+  const [error, setError] = useState<false | 'mismatch' | 'server'>(false);
   const [loading, setLoading] = useState(false);
 
   // Synchronous step mirror — `press()` reads this to route to pin vs confirm
@@ -41,15 +44,21 @@ function PinSetupContent() {
         setLoading(true);
         completeDriverPinSetupAction({ phone, pin }).then(res => {
           if ('error' in res) {
+            // Distinguish server failures from PIN mismatch — masking server
+            // errors as "codes don't match" hid PLZ-084 for weeks.
+            if (process.env.NODE_ENV === 'development') {
+              // eslint-disable-next-line no-console
+              console.error('[driver-pin-setup] server error:', res.error);
+            }
             setLoading(false);
-            setError(true);
+            setError('server');
             setConfirm('');
             return;
           }
           router.push(res.redirect);
         });
       } else {
-        setError(true);
+        setError('mismatch');
         setTimeout(() => { setError(false); setConfirm(''); }, 1500);
       }
     }
@@ -106,7 +115,22 @@ function PinSetupContent() {
         />
       </div>
 
-      {error && <p className="text-[13px] text-red-600 mt-3">Les codes ne correspondent pas</p>}
+      {error === 'mismatch' && (
+        <p
+          className="text-[13px] text-red-600 mt-3"
+          data-testid="driver-pin-setup-error-mismatch"
+        >
+          Les codes ne correspondent pas. Réessayez.
+        </p>
+      )}
+      {error === 'server' && (
+        <p
+          className="text-[13px] text-red-600 mt-3"
+          data-testid="driver-pin-setup-error-server"
+        >
+          Erreur technique. Veuillez réessayer dans un instant.
+        </p>
+      )}
       {loading && <Loader2 className="w-5 h-5 mt-3 animate-spin" style={{ color: 'var(--color-primary)' }} />}
 
       {/* Numpad */}
