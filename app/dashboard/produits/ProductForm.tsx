@@ -183,15 +183,15 @@ export function ProductForm({ product }: Props) {
   // ─── Shared sub-components ────────────────────────────────────────────────
 
   const priceCalculator = (
-    <div className="bg-white rounded-xl shadow-sm p-6 border-l-4" style={{ borderLeftColor: 'var(--color-primary)' }}>
-      <h2 className="text-base font-semibold text-[#1C1917] mb-1">{t('formPriceTitle')}</h2>
-      <p className="text-[13px] text-[#78716C] mb-4">{t('formPriceSubtitle')}</p>
+    <div className="bg-card rounded-xl shadow-card p-6 border-l-4" style={{ borderLeftColor: 'var(--color-primary)' }}>
+      <h2 className="text-base font-semibold text-foreground mb-1">{t('formPriceTitle')}</h2>
+      <p className="text-[13px] text-muted-foreground mb-4">{t('formPriceSubtitle')}</p>
 
-      {/* Promotion toggle */}
-      <div className="flex items-center justify-between mb-4 p-3 bg-[#FFF7ED] rounded-lg">
+      {/* Promotion toggle — secondary tint for "promotion" affinity */}
+      <div className="flex items-center justify-between mb-4 p-3 bg-secondary/10 rounded-lg">
         <div>
-          <div className="text-sm font-medium text-[#1C1917]">Activer une promotion</div>
-          <div className="text-xs text-[#78716C]">Afficher un prix barré sur le produit</div>
+          <div className="text-sm font-medium text-foreground">Activer une promotion</div>
+          <div className="text-xs text-muted-foreground">Afficher un prix barré sur le produit</div>
         </div>
         <button
           type="button"
@@ -199,7 +199,7 @@ export function ProductForm({ product }: Props) {
           aria-checked={discountActive}
           onClick={() => setDiscountActive(v => !v)}
           className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${
-            discountActive ? 'bg-[#E8632A]' : 'bg-[#E2E8F0]'
+            discountActive ? 'bg-secondary' : 'bg-border'
           }`}
           data-testid="merchant-product-form-discount-toggle-checkbox"
         >
@@ -211,7 +211,7 @@ export function ProductForm({ product }: Props) {
 
       {discountActive && (
         <div className="mb-3">
-          <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+          <label className="block text-[13px] font-medium text-foreground mb-1.5">
             Prix original (barré)
           </label>
           <div className="relative">
@@ -219,16 +219,16 @@ export function ProductForm({ product }: Props) {
               type="number"
               value={originalPrice}
               onChange={(e) => setOriginalPrice(e.target.value)}
-              className="w-full h-14 px-4 pr-16 border border-[#E2E8F0] rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+              className="w-full h-14 px-4 pr-16 border border-border rounded-lg text-2xl font-semibold text-foreground focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
               data-testid="merchant-product-form-original-price-input"
             />
-            <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
+            <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-muted-foreground">MAD</span>
           </div>
         </div>
       )}
 
       <div className="mb-3">
-        <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+        <label className="block text-[13px] font-medium text-foreground mb-1.5">
           {discountActive ? 'Prix promotionnel' : t('formPriceLabel')}
         </label>
         <div className="relative">
@@ -239,51 +239,51 @@ export function ProductForm({ product }: Props) {
               setPrice(e.target.value);
               setErrors((prev) => ({ ...prev, price: '' }));
             }}
-            className={`w-full h-14 px-4 pr-16 border rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none transition-all ${
+            className={`w-full h-14 px-4 pr-16 border rounded-lg text-2xl font-semibold text-foreground focus:outline-none transition-all ${
               errors.price || priceError
-                ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20'
-                : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
+                ? 'border-destructive focus:border-destructive focus:ring-2 focus:ring-destructive/20'
+                : 'border-border focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
             }`}
             data-testid="merchant-product-form-price-input"
           />
-          <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
+          <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-muted-foreground">MAD</span>
         </div>
         {(errors.price || priceError) && (
-          <p className="text-xs text-[#DC2626] mt-1.5">{errors.price || t('formPriceMin')}</p>
+          <p className="text-xs text-destructive mt-1.5">{errors.price || t('formPriceMin')}</p>
         )}
       </div>
 
-      <div className="bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg p-3">
-        <p className="text-xs font-semibold text-[#78716C] uppercase tracking-wide mb-2.5">
+      <div className="bg-background border border-border rounded-lg p-3">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
           {t('formRevenueTitle')}
         </p>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-[#1C1917]">{t('formPriceClient')}</span>
-            <span className="text-[#1C1917]">{showCalc ? `${priceNum.toFixed(2)} MAD` : '—'}</span>
+            <span className="text-foreground">{t('formPriceClient')}</span>
+            <span className="text-foreground">{showCalc ? `${priceNum.toFixed(2)} MAD` : '—'}</span>
           </div>
-          <div className="flex justify-between text-sm text-[#DC2626]">
+          <div className="flex justify-between text-sm text-destructive">
             <span>{t('formPriceCommission')}</span>
             <span>{showCalc ? `- ${commission.toFixed(2)} MAD` : '—'}</span>
           </div>
-          <div className="border-t border-[#E2E8F0]" />
+          <div className="border-t border-border" />
           <div className="flex justify-between text-sm font-semibold">
-            <span className="text-[#1C1917]">{t('formPriceRevenue')}</span>
-            <span className="text-[#16A34A]">{showCalc ? `${revenue.toFixed(2)} MAD` : '—'}</span>
+            <span className="text-foreground">{t('formPriceRevenue')}</span>
+            <span className="text-success">{showCalc ? `${revenue.toFixed(2)} MAD` : '—'}</span>
           </div>
         </div>
-        <div className="my-2.5 border-t border-dashed border-[#E2E8F0]" />
+        <div className="my-2.5 border-t border-dashed border-border" />
         <div className="flex gap-1.5 items-start">
-          <Info className="w-4 h-4 text-[#78716C] flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-[#78716C] leading-relaxed">{t('formPriceNote')}</p>
+          <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">{t('formPriceNote')}</p>
         </div>
       </div>
     </div>
   );
 
   const photoCard = (
-    <div className="bg-white rounded-xl shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#1C1917] mb-3">{t('formPhoto')}</h3>
+    <div className="bg-card rounded-xl shadow-card p-5">
+      <h3 className="text-sm font-semibold text-foreground mb-3">{t('formPhoto')}</h3>
       <input
         ref={fileInputRef}
         type="file"
@@ -301,8 +301,8 @@ export function ProductForm({ product }: Props) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={imageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
         ) : (
-          <div className="w-full h-full bg-[#F5F5F4] hover:bg-[#EEEEEE] transition-colors flex flex-col items-center justify-center gap-2">
-            <Camera className="w-8 h-8 text-[#A8A29E]" />
+          <div className="w-full h-full bg-muted/60 hover:bg-muted transition-colors flex flex-col items-center justify-center gap-2">
+            <Camera className="w-8 h-8 text-muted-foreground" />
             <span className="text-[13px]" style={{ color: 'var(--color-primary)' }}>
               {uploading ? t('uploading') : (imageUrl ? t('formPhotoChange') : t('formPhotoAdd'))}
             </span>
@@ -319,21 +319,21 @@ export function ProductForm({ product }: Props) {
           {uploading ? t('uploading') : t('formPhotoChange')}
         </button>
       )}
-      <p className="text-xs text-[#A8A29E] mt-1">{t('formPhotoFormats')}</p>
+      <p className="text-xs text-muted-foreground mt-1">{t('formPhotoFormats')}</p>
     </div>
   );
 
   const visibilityCard = (
-    <div className="bg-white rounded-xl shadow-sm p-5">
+    <div className="bg-card rounded-xl shadow-card p-5">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-[#1C1917]">{t('formVisible')}</span>
+        <span className="text-sm font-medium text-foreground">{t('formVisible')}</span>
         <button
           type="button"
           onClick={() => setIsVisible((v) => !v)}
           role="switch"
           aria-checked={isVisible}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
-            isVisible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
+            isVisible ? 'bg-[var(--color-primary)]' : 'bg-border'
           }`}
           data-testid="merchant-product-form-visibility-toggle-checkbox"
         >
@@ -344,24 +344,24 @@ export function ProductForm({ product }: Props) {
           />
         </button>
       </div>
-      <p className="text-xs text-[#78716C] mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         {isVisible ? t('formVisibleDesc') : t('formHiddenDesc')}
       </p>
     </div>
   );
 
   const dangerCard = isEdit ? (
-    <div className="bg-white rounded-xl border border-[#FEE2E2] shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#DC2626] mb-2">{t('formDangerZone')}</h3>
+    <div className="bg-card rounded-xl border border-destructive/20 shadow-card p-5">
+      <h3 className="text-sm font-semibold text-destructive mb-2">{t('formDangerZone')}</h3>
       <button
         type="button"
         onClick={() => setShowDeleteModal(true)}
-        className="w-full h-10 bg-white border-[1.5px] border-[#DC2626] text-[#DC2626] rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
+        className="w-full h-10 bg-card border-[1.5px] border-destructive text-destructive rounded-lg text-sm font-medium hover:bg-destructive/10 transition-colors"
         data-testid="merchant-product-form-delete-btn"
       >
         {t('formDelete')}
       </button>
-      <p className="text-xs text-[#78716C] mt-1.5">{t('formDangerDesc')}</p>
+      <p className="text-xs text-muted-foreground mt-1.5">{t('formDangerDesc')}</p>
     </div>
   ) : null;
 
@@ -369,14 +369,14 @@ export function ProductForm({ product }: Props) {
   // Rendered once. Inputs share responsive classes (mobile h-11 / desktop h-10).
   // Stock has desktop-only ± stepper buttons — those testids only exist once.
   const infoForm = (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 space-y-4">
-      <h2 className="hidden md:block text-base font-semibold text-[#1C1917] mb-4">
+    <div className="bg-card rounded-xl shadow-card p-4 md:p-6 space-y-4">
+      <h2 className="hidden md:block text-base font-semibold text-foreground mb-4">
         {t('formInfoTitle')}
       </h2>
 
       {/* Name FR */}
       <div>
-        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-[#1C1917] md:text-[#78716C] mb-2 md:mb-1.5">
+        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-foreground md:text-muted-foreground mb-2 md:mb-1.5">
           {t('formNameFr')}
         </label>
         <input
@@ -388,39 +388,39 @@ export function ProductForm({ product }: Props) {
           }}
           className={`w-full h-11 md:h-10 px-3 border rounded-lg text-sm focus:outline-none md:focus:ring-1 ${
             errors.nameFr
-              ? 'border-[#DC2626] focus:border-[#DC2626] md:focus:ring-[#DC2626]'
-              : 'border-[#E2E8F0] focus:border-[var(--color-primary)] md:focus:ring-[var(--color-primary)]'
+              ? 'border-destructive focus:border-destructive md:focus:ring-destructive'
+              : 'border-border focus:border-[var(--color-primary)] md:focus:ring-[var(--color-primary)]'
           }`}
           data-testid="merchant-product-form-name-input"
         />
         {errors.nameFr && (
-          <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
+          <p className="text-xs text-destructive mt-1">{errors.nameFr}</p>
         )}
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-[#1C1917] md:text-[#78716C] mb-2 md:mb-1.5">
+        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-foreground md:text-muted-foreground mb-2 md:mb-1.5">
           {t('formDescription')}
         </label>
         <textarea
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] md:focus:ring-1 md:focus:ring-[var(--color-primary)] resize-none md:min-h-[104px]"
+          className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] md:focus:ring-1 md:focus:ring-[var(--color-primary)] resize-none md:min-h-[104px]"
           data-testid="merchant-product-form-description-textarea"
         />
       </div>
 
       {/* Product categories — 3 levels */}
       <div>
-        <label className="block text-[13px] font-medium text-[#1C1917] mb-1.5">
+        <label className="block text-[13px] font-medium text-foreground mb-1.5">
           Catégorie
         </label>
         <select
           value={catL1}
           onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
-          className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+          className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-card mb-2"
           data-testid="merchant-product-form-category-l1-select"
         >
           <option value="">Sélectionner une catégorie</option>
@@ -433,7 +433,7 @@ export function ProductForm({ product }: Props) {
           <select
             value={catL2}
             onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+            className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-card mb-2"
             data-testid="merchant-product-form-category-l2-select"
           >
             <option value="">Sous-catégorie</option>
@@ -447,7 +447,7 @@ export function ProductForm({ product }: Props) {
           <select
             value={catL3}
             onChange={(e) => setCatL3(e.target.value)}
-            className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+            className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-card"
             data-testid="merchant-product-form-category-l3-select"
           >
             <option value="">Type (optionnel)</option>
@@ -460,14 +460,14 @@ export function ProductForm({ product }: Props) {
 
       {/* Stock — desktop shows ± stepper buttons around the input, mobile shows plain input. */}
       <div>
-        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-[#1C1917] md:text-[#78716C] mb-2 md:mb-1.5">
+        <label className="block text-sm md:text-[13px] font-medium md:font-normal text-foreground md:text-muted-foreground mb-2 md:mb-1.5">
           {t('formStock')}
         </label>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setStock((s) => Math.max(0, s - 1))}
-            className="hidden md:inline-flex items-center justify-center w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+            className="hidden md:inline-flex items-center justify-center w-8 h-8 border border-border rounded text-muted-foreground hover:bg-muted/40 text-lg leading-none"
             data-testid="merchant-product-form-stock-decrement-btn"
           >
             −
@@ -476,19 +476,19 @@ export function ProductForm({ product }: Props) {
             type="number"
             value={stock}
             onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
-            className="w-full md:w-24 h-11 md:h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm md:text-center focus:outline-none focus:border-[var(--color-primary)] md:focus:ring-1 md:focus:ring-[var(--color-primary)]"
+            className="w-full md:w-24 h-11 md:h-10 px-3 border border-border rounded-lg text-sm md:text-center focus:outline-none focus:border-[var(--color-primary)] md:focus:ring-1 md:focus:ring-[var(--color-primary)]"
             data-testid="merchant-product-form-stock-input"
           />
           <button
             type="button"
             onClick={() => setStock((s) => s + 1)}
-            className="hidden md:inline-flex items-center justify-center w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+            className="hidden md:inline-flex items-center justify-center w-8 h-8 border border-border rounded text-muted-foreground hover:bg-muted/40 text-lg leading-none"
             data-testid="merchant-product-form-stock-increment-btn"
           >
             +
           </button>
         </div>
-        <p className="text-xs text-[#78716C] mt-1 md:mt-1.5">
+        <p className="text-xs text-muted-foreground mt-1 md:mt-1.5">
           Stock = 0 signifie rupture de stock — le produit sera visible mais non commandable.
         </p>
       </div>
@@ -509,8 +509,12 @@ export function ProductForm({ product }: Props) {
   // publish bar sits at `bottom-16` so it stacks above MobileNav instead of
   // being occluded by it. On md+ the wrapper flips to `static`, which nullifies
   // any `bottom-*` class, so the inline desktop layout is unaffected.
+  // PLZ-088 — mobile publish bar must stay a solid #1A6BFF surface so it is
+  // visible above MobileNav. The inline `var(--color-primary)` style is the
+  // regression-safe form (Tailwind v4 @theme token). DO NOT refactor to a
+  // Tailwind class — bg-primary HSL form was the bug being fixed.
   const publishRow = (
-    <div className="fixed md:static bottom-16 md:bottom-0 start-0 end-0 z-10 md:z-0 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:mb-6 flex justify-stretch md:justify-end">
+    <div className="fixed md:static bottom-16 md:bottom-0 start-0 end-0 z-10 md:z-0 bg-card md:bg-transparent border-t md:border-t-0 border-border p-4 md:p-0 md:mb-6 flex justify-stretch md:justify-end">
       <button
         type="button"
         onClick={handleSubmit}
@@ -531,15 +535,15 @@ export function ProductForm({ product }: Props) {
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       data-testid="merchant-product-form-delete-dialog"
     >
-      <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-        <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
-        <p className="text-sm text-[#78716C] mb-6">{t('formDeleteBody')}</p>
+      <div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <h3 className="text-lg font-semibold text-foreground mb-2">{t('formDeleteTitle')}</h3>
+        <p className="text-sm text-muted-foreground mb-6">{t('formDeleteBody')}</p>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setShowDeleteModal(false)}
             disabled={isDeleting}
-            className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+            className="flex-1 h-10 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors disabled:opacity-50"
             data-testid="merchant-product-form-delete-cancel-btn"
           >
             {t('formDeleteCancel')}
@@ -548,7 +552,7 @@ export function ProductForm({ product }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+            className="flex-1 h-10 bg-destructive text-destructive-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
             data-testid="merchant-product-form-delete-confirm-btn"
           >
             {isDeleting ? t('loading') : t('formDeleteConfirm')}
@@ -560,24 +564,24 @@ export function ProductForm({ product }: Props) {
 
   return (
     <>
-      <div className="bg-[#FAFAF9] min-h-screen pb-40 md:pb-0">
+      <div className="bg-background min-h-screen pb-40 md:pb-0">
         {/* Mobile top bar (back link + title) — hidden on desktop. */}
-        <div className="md:hidden bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
+        <div className="md:hidden bg-card h-14 px-4 flex items-center justify-center relative border-b border-border">
           <Link
             href="/dashboard/produits"
-            className="absolute start-4 p-2 -ms-2 text-[#1C1917]"
+            className="absolute start-4 p-2 -ms-2 text-foreground"
             data-testid="merchant-product-form-back-link"
           >
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="text-base font-semibold text-[#1C1917]">
+          <h1 className="text-base font-semibold text-foreground">
             {isEdit ? t('editProduct') : t('newProduct')}
           </h1>
         </div>
 
         <div className="max-w-[1040px] mx-auto md:p-8">
           {/* Desktop breadcrumb — hidden on mobile. */}
-          <div className="hidden md:block text-xs text-[#78716C] mb-6">
+          <div className="hidden md:block text-xs text-muted-foreground mb-6">
             <Link href="/dashboard/produits" className="hover:underline">
               {t('title')}
             </Link>

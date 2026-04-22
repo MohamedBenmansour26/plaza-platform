@@ -43,19 +43,19 @@ export function ReportIssueSheet({ order, onClose }: Props) {
 
       {/* Sheet */}
       <div
-        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-[70] flex flex-col"
+        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-card shadow-xl z-[70] flex flex-col"
         data-testid="merchant-order-report-issue-sheet"
       >
 
         {/* Header */}
-        <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
+        <div className="h-16 border-b border-border px-6 flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-base font-semibold text-[#1C1917]">Signaler un problème</h2>
-            <p className="text-xs text-[#78716C]">{order.order_number}</p>
+            <h2 className="text-base font-semibold text-foreground">Signaler un problème</h2>
+            <p className="text-xs text-muted-foreground">{order.order_number}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -65,37 +65,37 @@ export function ReportIssueSheet({ order, onClose }: Props) {
         <div className="flex-1 overflow-y-auto p-6">
           {submitted ? (
             <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-[#F0FDF4] flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
                 <span className="text-3xl">✅</span>
               </div>
-              <h3 className="text-lg font-semibold text-[#1C1917] mb-2">Ticket créé</h3>
-              <p className="text-sm text-[#78716C]">
+              <h3 className="text-lg font-semibold text-foreground mb-2">Ticket créé</h3>
+              <p className="text-sm text-muted-foreground">
                 Votre signalement a été transmis à l&apos;équipe Plaza.
               </p>
             </div>
           ) : (
             <div className="space-y-5">
               {/* Pre-filled subject — read-only info */}
-              <div className="bg-[#F8FAFC] rounded-lg p-3 border border-[#E2E8F0]">
-                <p className="text-xs text-[#78716C] mb-0.5">Sujet</p>
-                <p className="text-sm font-medium text-[#1C1917]">{subject}</p>
+              <div className="bg-muted/40 rounded-lg p-3 border border-border">
+                <p className="text-xs text-muted-foreground mb-0.5">Sujet</p>
+                <p className="text-sm font-medium text-foreground">{subject}</p>
               </div>
 
-              {/* Description */}
+              {/* Description — brief §2.2 input */}
               <div>
-                <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   Description{' '}
-                  <span className="text-[#A8A29E] font-normal">(optionnel)</span>
+                  <span className="text-muted-foreground font-normal">(optionnel)</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC))}
                   placeholder="Décrivez le problème rencontré avec cette commande…"
                   rows={6}
-                  className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
                   data-testid="merchant-order-report-issue-description-textarea"
                 />
-                <div className="text-xs text-[#A8A29E] text-end mt-1">
+                <div className="text-xs text-muted-foreground text-end mt-1">
                   {description.length}/{MAX_DESC}
                 </div>
               </div>
@@ -103,9 +103,9 @@ export function ReportIssueSheet({ order, onClose }: Props) {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer — mobile primary keeps inline `var(--color-primary)` per PLZ-088 */}
         {!submitted && (
-          <div className="border-t border-[#E2E8F0] px-6 py-4 flex-shrink-0">
+          <div className="border-t border-border px-6 py-4 flex-shrink-0">
             <button
               disabled={isPending || submitted}
               onClick={handleSubmit}

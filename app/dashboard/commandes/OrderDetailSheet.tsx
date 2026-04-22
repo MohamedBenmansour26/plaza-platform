@@ -46,14 +46,14 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
     return (
       <div className="space-y-4">
         <div className="flex gap-3 items-center">
-          <div className="w-5 h-5 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
-            <CheckCircle className="w-3 h-3 text-white" />
+          <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+            <CheckCircle className="w-3 h-3 text-success-foreground" />
           </div>
-          <span className="text-[13px] text-[#1C1917]">Commande reçue</span>
+          <span className="text-[13px] text-foreground">Commande reçue</span>
         </div>
         <div className="flex gap-3 items-center">
-          <X className="w-5 h-5 text-[#DC2626] flex-shrink-0" />
-          <span className="text-[13px] text-[#DC2626]">Annulée</span>
+          <X className="w-5 h-5 text-destructive flex-shrink-0" />
+          <span className="text-[13px] text-destructive">Annulée</span>
         </div>
       </div>
     );
@@ -64,39 +64,36 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
       {TIMELINE_STEPS.map((step, i) => {
         const state = stepState(step.status, status);
         const isLast = i === TIMELINE_STEPS.length - 1;
+        /* "En livraison" step maps to primary per brief §2.8; earlier the
+           dispatched step used the secondary orange — aligned with the
+           Nouvelle→warning / En livraison→primary token rule. */
+        const currentClass = status === 'dispatched' ? 'text-primary' : 'text-primary';
         return (
           <div key={step.status} className="flex gap-3">
             <div className="flex flex-col items-center">
               {state === 'done' && (
-                <div className="w-5 h-5 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-3 h-3 text-white" />
+                <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-3 h-3 text-success-foreground" />
                 </div>
               )}
               {state === 'current' && (
-                <div
-                  className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                  style={{ borderColor: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' }}
-                >
-                  <div
-                    className="w-2 h-2 rounded-full animate-pulse"
-                    style={{ backgroundColor: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' }}
-                  />
+                <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 </div>
               )}
               {state === 'pending' && (
-                <Circle className="w-5 h-5 text-[#A8A29E] flex-shrink-0" />
+                <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               )}
               {!isLast && (
-                <div className="w-0.5 h-5 bg-[#E2E8F0] my-1" />
+                <div className="w-0.5 h-5 bg-border my-1" />
               )}
             </div>
             <span
               className={`text-[13px] pt-0.5 ${
-                state === 'done'    ? 'text-[#1C1917]' :
-                state === 'current' ? 'font-semibold' :
-                'text-[#A8A29E]'
+                state === 'done'    ? 'text-foreground' :
+                state === 'current' ? `font-semibold ${currentClass}` :
+                'text-muted-foreground'
               }`}
-              style={state === 'current' ? { color: status === 'dispatched' ? '#E8632A' : 'var(--color-primary)' } : undefined}
             >
               {step.label}
             </span>
@@ -109,29 +106,39 @@ function DeliveryTimeline({ status }: { status: OrderStatus }) {
 
 // ─── Delivery status card ─────────────────────────────────────────────────────
 
-const DELIVERY_STATUS_CONFIG: Partial<Record<DeliveryStatus, { label: string; color: string; bg: string }>> = {
-  available:  { label: 'Recherche livreur…', color: '#D97706', bg: '#FEF3C7' },
-  accepted:   { label: 'Livreur en route',   color: '#2563EB', bg: '#DBEAFE' },
-  assigned:   { label: 'Assigné',            color: '#2563EB', bg: '#DBEAFE' },
-  picked_up:  { label: 'Colis récupéré',     color: '#7C3AED', bg: '#EDE9FE' },
-  delivered:  { label: 'Livré',              color: '#16A34A', bg: '#DCFCE7' },
-  timed_out:  { label: 'Délai dépassé',      color: '#DC2626', bg: '#FEE2E2' },
-  cancelled:  { label: 'Annulée',            color: '#78716C', bg: '#F5F5F4' },
+/**
+ * Delivery-leg status chips — subset of the order timeline (coursier view).
+ * Uses the same /10 tinted bg + semantic foreground pattern as StatusBadge,
+ * except `picked_up` which retains a purple accent (not tokenised — separate
+ * semantic axis from order status).
+ */
+const DELIVERY_STATUS_CONFIG: Partial<Record<DeliveryStatus, { label: string; className: string; style?: React.CSSProperties }>> = {
+  available:  { label: 'Recherche livreur…', className: 'bg-warning/10 text-warning' },
+  accepted:   { label: 'Livreur en route',   className: 'bg-primary/10 text-primary' },
+  assigned:   { label: 'Assigné',            className: 'bg-primary/10 text-primary' },
+  picked_up:  {
+    label: 'Colis récupéré',
+    className: '',
+    style: { backgroundColor: '#EDE9FE', color: '#7C3AED' }, /* purple — pickup accent */
+  },
+  delivered:  { label: 'Livré',              className: 'bg-success/10 text-success' },
+  timed_out:  { label: 'Délai dépassé',      className: 'bg-destructive/10 text-destructive' },
+  cancelled:  { label: 'Annulée',            className: 'bg-muted text-muted-foreground' },
 };
 
 function DeliveryStatusCard({ delivery }: { delivery: NonNullable<OrderWithDetails['delivery']> }) {
-  const cfg = DELIVERY_STATUS_CONFIG[delivery.status] ?? { label: delivery.status, color: '#78716C', bg: '#F5F5F4' };
+  const cfg = DELIVERY_STATUS_CONFIG[delivery.status] ?? { label: delivery.status, className: 'bg-muted text-muted-foreground', style: undefined };
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
-      <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Coursier</div>
+    <div className="bg-card border border-border rounded-xl shadow-card p-4">
+      <div className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Coursier</div>
       <span
-        className="inline-block px-2.5 py-1 rounded-full text-[12px] font-medium"
-        style={{ color: cfg.color, backgroundColor: cfg.bg }}
+        className={`inline-block px-2.5 py-1 rounded-full text-[12px] font-medium ${cfg.className}`}
+        style={cfg.style}
       >
         {cfg.label}
       </span>
       {delivery.pickup_time && (
-        <p className="text-[12px] text-[#78716C] mt-2">
+        <p className="text-[12px] text-muted-foreground mt-2">
           Récupéré à {new Date(delivery.pickup_time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', timeZone: MOROCCO_TZ })}
         </p>
       )}
@@ -174,7 +181,7 @@ function ActionBar({
 
   if (order.status === 'delivered' || order.status === 'cancelled') {
     return (
-      <div className="flex-1 text-center text-sm text-[#78716C] py-2">
+      <div className="flex-1 text-center text-sm text-muted-foreground py-2">
         {order.status === 'delivered' ? 'Commande terminée' : 'Commande annulée'}
       </div>
     );
@@ -183,19 +190,23 @@ function ActionBar({
   return (
     <>
       {actionError && (
-        <div className="w-full mb-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-3 text-sm text-[#DC2626]">
+        <div className="w-full mb-3 bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
           {actionError}
         </div>
       )}
 
       <div className="flex flex-col gap-2 w-full">
         {isPending && (
-          <div className="flex-1 flex items-center justify-center gap-2 text-sm text-[#78716C]">
+          <div className="flex-1 flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
             Mise à jour…
           </div>
         )}
 
+        {/* Primary CTA — design-refresh §2.1 (primary btn h-10, rounded-lg,
+            hover:opacity-90). Uses `var(--color-primary)` inline so the
+            PLZ-088 mobile-bar fix stays regression-free (Tailwind v4
+            @theme form is the stable inheritance path). */}
         {!isPending && order.status === 'pending' && (
           <button
             onClick={() => run(confirmOrderAction)}
@@ -207,10 +218,11 @@ function ActionBar({
           </button>
         )}
 
+        {/* Outline secondary CTA — design-refresh §2.1 outline variant */}
         {!isPending && (
           <button
             onClick={onReportOpen}
-            className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg text-[14px] font-medium hover:bg-[#F5F5F4] transition-colors"
+            className="w-full h-12 border border-border text-muted-foreground rounded-lg text-[14px] font-medium hover:bg-muted/40 hover:text-foreground transition-colors"
             data-testid="merchant-order-report-issue-btn"
           >
             Signaler un problème
@@ -239,21 +251,21 @@ export function OrderDetailSheet({ order, onClose }: Props) {
         onClick={onClose}
       />
 
-      {/* Drawer panel */}
+      {/* Drawer panel — design-refresh §2.6 modal/sheet tokens */}
       <div
-        className="fixed end-0 top-0 h-screen w-full max-w-[560px] bg-white shadow-xl z-50 flex flex-col"
+        className="fixed end-0 top-0 h-screen w-full max-w-[560px] bg-card shadow-xl z-50 flex flex-col"
         data-testid="merchant-order-detail-sheet"
       >
 
         {/* Header */}
-        <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
+        <div className="h-16 border-b border-border px-6 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold text-[#1C1917]">{order.order_number}</span>
+            <span className="text-lg font-semibold text-foreground">{order.order_number}</span>
             <StatusBadge status={order.status} />
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -266,23 +278,22 @@ export function OrderDetailSheet({ order, onClose }: Props) {
             {/* Left column: customer + items */}
             <div className="flex-1 space-y-3">
 
-              {/* Customer */}
-              <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
-                <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Client</div>
+              {/* Customer — brief §2.3 card */}
+              <div className="bg-card border border-border rounded-xl shadow-card p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Client</div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-[#78716C] flex-shrink-0" />
-                    <span className="text-sm font-semibold text-[#1C1917]">
+                    <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-semibold text-foreground">
                       {order.customer?.full_name ?? '—'}
                     </span>
                   </div>
                   {order.customer?.phone && (
                     <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-[#78716C] flex-shrink-0" />
+                      <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <a
                         href={`tel:${order.customer.phone}`}
-                        className="text-sm hover:underline"
-                        style={{ color: 'var(--color-primary)' }}
+                        className="text-sm text-primary hover:underline"
                         dir="ltr"
                       >
                         {order.customer.phone}
@@ -291,20 +302,20 @@ export function OrderDetailSheet({ order, onClose }: Props) {
                   )}
                   {order.customer?.address && (
                     <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-[#78716C] mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-[#78716C]">{order.customer.address}</span>
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground">{order.customer.address}</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Articles + totals */}
-              <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
-                <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Articles</div>
+              <div className="bg-card border border-border rounded-xl shadow-card p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Articles</div>
                 <div className="space-y-3">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                      <div className="w-10 h-10 rounded-md bg-muted/60 flex-shrink-0 overflow-hidden">
                         {item.image_url && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -314,35 +325,35 @@ export function OrderDetailSheet({ order, onClose }: Props) {
                           />
                         )}
                       </div>
-                      <div className="flex-1 text-sm font-medium text-[#1C1917] truncate">
+                      <div className="flex-1 text-sm font-medium text-foreground truncate">
                         {item.name_fr}
                       </div>
-                      <div className="text-sm text-[#78716C] flex-shrink-0">x{item.quantity}</div>
-                      <div className="text-sm font-medium text-[#1C1917] flex-shrink-0">
+                      <div className="text-sm text-muted-foreground flex-shrink-0">x{item.quantity}</div>
+                      <div className="text-sm font-medium text-foreground flex-shrink-0">
                         {formatMAD(item.unit_price * item.quantity)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="border-t border-[#E2E8F0] my-3" />
+                <div className="border-t border-border my-3" />
 
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#78716C]">Sous-total</span>
-                    <span className="text-[#1C1917]">{formatMAD(order.subtotal)}</span>
+                    <span className="text-muted-foreground">Sous-total</span>
+                    <span className="text-foreground">{formatMAD(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#78716C]">Livraison</span>
-                    <span className="text-[#E8632A]">{formatMAD(order.delivery_fee)}</span>
+                    <span className="text-muted-foreground">Livraison</span>
+                    <span className="text-secondary">{formatMAD(order.delivery_fee)}</span>
                   </div>
                 </div>
 
-                <div className="border-t-2 border-[#E2E8F0] my-3" />
+                <div className="border-t-2 border-border my-3" />
 
                 <div className="flex justify-between">
-                  <span className="text-base font-semibold text-[#1C1917]">Total</span>
-                  <span className="text-lg font-semibold text-[#1C1917]">{formatMAD(order.total)}</span>
+                  <span className="text-base font-semibold text-foreground">Total</span>
+                  <span className="text-lg font-semibold text-foreground">{formatMAD(order.total)}</span>
                 </div>
               </div>
             </div>
@@ -351,8 +362,8 @@ export function OrderDetailSheet({ order, onClose }: Props) {
             <div className="w-[200px] space-y-3 flex-shrink-0">
 
               {/* Delivery timeline */}
-              <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
-                <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-3">Livraison</div>
+              <div className="bg-card border border-border rounded-xl shadow-card p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Livraison</div>
                 <DeliveryTimeline status={order.status} />
               </div>
 
@@ -362,10 +373,10 @@ export function OrderDetailSheet({ order, onClose }: Props) {
               )}
 
               {/* Payment */}
-              <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-4">
-                <div className="text-[13px] text-[#78716C] uppercase tracking-wide mb-2">Paiement</div>
+              <div className="bg-card border border-border rounded-xl shadow-card p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Paiement</div>
                 <PaymentBadge method={order.payment_method as PaymentMethod} />
-                <p className="text-[13px] text-[#78716C] mt-2">
+                <p className="text-[13px] text-muted-foreground mt-2">
                   {order.payment_method === 'cod'
                     ? 'Paiement à la livraison'
                     : order.payment_method === 'terminal'
@@ -379,7 +390,7 @@ export function OrderDetailSheet({ order, onClose }: Props) {
         </div>
 
         {/* Footer actions */}
-        <div className="border-t border-[#E2E8F0] px-6 py-4 flex gap-3 flex-shrink-0 bg-white">
+        <div className="border-t border-border px-6 py-4 flex gap-3 flex-shrink-0 bg-card">
           <ActionBar
             order={order}
             onClose={onClose}

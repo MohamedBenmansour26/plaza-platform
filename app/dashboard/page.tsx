@@ -110,12 +110,15 @@ export default async function DashboardPage() {
   const storeUrl = `plaza.ma/store/${merchant.store_slug}`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
-      {/* Mobile top bar */}
-      <div className="md:hidden bg-white px-4 py-4 flex items-center justify-between border-b border-[#E2E8F0]">
-        <div className="font-bold text-xl" style={{ color: 'var(--color-primary)' }}>Plaza</div>
+    // design-refresh §3.1 — page canvas picks up the new `--background` token
+    // (#F8F9FA) merged in PR #1. Fall back to the token class instead of hex.
+    <div className="min-h-screen bg-background">
+      {/* Mobile top bar — structure preserved per scope refinement log (no
+          desktop TopBar in this sprint); tokens only. */}
+      <div className="md:hidden bg-card px-4 py-4 flex items-center justify-between border-b border-border">
+        <div className="font-bold text-xl text-primary">Plaza</div>
         <Link href="/dashboard/compte" data-testid="merchant-dashboard-account-link">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm bg-primary/10 text-primary">
             {merchant.store_name.slice(0, 2).toUpperCase()}
           </div>
         </Link>
@@ -124,10 +127,10 @@ export default async function DashboardPage() {
       <div className="max-w-[1040px] mx-auto px-4 py-6 md:p-8">
         {/* Header */}
         <div className="mb-6 md:mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">
             Bonjour, {firstName} !
           </h1>
-          <p className="text-sm text-[#78716C] mt-1 capitalize">{formatDate()}</p>
+          <p className="text-sm text-muted-foreground mt-1 capitalize">{formatDate()}</p>
         </div>
 
         {/* Onboarding checklist — shown when store is not yet live OR setup is incomplete.
@@ -146,60 +149,63 @@ export default async function DashboardPage() {
           </Suspense>
         )}
 
-        {/* Stats grid — 2 cols mobile, 4 cols desktop */}
+        {/* Stats grid — 2 cols mobile, 4 cols desktop.
+            design-refresh §2.3 + §3.1: bg-card with shadow-card, KPI icons
+            tinted per semantic (orders → secondary orange, revenue → success,
+            pending → warning, delivered → success). */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
+          <div className="bg-card rounded-xl shadow-card p-4 md:p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
-                <ShoppingBag className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-secondary" />
               </div>
             </div>
-            <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
+            <div className="text-2xl md:text-[28px] font-semibold text-foreground leading-tight">
               {ordersToday ?? 0}
             </div>
-            <div className="text-[12px] md:text-[13px] text-[#78716C] mt-1">
+            <div className="text-[12px] md:text-[13px] text-muted-foreground mt-1">
               Commandes aujourd&apos;hui
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
+          <div className="bg-card rounded-xl shadow-card p-4 md:p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#FFF7ED] flex items-center justify-center">
-                <Banknote className="w-5 h-5 text-[#E8632A]" />
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                <Banknote className="w-5 h-5 text-success" />
               </div>
             </div>
-            <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
+            <div className="text-2xl md:text-[28px] font-semibold text-foreground leading-tight">
               {formatPrice(revenueToday)}
             </div>
-            <div className="text-[12px] md:text-[13px] text-[#78716C] mt-1">
+            <div className="text-[12px] md:text-[13px] text-muted-foreground mt-1">
               Revenus aujourd&apos;hui
             </div>
           </div>
 
           <Link href="/dashboard/commandes?filter=pending" className="block" data-testid="merchant-dashboard-pending-orders-link">
-            <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 h-full cursor-pointer hover:shadow-md transition-shadow">
+            <div className="bg-card rounded-xl shadow-card hover:shadow-card-hover p-4 md:p-5 h-full cursor-pointer transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#FFFBEB] flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-[#D97706]" />
+                <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-warning" />
                 </div>
               </div>
-              <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
+              <div className="text-2xl md:text-[28px] font-semibold text-foreground leading-tight">
                 {pendingCount ?? 0}
               </div>
-              <div className="text-[12px] md:text-[13px] text-[#78716C] mt-1">En attente</div>
+              <div className="text-[12px] md:text-[13px] text-muted-foreground mt-1">En attente</div>
             </div>
           </Link>
 
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
+          <div className="bg-card rounded-xl shadow-card p-4 md:p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#F0FDF4] flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-[#16A34A]" />
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-success" />
               </div>
             </div>
-            <div className="text-2xl md:text-[28px] font-semibold text-[#1C1917] leading-tight">
+            <div className="text-2xl md:text-[28px] font-semibold text-foreground leading-tight">
               {deliveredToday ?? 0}
             </div>
-            <div className="text-[12px] md:text-[13px] text-[#78716C] mt-1">
+            <div className="text-[12px] md:text-[13px] text-muted-foreground mt-1">
               Livrées aujourd&apos;hui
             </div>
           </div>
@@ -207,14 +213,14 @@ export default async function DashboardPage() {
 
         {/* Lower section */}
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Recent activity */}
+          {/* Recent activity — brief §2.4 list/table styling */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-[#1C1917] mb-4">Activité récente</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Activité récente</h2>
 
             {/* Mobile: cards */}
             <div className="space-y-2 md:hidden">
               {(recentOrders ?? []).length === 0 ? (
-                <div className="bg-white rounded-xl p-6 text-center text-sm text-[#78716C]">
+                <div className="bg-card rounded-xl p-6 text-center text-sm text-muted-foreground shadow-card">
                   Aucune commande pour l&apos;instant
                 </div>
               ) : (
@@ -222,23 +228,23 @@ export default async function DashboardPage() {
                   <Link
                     key={order.id}
                     href={`/dashboard/commandes/${order.id}`}
-                    className="block bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow"
+                    className="block bg-card rounded-xl p-3 shadow-card hover:shadow-card-hover transition-shadow"
                     data-testid="merchant-dashboard-recent-order-row"
                     data-id={order.id}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <span className="font-bold text-sm text-[#1C1917]">
+                        <span className="font-bold text-sm text-foreground">
                           {order.order_number}
                         </span>
                       </div>
-                      <div className="text-sm font-semibold text-[#1C1917]">
+                      <div className="text-sm font-semibold text-foreground">
                         {formatPrice(order.total)}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <StatusBadge status={order.status as OrderStatus} />
-                      <span className="text-xs text-[#78716C]">
+                      <span className="text-xs text-muted-foreground">
                         Il y a {timeAgo(order.created_at)}
                       </span>
                     </div>
@@ -247,19 +253,19 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            {/* Desktop: table */}
-            <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="h-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 flex items-center">
-                <div className="w-[130px] text-[13px] font-medium text-[#78716C] uppercase">Commande</div>
-                <div className="w-[160px] text-[13px] font-medium text-[#78716C] uppercase">Client</div>
-                <div className="w-[130px] text-[13px] font-medium text-[#78716C] uppercase">Montant</div>
-                <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">Statut</div>
-                <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">Paiement</div>
-                <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase whitespace-nowrap min-w-[60px]">Il y a</div>
+            {/* Desktop: table — brief §2.4 header + row states */}
+            <div className="hidden md:block bg-card rounded-xl shadow-card overflow-hidden">
+              <div className="h-12 bg-muted/40 border-b border-border px-4 flex items-center">
+                <div className="w-[130px] text-xs font-medium text-muted-foreground uppercase tracking-wide">Commande</div>
+                <div className="w-[160px] text-xs font-medium text-muted-foreground uppercase tracking-wide">Client</div>
+                <div className="w-[130px] text-xs font-medium text-muted-foreground uppercase tracking-wide">Montant</div>
+                <div className="w-[140px] text-xs font-medium text-muted-foreground uppercase tracking-wide">Statut</div>
+                <div className="w-[120px] text-xs font-medium text-muted-foreground uppercase tracking-wide">Paiement</div>
+                <div className="flex-1 text-xs font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap min-w-[60px]">Il y a</div>
               </div>
 
               {(recentOrders ?? []).length === 0 ? (
-                <div className="py-12 text-center text-sm text-[#78716C]">
+                <div className="py-12 text-center text-sm text-muted-foreground">
                   Aucune commande pour l&apos;instant
                 </div>
               ) : (
@@ -267,17 +273,17 @@ export default async function DashboardPage() {
                   <Link
                     key={order.id}
                     href={`/dashboard/commandes/${order.id}`}
-                    className="h-12 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] cursor-pointer transition-colors"
+                    className="h-12 px-4 flex items-center border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
                     data-testid="merchant-dashboard-recent-order-row"
                     data-id={order.id}
                   >
-                    <div className="w-[130px] text-sm font-medium text-[#1C1917]">
+                    <div className="w-[130px] text-sm font-medium text-primary">
                       {order.order_number}
                     </div>
-                    <div className="w-[160px] text-sm text-[#1C1917]">
+                    <div className="w-[160px] text-sm text-foreground">
                       {order.customers?.full_name ?? '—'}
                     </div>
-                    <div className="w-[130px] text-sm text-[#1C1917]">
+                    <div className="w-[130px] text-sm text-foreground">
                       {formatPrice(order.total)}
                     </div>
                     <div className="w-[140px]">
@@ -286,7 +292,7 @@ export default async function DashboardPage() {
                     <div className="w-[120px]">
                       <PaymentBadge method={order.payment_method as PaymentMethod} />
                     </div>
-                    <div className="flex-1 text-sm text-[#78716C] whitespace-nowrap">{timeAgo(order.created_at)}</div>
+                    <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">{timeAgo(order.created_at)}</div>
                   </Link>
                 ))
               )}
@@ -295,35 +301,35 @@ export default async function DashboardPage() {
 
           {/* Store link card */}
           <div className="md:w-[320px]">
-            {/* Mobile banner */}
-            <div className="md:hidden bg-[#FFF7ED] rounded-xl p-4 border-l-4 border-[#E8632A]">
-              <div className="text-sm font-semibold text-[#1C1917] mb-1">
+            {/* Mobile banner — kept secondary-orange accent (brief §3.1 says
+                secondary orange surfaces the "Voir ma boutique" affordance). */}
+            <div className="md:hidden bg-secondary/10 rounded-xl p-4 border-l-4 border-secondary">
+              <div className="text-sm font-semibold text-foreground mb-1">
                 Votre boutique est en ligne !
               </div>
-              <div className="text-sm underline mb-3" style={{ color: 'var(--color-primary)' }}>{storeUrl}</div>
+              <div className="text-sm underline text-primary mb-3">{storeUrl}</div>
               <CopyButton url={`https://${storeUrl}`} />
             </div>
 
-            {/* Desktop card */}
-            <div className="hidden md:block bg-white rounded-xl shadow-sm p-5">
-              <div className="text-[13px] text-[#78716C] uppercase mb-2">Votre boutique</div>
-              <p className="text-sm underline mb-3" style={{ color: 'var(--color-primary)' }}>{storeUrl}</p>
+            {/* Desktop card — brief §2.3 (card) + §2.1 (outline button) */}
+            <div className="hidden md:block bg-card rounded-xl shadow-card p-5">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Votre boutique</div>
+              <p className="text-sm underline text-primary mb-3">{storeUrl}</p>
               <a
                 href={`https://${storeUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary-outline-hover w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}
+                className="btn-primary-outline-hover w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 border border-primary text-primary"
                 data-testid="merchant-dashboard-view-store-link"
               >
                 <ExternalLink className="w-4 h-4" />
                 Voir la boutique
               </a>
 
-              <div className="my-4 border-t border-[#E2E8F0]" />
+              <div className="my-4 border-t border-border" />
 
-              <div className="w-[120px] h-[120px] bg-[#F5F5F4] rounded-lg mx-auto flex items-center justify-center mb-3">
-                <div className="text-4xl text-[#A8A29E]">QR</div>
+              <div className="w-[120px] h-[120px] bg-muted/60 rounded-lg mx-auto flex items-center justify-center mb-3">
+                <div className="text-4xl text-muted-foreground">QR</div>
               </div>
 
               <CopyButton url={`https://${storeUrl}`} />

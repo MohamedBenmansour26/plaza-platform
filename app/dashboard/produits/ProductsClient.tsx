@@ -69,22 +69,22 @@ export function ProductsClient({ products: initialProducts }: Props) {
 
   return (
     <>
-      {/* Search */}
+      {/* Search — brief §2.2 input with primary focus ring */}
       <div className="px-4 py-3 md:px-0 md:pt-0 md:pb-4">
         <div className="relative w-full md:w-[280px]">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78716C]" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 ps-10 pe-4 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+            className="w-full h-10 ps-10 pe-4 border border-border rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-card"
             data-testid="merchant-products-search-input"
           />
         </div>
       </div>
 
-      {/* Filter chips */}
+      {/* Filter chips — brief §2.8 pill sizing */}
       <div className="px-4 pb-3 md:px-0 flex gap-2 overflow-x-auto">
         {filters.map((f) => (
           <button
@@ -92,8 +92,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
             onClick={() => setFilter(f.id)}
             className={`px-3 h-10 rounded-full text-sm whitespace-nowrap font-medium transition-colors ${
               filter === f.id
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card text-muted-foreground border border-border hover:bg-muted/40'
             }`}
             data-testid={`merchant-products-filter-${f.id}-btn`}
           >
@@ -102,14 +102,14 @@ export function ProductsClient({ products: initialProducts }: Props) {
         ))}
       </div>
 
-      {/* Mobile card list */}
+      {/* Mobile card list — brief §2.3 card */}
       <div className="px-4 space-y-2 md:hidden">
         {filtered.length === 0 ? (
           <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
           filtered.map((product) => (
             <Link key={product.id} href={`/dashboard/produits/${product.id}`} data-testid="merchant-products-row" data-id={product.id}>
-              <div className="bg-white rounded-xl p-3 shadow-sm flex gap-3 hover:shadow-md transition-shadow">
+              <div className="bg-card rounded-xl p-3 shadow-card flex gap-3 hover:shadow-card-hover transition-shadow">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -118,31 +118,31 @@ export function ProductsClient({ products: initialProducts }: Props) {
                     className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-lg bg-[#F5F5F4] flex-shrink-0" />
+                  <div className="w-20 h-20 rounded-lg bg-muted/60 flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-[#1C1917]">{product.name_fr}</div>
+                  <div className="text-sm font-medium text-foreground">{product.name_fr}</div>
                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                    <span className="text-sm font-semibold text-[#1C1917]">
+                    <span className="text-sm font-semibold text-foreground">
                       {formatPrice(product.price)}
                     </span>
                     {product.discount_active && product.original_price != null && (
                       <>
-                        <span className="text-xs text-[#A8A29E] line-through">
+                        <span className="text-xs text-muted-foreground line-through">
                           {formatPrice(product.original_price)}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FEF2F2] text-[#DC2626]">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-destructive/10 text-destructive">
                           -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
                         </span>
                       </>
                     )}
                   </div>
                   {product.stock === 0 ? (
-                    <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-[#FEF2F2] text-[#DC2626] mt-1">
+                    <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-destructive/10 text-destructive mt-1">
                       {t('outOfStock')}
                     </span>
                   ) : (
-                    <div className="text-xs text-[#78716C] mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       {t('inStock', { count: product.stock })}
                     </div>
                   )}
@@ -153,15 +153,15 @@ export function ProductsClient({ products: initialProducts }: Props) {
         )}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="h-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 flex items-center">
-          <div className="w-16 text-[13px] font-medium text-[#78716C] uppercase">{t('colImage')}</div>
-          <div className="flex-1 text-[13px] font-medium text-[#78716C] uppercase">{t('colName')}</div>
-          <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">{t('colPrice')}</div>
-          <div className="w-[140px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStock')}</div>
-          <div className="w-[120px] text-[13px] font-medium text-[#78716C] uppercase">{t('colStatus')}</div>
-          <div className="w-20 text-[13px] font-medium text-[#78716C] uppercase">{t('colActions')}</div>
+      {/* Desktop table — brief §2.4 */}
+      <div className="hidden md:block bg-card rounded-xl shadow-card overflow-hidden">
+        <div className="h-12 bg-muted/40 border-b border-border px-4 flex items-center">
+          <div className="w-16 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colImage')}</div>
+          <div className="flex-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colName')}</div>
+          <div className="w-[120px] text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colPrice')}</div>
+          <div className="w-[140px] text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colStock')}</div>
+          <div className="w-[120px] text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colStatus')}</div>
+          <div className="w-20 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('colActions')}</div>
         </div>
 
         {filtered.length === 0 ? (
@@ -170,7 +170,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
           filtered.map((product) => (
             <div
               key={product.id}
-              className="min-h-16 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] transition-colors"
+              className="min-h-16 px-4 flex items-center border-b border-border hover:bg-muted/40 transition-colors last:border-b-0"
               data-testid="merchant-products-row"
               data-id={product.id}
             >
@@ -183,18 +183,18 @@ export function ProductsClient({ products: initialProducts }: Props) {
                     className="w-12 h-12 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-lg bg-[#F5F5F4]" />
+                  <div className="w-12 h-12 rounded-lg bg-muted/60" />
                 )}
               </div>
-              <div className="flex-1 text-sm font-semibold text-[#1C1917]">{product.name_fr}</div>
+              <div className="flex-1 text-sm font-semibold text-foreground">{product.name_fr}</div>
               <div className="w-[120px]">
-                <div className="text-sm font-semibold text-[#1C1917]">{formatPrice(product.price)}</div>
+                <div className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</div>
                 {product.discount_active && product.original_price != null && (
                   <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-xs text-[#A8A29E] line-through">
+                    <span className="text-xs text-muted-foreground line-through">
                       {formatPrice(product.original_price)}
                     </span>
-                    <span className="px-1 py-0.5 rounded text-[10px] font-semibold bg-[#FEF2F2] text-[#DC2626]">
+                    <span className="px-1 py-0.5 rounded text-[10px] font-semibold bg-destructive/10 text-destructive">
                       -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
                     </span>
                   </div>
@@ -202,16 +202,16 @@ export function ProductsClient({ products: initialProducts }: Props) {
               </div>
               <div className="w-[140px]">
                 {product.stock === 0 ? (
-                  <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-[#FEF2F2] text-[#DC2626]">
+                  <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-destructive/10 text-destructive">
                     {t('outOfStock')}
                   </span>
                 ) : (
-                  <span className="text-[13px] text-[#78716C]">
+                  <span className="text-[13px] text-muted-foreground">
                     {t('inStock', { count: product.stock })}
                   </span>
                 )}
               </div>
-              {/* M7 — Inline visibility toggle */}
+              {/* M7 — Inline visibility toggle (mobile primary keeps var(--color-primary) per PLZ-088) */}
               <div className="w-[120px]">
                 <button
                   type="button"
@@ -221,7 +221,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                   disabled={isPending}
                   onClick={() => handleToggleVisibility(product.id, product.is_visible)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-60 ${
-                    product.is_visible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
+                    product.is_visible ? 'bg-[var(--color-primary)]' : 'bg-border'
                   }`}
                   data-testid="merchant-products-visibility-toggle-checkbox"
                   data-id={product.id}
@@ -237,7 +237,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
               <div className="w-20 flex items-center gap-1">
                 <Link
                   href={`/dashboard/produits/${product.id}`}
-                  className="p-1 text-[#78716C] hover:text-[var(--color-primary)] transition-colors"
+                  className="p-1 text-muted-foreground hover:text-primary transition-colors"
                   title={t('editButton')}
                   data-testid="merchant-products-edit-link"
                   data-id={product.id}
@@ -247,7 +247,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 <button
                   type="button"
                   onClick={() => setDeleteModal({ id: product.id, name: product.name_fr })}
-                  className="p-1 text-[#78716C] hover:text-[#DC2626] transition-colors"
+                  className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                   title={t('formDelete')}
                   data-testid="merchant-products-delete-btn"
                   data-id={product.id}
@@ -260,12 +260,12 @@ export function ProductsClient({ products: initialProducts }: Props) {
         )}
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete confirmation modal — brief §2.3 card + §2.1 destructive button */}
       {deleteModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="merchant-products-delete-dialog">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
-            <p className="text-sm text-[#78716C] mb-6">
+          <div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('formDeleteTitle')}</h3>
+            <p className="text-sm text-muted-foreground mb-6">
               {t('formDeleteBody')}
             </p>
             <div className="flex gap-3">
@@ -273,7 +273,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 type="button"
                 onClick={() => setDeleteModal(null)}
                 disabled={isPending}
-                className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+                className="flex-1 h-10 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors disabled:opacity-50"
                 data-testid="merchant-products-delete-cancel-btn"
               >
                 {t('formDeleteCancel')}
@@ -282,7 +282,7 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 type="button"
                 onClick={() => handleDeleteConfirm(deleteModal.id)}
                 disabled={isPending}
-                className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+                className="flex-1 h-10 bg-destructive text-destructive-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                 data-testid="merchant-products-delete-confirm-btn"
               >
                 {isPending ? '…' : t('formDeleteConfirm')}
@@ -301,9 +301,9 @@ function EmptyState({ hasProducts }: { hasProducts: boolean }) {
   if (hasProducts) {
     return (
       <div className="py-16 text-center">
-        <Search className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
-        <h3 className="text-base font-semibold text-[#1C1917] mb-1">{t('emptySearchTitle')}</h3>
-        <p className="text-sm text-[#78716C]">{t('emptySearchSub')}</p>
+        <Search className="w-12 h-12 text-border mx-auto mb-4" />
+        <h3 className="text-base font-semibold text-foreground mb-1">{t('emptySearchTitle')}</h3>
+        <p className="text-sm text-muted-foreground">{t('emptySearchSub')}</p>
       </div>
     );
   }
@@ -312,8 +312,8 @@ function EmptyState({ hasProducts }: { hasProducts: boolean }) {
       <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)' }}>
         <Plus className="w-8 h-8" style={{ color: 'var(--color-primary)' }} />
       </div>
-      <h3 className="text-base font-semibold text-[#1C1917] mb-2">{t('emptyTitle')}</h3>
-      <p className="text-sm text-[#78716C] mb-4">{t('emptyCta')}</p>
+      <h3 className="text-base font-semibold text-foreground mb-2">{t('emptyTitle')}</h3>
+      <p className="text-sm text-muted-foreground mb-4">{t('emptyCta')}</p>
       <Link
         href="/dashboard/produits/nouveau"
         className="inline-flex items-center gap-2 h-9 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"

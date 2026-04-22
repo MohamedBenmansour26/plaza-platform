@@ -52,30 +52,29 @@ function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus
           <div key={step.key} className="flex gap-3">
             <div className="relative flex flex-col items-center">
               {state === 'done' && (
-                <div className="w-6 h-6 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3.5 h-3.5 text-white" />
+                <div className="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+                  <Check className="w-3.5 h-3.5 text-success-foreground" />
                 </div>
               )}
               {state === 'current' && (
-                <div className="w-6 h-6 rounded-full flex-shrink-0 relative" style={{ backgroundColor: 'var(--color-primary)' }}>
-                  <div className="absolute inset-0 rounded-full animate-ping opacity-75" style={{ backgroundColor: 'var(--color-primary)' }} />
+                <div className="w-6 h-6 rounded-full bg-primary flex-shrink-0 relative">
+                  <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
                 </div>
               )}
               {state === 'pending' && (
-                <div className="w-6 h-6 rounded-full border-2 border-[#E2E8F0] bg-white flex-shrink-0" />
+                <div className="w-6 h-6 rounded-full border-2 border-border bg-card flex-shrink-0" />
               )}
               {!isLast && (
-                <div className="absolute top-6 start-3 w-0.5 h-8 bg-[#E2E8F0]" />
+                <div className="absolute top-6 start-3 w-0.5 h-8 bg-border" />
               )}
             </div>
             <div className="pt-0.5">
               <div
                 className={`text-[14px] ${
-                  state === 'done'    ? 'font-medium text-[#1C1917]' :
-                  state === 'current' ? 'font-semibold' :
-                  'text-[#A8A29E]'
+                  state === 'done'    ? 'font-medium text-foreground' :
+                  state === 'current' ? 'font-semibold text-primary' :
+                  'text-muted-foreground'
                 }`}
-                style={state === 'current' ? { color: 'var(--color-primary)' } : undefined}
               >
                 {step.label}
               </div>
@@ -87,11 +86,11 @@ function DeliveryTimeline({ status, steps, pendingLabel }: { status: OrderStatus
       {/* Extra step for pending orders */}
       {status === 'pending' && (
         <div className="flex gap-3 -mt-2">
-          <div className="w-6 h-6 rounded-full flex-shrink-0 relative" style={{ backgroundColor: 'var(--color-primary)' }}>
-            <div className="absolute inset-0 rounded-full animate-ping opacity-75" style={{ backgroundColor: 'var(--color-primary)' }} />
+          <div className="w-6 h-6 rounded-full bg-primary flex-shrink-0 relative">
+            <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
           </div>
           <div className="pt-0.5">
-            <div className="text-[14px] font-semibold" style={{ color: 'var(--color-primary)' }}>{pendingLabel}</div>
+            <div className="text-[14px] font-semibold text-primary">{pendingLabel}</div>
           </div>
         </div>
       )}
@@ -110,12 +109,14 @@ export function OrderDetailClient({ order }: Props) {
   const [reportOpen, setReportOpen] = useState(false);
 
   // User-facing string arrays MUST be inside the component after t() — see memory.md BUG-013–016
-  const STATUS_BANNER: Record<OrderStatus, { bg: string; text: string; label: string }> = {
-    pending:    { bg: '#FFF7ED', text: '#E8632A', label: t('banner_pending') },
-    confirmed:  { bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)', label: t('banner_confirmed') },
-    dispatched: { bg: '#FFF7ED', text: '#E8632A', label: t('banner_dispatched') },
-    delivered:  { bg: '#F0FDF4', text: '#16A34A', label: t('banner_delivered') },
-    cancelled:  { bg: '#FEF2F2', text: '#DC2626', label: t('banner_cancelled') },
+  // design-refresh §2.8 — banners mirror StatusBadge pairings. Pending uses
+  // warning tint (amber) rather than orange to match the order-status map.
+  const STATUS_BANNER: Record<OrderStatus, { className: string; label: string }> = {
+    pending:    { className: 'bg-warning/10 text-warning',            label: t('banner_pending') },
+    confirmed:  { className: 'bg-primary/10 text-primary',            label: t('banner_confirmed') },
+    dispatched: { className: 'bg-primary/10 text-primary',            label: t('banner_dispatched') },
+    delivered:  { className: 'bg-success/10 text-success',            label: t('banner_delivered') },
+    cancelled:  { className: 'bg-destructive/10 text-destructive',    label: t('banner_cancelled') },
   };
 
   const STEPS: TimelineStep[] = [
@@ -137,52 +138,46 @@ export function OrderDetailClient({ order }: Props) {
   const isActive = order.status !== 'delivered' && order.status !== 'cancelled';
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-background">
       <div className="max-w-[480px] mx-auto pb-28">
 
-        {/* Top bar */}
-        <div className="bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
+        {/* Top bar — per-page mobile bar preserved structurally; tokens only */}
+        <div className="bg-card h-14 px-4 flex items-center justify-center relative border-b border-border">
           <button
             onClick={() => router.back()}
             className="absolute start-4 p-2 -ms-2"
             data-testid="merchant-order-detail-back-btn"
           >
-            <ArrowLeft size={20} className="text-[#1C1917]" />
+            <ArrowLeft size={20} className="text-foreground" />
           </button>
-          <h1 className="text-[16px] font-semibold text-[#1C1917]">{order.order_number}</h1>
+          <h1 className="text-[16px] font-semibold text-foreground">{order.order_number}</h1>
           <div className="absolute end-4">
             <StatusBadge status={order.status} />
           </div>
         </div>
 
-        {/* Status banner */}
-        <div
-          className="h-11 flex items-center justify-center"
-          style={{ backgroundColor: banner.bg }}
-        >
-          <span className="text-[14px] font-medium" style={{ color: banner.text }}>
-            {banner.label}
-          </span>
+        {/* Status banner — design-refresh §2.8 */}
+        <div className={`h-11 flex items-center justify-center ${banner.className}`}>
+          <span className="text-[14px] font-medium">{banner.label}</span>
         </div>
 
         <div className="p-4 space-y-3">
 
-          {/* Client card */}
-          <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
-            <h3 className="text-[16px] font-semibold text-[#1C1917]">Client</h3>
+          {/* Client card — brief §2.3 */}
+          <div className="bg-card rounded-xl shadow-card p-4 space-y-3">
+            <h3 className="text-[16px] font-semibold text-foreground">Client</h3>
             <div className="flex items-center gap-3">
-              <User size={18} className="text-[#78716C] flex-shrink-0" />
-              <span className="text-[14px] font-semibold text-[#1C1917]">
+              <User size={18} className="text-muted-foreground flex-shrink-0" />
+              <span className="text-[14px] font-semibold text-foreground">
                 {order.customer?.full_name ?? '—'}
               </span>
             </div>
             {order.customer?.phone && (
               <div className="flex items-center gap-3">
-                <Phone size={18} className="text-[#78716C] flex-shrink-0" />
+                <Phone size={18} className="text-muted-foreground flex-shrink-0" />
                 <a
                   href={`tel:${order.customer.phone}`}
-                  className="text-[14px] hover:underline"
-                  style={{ color: 'var(--color-primary)' }}
+                  className="text-[14px] text-primary hover:underline"
                 >
                   {order.customer.phone}
                 </a>
@@ -190,19 +185,19 @@ export function OrderDetailClient({ order }: Props) {
             )}
             {order.customer?.address && (
               <div className="flex items-start gap-3">
-                <MapPin size={18} className="text-[#78716C] mt-0.5 flex-shrink-0" />
-                <span className="text-[14px] text-[#78716C]">{order.customer.address}</span>
+                <MapPin size={18} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+                <span className="text-[14px] text-muted-foreground">{order.customer.address}</span>
               </div>
             )}
           </div>
 
           {/* Articles + totals */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <h3 className="text-[16px] font-semibold text-[#1C1917] mb-3">Articles commandés</h3>
+          <div className="bg-card rounded-xl shadow-card p-4">
+            <h3 className="text-[16px] font-semibold text-foreground mb-3">Articles commandés</h3>
             <div className="space-y-3">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-md bg-muted/60 flex-shrink-0 overflow-hidden">
                     {item.image_url && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -213,36 +208,36 @@ export function OrderDetailClient({ order }: Props) {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-medium text-[#1C1917] truncate">{item.name_fr}</div>
-                    <div className="text-[12px] text-[#78716C]">x{item.quantity}</div>
+                    <div className="text-[14px] font-medium text-foreground truncate">{item.name_fr}</div>
+                    <div className="text-[12px] text-muted-foreground">x{item.quantity}</div>
                   </div>
-                  <div className="text-[14px] font-semibold text-[#1C1917] flex-shrink-0">
+                  <div className="text-[14px] font-semibold text-foreground flex-shrink-0">
                     {formatMAD(item.unit_price * item.quantity)}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-[#E2E8F0] mt-4 pt-3 space-y-2">
+            <div className="border-t border-border mt-4 pt-3 space-y-2">
               <div className="flex justify-between text-[14px]">
-                <span className="text-[#78716C]">Sous-total</span>
-                <span className="text-[#1C1917]">{formatMAD(order.subtotal)}</span>
+                <span className="text-muted-foreground">Sous-total</span>
+                <span className="text-foreground">{formatMAD(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-[14px]">
-                <span className="text-[#78716C]">Livraison</span>
-                <span className="text-[#E8632A]">{formatMAD(order.delivery_fee)}</span>
+                <span className="text-muted-foreground">Livraison</span>
+                <span className="text-secondary">{formatMAD(order.delivery_fee)}</span>
               </div>
-              <div className="border-t-2 border-[#E2E8F0] pt-2 flex justify-between">
-                <span className="text-[16px] font-semibold text-[#1C1917]">Total</span>
-                <span className="text-[20px] font-semibold text-[#1C1917]">{formatMAD(order.total)}</span>
+              <div className="border-t-2 border-border pt-2 flex justify-between">
+                <span className="text-[16px] font-semibold text-foreground">Total</span>
+                <span className="text-[20px] font-semibold text-foreground">{formatMAD(order.total)}</span>
               </div>
             </div>
           </div>
 
           {/* Payment */}
-          <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
+          <div className="bg-card rounded-xl shadow-card p-4 flex items-center gap-3">
             <PaymentBadge method={order.payment_method as PaymentMethod} />
-            <span className="text-[14px] text-[#1C1917]">
+            <span className="text-[14px] text-foreground">
               {order.payment_method === 'cod'
                 ? 'Paiement à la livraison'
                 : order.payment_method === 'terminal'
@@ -252,8 +247,8 @@ export function OrderDetailClient({ order }: Props) {
           </div>
 
           {/* Delivery timeline */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <h3 className="text-[16px] font-semibold text-[#1C1917] mb-4">Statut de livraison</h3>
+          <div className="bg-card rounded-xl shadow-card p-4">
+            <h3 className="text-[16px] font-semibold text-foreground mb-4">Statut de livraison</h3>
             <DeliveryTimeline status={order.status} steps={STEPS} pendingLabel={t('step_pending_confirmation')} />
           </div>
 
@@ -304,28 +299,28 @@ export function OrderDetailClient({ order }: Props) {
             </div>
           )}
 
-          {/* Dispatched info */}
+          {/* Dispatched info — design-refresh §2.8 warning tint */}
           {order.status === 'dispatched' && (
-            <div className="rounded-xl p-4 border border-[#FED7AA] bg-[#FFF7ED]">
-              <p className="text-[14px] font-medium text-[#9A3412] text-center">
+            <div className="rounded-xl p-4 bg-warning/10">
+              <p className="text-[14px] font-medium text-warning text-center">
                 En attente du livreur Plaza
               </p>
             </div>
           )}
 
           {/* Date info */}
-          <p className="text-xs text-[#A8A29E] text-center">
+          <p className="text-xs text-muted-foreground text-center">
             Commandé le {formatDate(order.created_at)}
           </p>
 
         </div>
       </div>
 
-      {/* Fixed action bar */}
+      {/* Fixed action bar — mobile primary keeps inline `var(--color-primary)` per PLZ-088 */}
       {isActive && (
-        <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#E2E8F0] p-4 max-w-[480px] mx-auto">
+        <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4 max-w-[480px] mx-auto">
           {isPending ? (
-            <div className="flex items-center justify-center gap-2 h-12 text-[#78716C]">
+            <div className="flex items-center justify-center gap-2 h-12 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
               Mise à jour…
             </div>
@@ -343,7 +338,7 @@ export function OrderDetailClient({ order }: Props) {
               )}
               <button
                 onClick={() => setReportOpen(true)}
-                className="w-full h-12 border border-[#E2E8F0] text-[#78716C] text-[14px] font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors"
+                className="w-full h-12 border border-border text-muted-foreground text-[14px] font-medium rounded-lg hover:bg-muted/40 hover:text-foreground transition-colors"
                 data-testid="merchant-order-report-issue-btn"
               >
                 Signaler un problème
