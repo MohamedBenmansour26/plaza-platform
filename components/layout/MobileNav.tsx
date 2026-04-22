@@ -21,7 +21,9 @@ export function MobileNav() {
     exact ? pathname === href || pathname === `${href}/` : pathname.startsWith(href);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E2E8F0] h-16 flex items-center justify-around z-50 lg:hidden">
+    // Structure preserved per brief §2.5 — only tokens updated so the active
+    // mobile tab inherits the new #1A6BFF primary (was hardcoded #2563EB).
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border h-16 flex items-center justify-around z-50 lg:hidden">
       {tabs.map((tab) => {
         const active = isActive(tab.href, tab.exact);
         const Icon = tab.icon;
@@ -33,12 +35,12 @@ export function MobileNav() {
           >
             <Icon
               size={20}
-              className={active ? 'text-[#2563EB]' : 'text-[#78716C]'}
+              className={active ? 'text-primary' : 'text-muted-foreground'}
               strokeWidth={2}
             />
             <span
               className={`text-xs ${
-                active ? 'text-[#2563EB] font-semibold' : 'text-[#78716C]'
+                active ? 'text-primary font-semibold' : 'text-muted-foreground'
               }`}
             >
               {tab.label}

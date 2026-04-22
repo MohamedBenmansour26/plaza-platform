@@ -41,6 +41,17 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
 
+        /* ─── Merchant sidebar tokens (design-refresh v1 PR #2) ───── */
+        /* Dark-slate sidebar for merchant dashboard. Admin scope     */
+        /* overrides these inside `.admin-scope` (separate PR).       */
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+        },
+
         /* ─── Plaza design tokens ─────────────────────────────────── */
         /* Usage: bg-plaza-primary-600, text-plaza-accent-600, etc.   */
         'plaza-primary': {
