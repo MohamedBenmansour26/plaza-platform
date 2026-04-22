@@ -2,7 +2,7 @@
 
 import { CheckCircle2 } from 'lucide-react';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { requestAdminMagicLink } from './actions';
+import { requestAdminMagicLink, signInWithPasswordAction } from './actions';
 
 type FormState =
   | { kind: 'idle' }
@@ -11,7 +11,9 @@ type FormState =
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [trustDevice, setTrustDevice] = useState(true);
+  const [usePassword, setUsePassword] = useState(false);
   const [state, setState] = useState<FormState>({ kind: 'idle' });
   const [pending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,6 +30,25 @@ export function LoginForm() {
       return;
     }
     setState({ kind: 'idle' });
+
+    if (usePassword) {
+      startTransition(async () => {
+        const result = await signInWithPasswordAction(trimmed, password, trustDevice);
+        if (result && 'error' in result) {
+          setState({
+            kind: 'error',
+            message:
+              result.error === 'invalid_email'
+                ? 'Adresse email invalide.'
+                : result.error === 'not_admin'
+                  ? 'Accès non autorisé.'
+                  : 'Identifiants incorrects.',
+          });
+        }
+      });
+      return;
+    }
+
     startTransition(async () => {
       const result = await requestAdminMagicLink(trimmed, trustDevice);
       if ('error' in result) {
@@ -68,6 +89,24 @@ export function LoginForm() {
         aria-describedby={state.kind === 'error' ? 'admin-email-error' : undefined}
         className="mt-2 h-10 w-full rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
       />
+      {usePassword && (
+        <>
+          <label
+            htmlFor="admin-password"
+            className="mt-3 text-[13px] font-semibold text-[#1C1917]"
+          >
+            Mot de passe
+          </label>
+          <input
+            id="admin-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            className="mt-2 h-10 w-full rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] text-[#1C1917] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
+          />
+        </>
+      )}
       {state.kind === 'error' ? (
         <p
           id="admin-email-error"
@@ -102,12 +141,17 @@ export function LoginForm() {
         aria-disabled={pending}
         className="mt-5 h-10 w-full rounded-[6px] bg-[#2563EB] text-[14px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:bg-[#E7E5E4] disabled:text-[#A8A29E]"
       >
-        {pending ? 'Envoi en cours…' : 'Recevoir le lien magique'}
+        {pending
+          ? usePassword ? 'Connexion…' : 'Envoi en cours…'
+          : usePassword ? 'Se connecter' : 'Recevoir le lien magique'}
       </button>
-      <p className="mt-4 text-center text-[12px] text-[#78716C]">
-        Un lien de connexion sera envoyé à votre adresse email. Il est valable
-        15 minutes.
-      </p>
+      <button
+        type="button"
+        onClick={() => { setUsePassword((v) => !v); setState({ kind: 'idle' }); }}
+        className="mt-3 text-center text-[12px] text-[#78716C] hover:text-[#2563EB] hover:underline"
+      >
+        {usePassword ? 'Revenir au lien magique' : 'Connexion par mot de passe'}
+      </button>
     </form>
   );
 }

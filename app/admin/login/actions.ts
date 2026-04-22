@@ -1,11 +1,15 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import {
+  TRUST_COOKIE_NAME,
+  TRUST_COOKIE_OPTIONS,
   TRUST_PENDING_COOKIE_NAME,
   TRUST_PENDING_COOKIE_OPTIONS,
+  signTrustCookie,
 } from '@/lib/admin-trust-cookie';
 
 export type RequestMagicLinkResult =
@@ -79,4 +83,50 @@ export async function requestAdminMagicLink(
   }
 
   return { success: true };
+}
+
+export type SignInWithPasswordResult =
+  | { success: true }
+  | { success: false; error: 'invalid_email' | 'invalid_credentials' | 'not_admin' };
+
+export async function signInWithPasswordAction(
+  email: string,
+  password: string,
+  trustDevice: boolean,
+): Promise<SignInWithPasswordResult> {
+  const trimmed = (email ?? '').trim().toLowerCase();
+
+  if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    return { success: false, error: 'invalid_email' };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email: trimmed, password });
+
+  if (error || !data.user) {
+    return { success: false, error: 'invalid_credentials' };
+  }
+
+  // Verify admin membership.
+  const service = createServiceClient();
+  const { data: adminRow } = await service
+    .from('admin_users')
+    .select('id, is_active')
+    .eq('user_id', data.user.id)
+    .maybeSingle();
+
+  if (!adminRow?.is_active) {
+    await supabase.auth.signOut();
+    return { success: false, error: 'not_admin' };
+  }
+
+  // Mint trust cookie inline (no callback redirect needed for password login).
+  const signed = await signTrustCookie(data.user.id);
+  const cookieStore = await cookies();
+  cookieStore.set(TRUST_COOKIE_NAME, signed, {
+    ...TRUST_COOKIE_OPTIONS,
+    ...(trustDevice ? {} : { maxAge: undefined }),
+  });
+
+  redirect('/admin');
 }
