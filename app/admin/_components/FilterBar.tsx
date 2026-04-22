@@ -68,7 +68,7 @@ export function FilterBar({
             value={search.value}
             onChange={(event) => search.onChange(event.target.value)}
             placeholder={search.placeholder ?? 'Rechercher'}
-            className="h-9 w-full rounded-[6px] border border-[#E7E5E4] bg-white pl-9 pr-10 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
+            className="h-9 w-full rounded-[6px] border border-[#E7E5E4] bg-white pl-9 pr-10 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:border-[var(--admin-color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-color-primary-tint)]"
             data-testid={search.testId}
           />
           <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-[4px] bg-[#F5F5F4] px-1.5 py-0.5 text-[11px] text-[#78716C]">

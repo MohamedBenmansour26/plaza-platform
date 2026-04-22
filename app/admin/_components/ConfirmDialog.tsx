@@ -145,10 +145,10 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
               aria-required="true"
               aria-invalid={submitted && reasonTooShort}
               className={cn(
-                'mt-2 h-24 w-full rounded-[6px] border p-2.5 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]',
+                'mt-2 h-24 w-full rounded-[6px] border p-2.5 text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[var(--admin-color-primary-tint)]',
                 submitted && reasonTooShort
                   ? 'border-[#DC2626]'
-                  : 'border-[#E7E5E4] focus:border-[#2563EB]',
+                  : 'border-[#E7E5E4] focus:border-[var(--admin-color-primary)]',
               )}
               data-testid={testIdPrefix ? `${testIdPrefix}-reason-textarea` : undefined}
             />
@@ -185,7 +185,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
               'h-10 rounded-[6px] px-4 text-[14px] font-semibold text-white transition-colors',
               variant === 'destructive'
                 ? 'bg-[#DC2626] hover:bg-[#B91C1C] disabled:cursor-not-allowed disabled:bg-[#F5F5F4] disabled:text-[#A8A29E]'
-                : 'bg-[#2563EB] hover:bg-[#1D4ED8]',
+                : 'bg-[var(--admin-color-primary)] hover:bg-[var(--admin-color-primary-dark)]',
             )}
             data-testid={testIdPrefix ? `${testIdPrefix}-confirm-btn` : undefined}
           >
