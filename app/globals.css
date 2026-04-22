@@ -53,6 +53,16 @@
     /* Sidebar accent border (PR #2 will apply on merchant sidebar). */
     --sidebar-active-border: 217 100% 55%;
 
+    /* ─── Merchant sidebar tokens (design-refresh v1 PR #2) ──────────
+       Dark slate theme for the desktop merchant sidebar. Not shared
+       with admin (admin overrides inside .admin-scope in a separate
+       PR). HSL form for shadcn semantic colors.                       */
+    --sidebar: 222 47% 11%;             /* #111827 dark slate */
+    --sidebar-foreground: 220 9% 65%;   /* #9CA3AF muted text */
+    --sidebar-accent: 215 28% 17%;      /* #1F2937 hover/active row */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 28% 17%;      /* #1F2937 dividers inside sidebar */
+
     /* ─── Tailwind v4 @theme CSS-variable form (hex) ─────────────────
        These forms are consumed by existing code as `var(--color-*)`
        (e.g. `var(--color-primary)` in BoutiqueForm save bar).

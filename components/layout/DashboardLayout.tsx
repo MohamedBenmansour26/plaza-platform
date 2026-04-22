@@ -9,9 +9,11 @@ type Props = {
 
 export function DashboardLayout({ children, merchantName }: Props) {
   return (
-    <div className="flex min-h-screen bg-[#FAFAF9]">
+    // `bg-background` reads the merchant-refresh token (#F8F9FA) set in PR #1.
+    // Sidebar uses the dark-slate `bg-sidebar` token (#111827) per brief §2.5.
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar — desktop only (lg = 1024px+) */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-[#E2E8F0] flex-col z-40">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-[240px] bg-sidebar border-r border-sidebar-border flex-col z-40">
         <SidebarNav merchantName={merchantName} />
       </aside>
 
