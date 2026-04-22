@@ -734,7 +734,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   // save-button row, fixing SAAD-003 (indicator invisible on desktop).
   return (
     <>
-      <div className="bg-[#FAFAF9] min-h-screen pb-24 md:pb-0">
+      <div className="bg-[#FAFAF9] min-h-screen pb-40 md:pb-0">
         {/* Top bar — mobile: compact h-14 with text link.
                       desktop: bordered ExternalLink button. */}
         <div className="bg-white md:bg-transparent h-14 md:h-auto px-4 md:px-0 flex items-center justify-between border-b md:border-b-0 border-[#E2E8F0] md:pt-8 md:mb-6 md:max-w-[1280px] md:mx-auto md:w-full md:px-8">
@@ -794,8 +794,12 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
 
             {/* Save row — single element, positioned fixed bottom on mobile,
                 static inline on desktop. `flex-col-reverse` on mobile puts the
-                indicator ABOVE the button (DOM order is button → indicator). */}
-            <div className="fixed md:static bottom-0 start-0 end-0 z-10 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:pt-2 flex flex-col-reverse md:flex-row md:items-center md:gap-4">
+                indicator ABOVE the button (DOM order is button → indicator).
+                PLZ-082: on mobile (<lg) MobileNav is fixed at bottom-0 with h-16
+                so the save bar sits at `bottom-16` to stack above it. Z-index
+                stays below MobileNav's z-50 so the nav's shadow doesn't bleed
+                over the save bar; the vertical offset prevents occlusion. */}
+            <div className="fixed md:static bottom-16 md:bottom-0 start-0 end-0 z-10 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:pt-2 flex flex-col-reverse md:flex-row md:items-center md:gap-4">
               <button
                 type="button"
                 onClick={handleSave}
