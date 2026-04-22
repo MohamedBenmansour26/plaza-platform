@@ -41,11 +41,17 @@ function PinLoginContent() {
   }, [pin]);
 
   function press(n: string) {
-    if (!locked && !submitting && pin.length < 4) setPin(p => p + n);
+    if (locked || submitting) return;
+    // Guard length INSIDE the functional updater — reading pin.length from
+    // the closure (the pre-PLZ-087 pattern) drops digits when several
+    // clicks land in the same React batch (programmatic clicks, fast taps).
+    // This is the same stale-closure shape PLZ-083 fixed on pin-setup.
+    setPin(prev => (prev.length >= 4 ? prev : prev + n));
   }
 
   function del() {
-    if (!locked && !submitting) setPin(p => p.slice(0, -1));
+    if (locked || submitting) return;
+    setPin(p => p.slice(0, -1));
   }
 
   return (
@@ -81,16 +87,19 @@ function PinLoginContent() {
       <div className="grid grid-cols-3 gap-3 mt-8 w-[280px]">
         {NUMPAD.map(n => (
           <button key={n} onClick={() => press(String(n))} disabled={locked || submitting}
+            data-testid={`driver-pin-login-keypad-${n}-btn`}
             className="h-16 rounded-2xl bg-white border border-gray-200 text-xl font-medium text-[#1C1917] hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50">
             {n}
           </button>
         ))}
         <div />
         <button onClick={() => press('0')} disabled={locked || submitting}
+          data-testid="driver-pin-login-keypad-0-btn"
           className="h-16 rounded-2xl bg-white border border-gray-200 text-xl font-medium text-[#1C1917] hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50">
           0
         </button>
         <button onClick={del} disabled={locked || submitting}
+          data-testid="driver-pin-login-keypad-backspace-btn"
           className="h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50"
           aria-label="Effacer">
           <Delete className="w-5 h-5 text-[#1C1917]" />
