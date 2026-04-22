@@ -15,6 +15,7 @@ export function LogoutButton() {
       onClick={handleLogout}
       className="px-4 flex items-center gap-3 w-full text-left"
       style={{ height: 52 }}
+      data-testid="driver-profil-logout-btn"
     >
       <LogOut className="w-5 h-5 flex-shrink-0" style={{ color: '#DC2626' }} />
       <span className="flex-1 text-[15px]" style={{ color: '#DC2626' }}>Se déconnecter</span>

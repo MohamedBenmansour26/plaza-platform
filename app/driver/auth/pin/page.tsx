@@ -68,7 +68,7 @@ function PinLoginContent() {
       <h1 className="text-[18px] font-semibold text-[#1C1917] mt-3">Saisissez votre code PIN</h1>
 
       <div className="mt-6">
-        <PinBoxes value={pin} onChange={setPin} state={error ? 'error' : locked ? 'error' : 'default'} disabled={locked || submitting} />
+        <PinBoxes value={pin} onChange={setPin} state={error ? 'error' : locked ? 'error' : 'default'} disabled={locked || submitting} testIdPrefix="driver-auth-pin" />
       </div>
 
       {error && !locked && (

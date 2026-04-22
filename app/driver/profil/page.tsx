@@ -92,13 +92,14 @@ export default async function ProfilPage() {
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
-            { Icon: Calendar,   label: 'Mes horaires',   color: 'var(--color-primary)', href: '/driver/profil/horaires' },
-            { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#' },
-            { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#' },
-          ].map(({ Icon, label, color, href }) => (
+            { Icon: Calendar,   label: 'Mes horaires',   color: 'var(--color-primary)', href: '/driver/profil/horaires', testId: 'driver-profil-horaires-link' },
+            { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#', testId: undefined },
+            { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#', testId: undefined },
+          ].map(({ Icon, label, color, href, testId }) => (
             <a key={label} href={href}
               className="px-4 flex items-center gap-3 border-b border-gray-100"
-              style={{ height: 52 }}>
+              style={{ height: 52 }}
+              data-testid={testId}>
               <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} />
               <span className="flex-1 text-[15px]" style={{ color }}>{label}</span>
               <ChevronRight className="w-4 h-4 text-gray-300" />

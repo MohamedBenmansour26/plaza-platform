@@ -20,6 +20,7 @@ export default function AdminHomePage() {
           <Link
             href="/admin/drivers/pending"
             className="font-medium text-[#2563EB] hover:underline"
+            data-testid="admin-home-drivers-pending-link"
           >
             file d&apos;attente des livreurs
           </Link>{' '}

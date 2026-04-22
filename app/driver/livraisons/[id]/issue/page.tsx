@@ -69,6 +69,7 @@ function IssueContent() {
                   borderColor: active ? 'var(--color-primary)' : '#E2E8F0',
                   background: active ? 'color-mix(in srgb, var(--color-primary) 5%, white)' : 'white',
                 }}
+                data-testid={`driver-issue-${type.replace(/_/g, '-')}-btn`}
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
                   style={active ? { backgroundColor: 'var(--color-primary)' } : { backgroundColor: '#F5F5F4' }}>
@@ -88,6 +89,7 @@ function IssueContent() {
             placeholder="Décrivez le problème..."
             rows={4}
             className="w-full border border-gray-300 rounded-xl p-3 text-sm text-[#1C1917] outline-none resize-none mb-4"
+            data-testid="driver-issue-notes-textarea"
           />
         )}
 
@@ -96,7 +98,7 @@ function IssueContent() {
             <p className="text-sm text-[#1C1917]">Ajouter une photo</p>
             <span className="text-xs text-[#78716C]">facultatif</span>
           </div>
-          <PhotoCapture value={photo} onChange={setPhoto} height={120} />
+          <PhotoCapture value={photo} onChange={setPhoto} height={120} testId="driver-issue-photo-input" />
         </div>
       </div>
 
@@ -106,6 +108,7 @@ function IssueContent() {
         disabled={!selected}
         loading={loading}
         onClick={handleSubmit}
+        testId="driver-issue-submit-btn"
       />
     </div>
   );

@@ -11,9 +11,10 @@ type Props = {
   onChange: (val: string) => void;
   state?: State;
   disabled?: boolean;
+  testIdPrefix?: string;   // if set, each box gets `${testIdPrefix}-digit-${i+1}-input`
 };
 
-export function PinBoxes({ value, onChange, state = 'default', disabled = false }: Props) {
+export function PinBoxes({ value, onChange, state = 'default', disabled = false, testIdPrefix }: Props) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   function handleChange(index: number, raw: string) {
@@ -60,6 +61,7 @@ export function PinBoxes({ value, onChange, state = 'default', disabled = false 
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           className={boxClass(i)}
+          data-testid={testIdPrefix ? `${testIdPrefix}-digit-${i + 1}-input` : undefined}
         />
       ))}
     </div>

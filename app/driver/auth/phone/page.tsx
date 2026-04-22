@@ -106,6 +106,7 @@ export default function DriverPhonePage() {
               onChange={(e) => setPhone(normalizeForDisplay(e.target.value))}
               className="flex-1 px-3 text-[15px] text-[#1C1917] outline-none bg-transparent"
               autoFocus
+              data-testid="driver-auth-phone-input"
             />
           </div>
 
@@ -118,6 +119,7 @@ export default function DriverPhonePage() {
             disabled={!isValid || loading}
             className="mt-4 w-full h-[52px] rounded-xl text-base font-bold text-white flex items-center justify-center gap-2 transition-all disabled:bg-gray-200 disabled:text-gray-400"
             style={isValid && !loading ? { backgroundColor: 'var(--color-primary)' } : {}}
+            data-testid="driver-auth-phone-submit-btn"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Recevoir un code <ArrowRight className="w-4 h-4" /></>}
           </button>

@@ -82,6 +82,7 @@ export default async function PendingPage() {
         <Link
           href="/driver/onboarding/identity"
           className="mt-6 inline-flex h-12 items-center justify-center rounded-[12px] bg-[#2563EB] px-6 text-[14px] font-semibold text-white hover:bg-[#1D4ED8]"
+          data-testid="driver-onboarding-pending-resubmit-link"
         >
           {t('resubmit.cta')}
         </Link>

@@ -283,6 +283,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
                   onClick={handleApprovePrimary}
                   disabled={pending}
                   className="h-11 w-full rounded-[6px] bg-[#2563EB] text-[14px] font-semibold text-white hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
+                  data-testid="admin-driver-dossier-approve-btn"
                 >
                   Approuver le dossier
                 </button>
@@ -293,6 +294,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
                   type="button"
                   onClick={() => setDialog({ kind: 'reject-driver' })}
                   className="mt-3 h-11 w-full rounded-[6px] border border-[#DC2626] bg-white text-[14px] font-semibold text-[#DC2626] hover:bg-[#FEF2F2]"
+                  data-testid="admin-driver-dossier-reject-btn"
                 >
                   Rejeter le dossier
                 </button>
@@ -349,6 +351,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
         cancelLabel="Annuler"
         confirmLabel="Confirmer l'approbation"
         onConfirm={handleApproveOverride}
+        testIdPrefix="admin-driver-dossier-approve-override"
       />
 
       {/* Reject driver */}
@@ -365,6 +368,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
         cancelLabel="Annuler"
         confirmLabel="Confirmer le rejet"
         onConfirm={handleRejectDriver}
+        testIdPrefix="admin-driver-dossier-reject"
       />
 
       {/* Resubmit single doc */}
@@ -385,6 +389,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
             handleRequestResubmit(dialog.doc, reason);
           }
         }}
+        testIdPrefix="admin-driver-dossier-resubmit-doc"
       />
 
       {/* Reject single doc */}
@@ -405,6 +410,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
             handleRejectDoc(dialog.doc, reason);
           }
         }}
+        testIdPrefix="admin-driver-dossier-reject-doc"
       />
 
       {/* Toast */}
@@ -582,6 +588,7 @@ function MobileDetail({
                   onToggleMenu();
                 }}
                 className="block w-full px-4 py-3 text-left text-[14px] text-[#DC2626] hover:bg-[#FEF2F2]"
+                data-testid="admin-driver-dossier-reject-mobile-btn"
               >
                 Rejeter le dossier
               </button>
@@ -682,6 +689,7 @@ function MobileDetail({
           type="button"
           onClick={onApprovePrimary}
           className="h-12 w-full rounded-[6px] bg-[#2563EB] text-[15px] font-semibold text-white hover:bg-[#1D4ED8]"
+          data-testid="admin-driver-dossier-approve-mobile-btn"
         >
           Approuver le dossier
         </button>

@@ -65,7 +65,7 @@ function OtpContent() {
         </p>
 
         <div className="mt-8 w-full">
-          <OtpBoxes value={otp} onChange={setOtp} state={error ? 'error' : 'default'} />
+          <OtpBoxes value={otp} onChange={setOtp} state={error ? 'error' : 'default'} testIdPrefix="driver-auth-otp" />
         </div>
 
         {error && (
@@ -91,6 +91,7 @@ function OtpContent() {
           disabled={!allFilled || loading}
           className="mt-8 w-full h-[52px] rounded-xl text-base font-bold text-white flex items-center justify-center transition-all disabled:bg-gray-200 disabled:text-gray-400"
           style={allFilled && !loading ? { backgroundColor: 'var(--color-primary)' } : {}}
+          data-testid="driver-auth-otp-submit-btn"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Vérifier le code'}
         </button>

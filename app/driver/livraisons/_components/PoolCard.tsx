@@ -35,7 +35,7 @@ export function PoolCard({ delivery }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4" data-testid="driver-livraisons-pool-card" data-id={delivery.id}>
       {/* Zones */}
       <div className="mb-3 flex items-center gap-2">
         <div className="flex-1 rounded-lg bg-white px-3 py-2 text-center">
@@ -83,6 +83,7 @@ export function PoolCard({ delivery }: Props) {
         onClick={handleAccept}
         disabled={loading}
         className="flex h-11 w-full items-center justify-center rounded-xl bg-[var(--color-primary)] font-semibold text-sm text-white disabled:opacity-60"
+        data-testid="driver-livraisons-pool-accept-btn"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Accepter'}
       </button>

@@ -23,7 +23,7 @@ export function NewAssignmentOverlay({ delivery, onAccept, onDismiss }: Props) {
   const progress = (countdown / 30) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end">
+    <div className="fixed inset-0 z-50 flex items-end" data-testid="driver-livraisons-assignment-sheet">
       <div className="absolute inset-0 bg-black/50" onClick={onDismiss} />
       <div className="relative w-full max-w-[430px] mx-auto bg-white rounded-t-3xl shadow-2xl pb-8">
         {/* Drag handle */}
@@ -82,11 +82,13 @@ export function NewAssignmentOverlay({ delivery, onAccept, onDismiss }: Props) {
 
           <button onClick={onAccept}
             className="w-full h-[52px] rounded-xl text-base font-bold text-white mb-2"
-            style={{ backgroundColor: 'var(--color-primary)' }}>
+            style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="driver-livraisons-assignment-accept-btn">
             Voir la commande
           </button>
           <button onClick={onDismiss}
-            className="w-full h-11 rounded-xl border border-gray-200 text-[15px] text-[#78716C]">
+            className="w-full h-11 rounded-xl border border-gray-200 text-[15px] text-[#78716C]"
+            data-testid="driver-livraisons-assignment-dismiss-btn">
             Ignorer
           </button>
         </div>

@@ -8,9 +8,10 @@ type Props = {
   disabled?: boolean;
   loading?: boolean;
   variant?: 'primary' | 'danger';
+  testId?: string;
 };
 
-export function StickyCTA({ label, onClick, disabled, loading, variant = 'primary' }: Props) {
+export function StickyCTA({ label, onClick, disabled, loading, variant = 'primary', testId }: Props) {
   const bg = disabled
     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
     : variant === 'danger'
@@ -24,6 +25,7 @@ export function StickyCTA({ label, onClick, disabled, loading, variant = 'primar
         disabled={disabled || loading}
         className={`w-full h-[52px] rounded-xl text-base font-bold flex items-center justify-center transition-all ${bg}`}
         style={!disabled && variant === 'primary' ? { backgroundColor: 'var(--color-primary)' } : {}}
+        data-testid={testId}
       >
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : label}
       </button>
