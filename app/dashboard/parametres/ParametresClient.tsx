@@ -21,11 +21,11 @@ export function ParametresClient() {
   const [twoFactor, _setTwoFactor] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const notifItems: { id: NotifKey; label: string }[] = [
-    { id: 'newOrders', label: t('notifNewOrders') },
-    { id: 'delivered', label: t('notifDelivered') },
-    { id: 'support', label: t('notifSupport') },
-    { id: 'promotions', label: t('notifPromotions') },
+  const notifItems: { id: NotifKey; slug: string; label: string }[] = [
+    { id: 'newOrders', slug: 'new-orders', label: t('notifNewOrders') },
+    { id: 'delivered', slug: 'delivered', label: t('notifDelivered') },
+    { id: 'support', slug: 'support', label: t('notifSupport') },
+    { id: 'promotions', slug: 'promotions', label: t('notifPromotions') },
   ];
 
   function handleDeleteAccount() {
@@ -87,7 +87,7 @@ export function ParametresClient() {
                   onChange={() =>
                     setNotifications((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
                   }
-                  testId={`merchant-settings-notif-${item.id}-toggle-checkbox`}
+                  testId={`merchant-settings-notif-${item.slug}-toggle-checkbox`}
                 />
               </div>
             ))}
