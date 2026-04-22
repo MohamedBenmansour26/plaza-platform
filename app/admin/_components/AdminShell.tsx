@@ -36,7 +36,8 @@ export function AdminShell({
   return (
     <div
       data-admin-shell
-      className="flex min-h-screen bg-[#FAFAF9]"
+      className="flex min-h-screen"
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
       aria-busy={pending}
     >
       <SidebarNav adminEmail={adminEmail} adminName={adminName} />

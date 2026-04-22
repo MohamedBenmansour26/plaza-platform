@@ -115,12 +115,12 @@ export function SidebarNav({ adminEmail, adminName }: Props) {
       data-admin-sidebar
       role="navigation"
       aria-label="Navigation principale"
-      className="flex h-screen w-[240px] flex-col border-r border-[#E7E5E4] bg-white"
+      className="flex h-screen w-[240px] flex-col bg-[#0F172A] text-[#94A3B8]"
     >
       {/* Logo */}
       <div className="flex items-baseline gap-2 px-5 pb-6 pt-6">
-        <span className="text-[18px] font-bold text-[#2563EB]">Plaza</span>
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#78716C]">
+        <span className="text-[18px] font-bold text-white">Plaza</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">
           Admin
         </span>
       </div>
@@ -138,16 +138,16 @@ export function SidebarNav({ adminEmail, adminName }: Props) {
         ))}
       </nav>
       {/* Footer */}
-      <div className="border-t border-[#E7E5E4] p-4">
+      <div className="border-t border-white/5 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EFF6FF] text-[13px] font-semibold text-[#2563EB]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E3A5F] text-[13px] font-semibold text-[#1A6BFF]">
             {initials || '?'}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[14px] font-medium text-[#1C1917]">
+            <div className="truncate text-[14px] font-medium text-white">
               {adminName}
             </div>
-            <div className="truncate text-[12px] text-[#78716C]">
+            <div className="truncate text-[12px] text-[#94A3B8]">
               {adminEmail}
             </div>
           </div>

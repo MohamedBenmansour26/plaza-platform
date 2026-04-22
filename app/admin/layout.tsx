@@ -22,7 +22,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${inter.variable} admin-scope min-h-screen bg-[#FAFAF9]`}>
+    <div
+      className={`${inter.variable} admin-scope min-h-screen`}
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
+    >
       {children}
     </div>
   );

@@ -152,14 +152,20 @@
 /* ─── Admin console scope ─────────────────────────────────────────────
    Applied to any route under /admin via the `.admin-scope` class on
    app/admin/layout.tsx. Admin is monochrome-first, denser, and uses
-   Inter exclusively. No orange (#E8632A) anywhere — that color belongs
-   to merchant+driver surfaces.                                          */
+   Inter exclusively. No orange (#E8632A / #FF6B1A) anywhere — that
+   color belongs to merchant+driver surfaces.
+
+   Design-refresh v1 (2026-04-22): primary unified to #1A6BFF to match
+   merchant (see design-exports/design-refresh-brief.md §3.2), page
+   canvas cooled to #F1F5F9, and dark slate sidebar tokens added.      */
 .admin-scope {
   --admin-radius: 8px;
-  --admin-color-primary: #2563EB;
-  --admin-color-primary-dark: #1D4ED8;
+  /* Primary: #1A6BFF — unified Plaza blue (design-refresh v1). */
+  --admin-color-primary: #1A6BFF;
+  --admin-color-primary-dark: #1550CC;
   --admin-color-primary-tint: #EFF6FF;
-  --admin-color-bg: #FAFAF9;
+  /* Page canvas — slightly cooler than merchant dashboard's #F8F9FA. */
+  --admin-color-bg: #F1F5F9;
   --admin-color-surface: #FFFFFF;
   --admin-color-text-primary: #1C1917;
   --admin-color-text-secondary: #44403C;
@@ -167,7 +173,7 @@
   --admin-color-text-faint: #A8A29E;
   --admin-color-border: #E7E5E4;
   --admin-color-border-soft: #F5F5F4;
-  --admin-color-row-hover: #FAFAF9;
+  --admin-color-row-hover: #F1F5F9;
   --admin-color-row-selected: #F5F5F4;
   --admin-color-success: #16A34A;
   --admin-color-success-tint: #F0FDF4;
@@ -175,6 +181,30 @@
   --admin-color-warning-tint: #FEF3C7;
   --admin-color-error: #DC2626;
   --admin-color-error-tint: #FEF2F2;
+
+  /* Dark slate sidebar (design-refresh v1 §1.1, §3.2). */
+  --admin-color-sidebar-bg: #0F172A;
+  --admin-color-sidebar-fg: #94A3B8;
+  --admin-color-sidebar-active-bg: #1E3A5F;
+  --admin-color-sidebar-active-border: #1A6BFF;
+  --admin-color-sidebar-hover-bg: #1E293B;
+
+  /* Override shadcn semantic tokens inside admin so any shadcn primitives
+     (Button, Input, Card) adopt the admin palette automatically.
+     --primary matches #1A6BFF in HSL; --background matches #F1F5F9.
+     --secondary is neutralised to slate — admin does NOT use orange.  */
+  --background: 210 40% 96%;          /* #F1F5F9 */
+  --primary: 217 100% 55%;             /* #1A6BFF */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 214 32% 91%;            /* neutral slate, not orange */
+  --secondary-foreground: 222 47% 11%;
+  --ring: 217 100% 55%;                /* #1A6BFF */
+  --radius: 0.5rem;                    /* 8px denser admin */
+  --color-primary: #1A6BFF;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #E2E8F0;
+  --color-secondary-foreground: #0F172A;
+
   font-family: var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
 }
 
