@@ -54,17 +54,11 @@ export default async function PendingPage() {
 
   if (approvalStatus === 'rejected') {
     return (
-      <main
-        className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-6 py-10"
-        data-testid="driver-onboarding-pending-rejected"
-      >
+      <main className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-6 py-10">
         <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-[#FEE2E2]">
           <XCircle className="w-10 h-10 text-[#DC2626]" />
         </div>
-        <h1
-          className="text-[22px] font-bold text-[#1C1917] mt-5 text-center"
-          data-testid="driver-onboarding-pending-rejected-title"
-        >
+        <h1 className="text-[22px] font-bold text-[#1C1917] mt-5 text-center">
           {t('rejected.title')}
         </h1>
         <p className="text-[14px] text-[#78716C] mt-2 text-center max-w-[420px]">
@@ -75,18 +69,12 @@ export default async function PendingPage() {
             <div className="text-[12px] font-semibold uppercase tracking-wider text-[#991B1B]">
               {t('rejected.reasonLabel')}
             </div>
-            <p
-              className="mt-2 text-[13px] leading-relaxed text-[#78716C] whitespace-pre-line"
-              data-testid="driver-onboarding-pending-rejected-reason"
-            >
+            <p className="mt-2 text-[13px] leading-relaxed text-[#78716C] whitespace-pre-line">
               {rejectionReason}
             </p>
           </div>
         ) : (
-          <p
-            className="mt-5 w-full max-w-[420px] text-[13px] leading-relaxed text-[#78716C] text-center"
-            data-testid="driver-onboarding-pending-rejected-fallback"
-          >
+          <p className="mt-5 w-full max-w-[420px] text-[13px] leading-relaxed text-[#78716C] text-center">
             {t('rejected.fallbackReason')}
           </p>
         )}

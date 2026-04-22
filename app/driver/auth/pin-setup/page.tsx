@@ -116,18 +116,12 @@ function PinSetupContent() {
       </div>
 
       {error === 'mismatch' && (
-        <p
-          className="text-[13px] text-red-600 mt-3"
-          data-testid="driver-pin-setup-error-mismatch"
-        >
+        <p role="alert" className="text-[13px] text-red-600 mt-3">
           Les codes ne correspondent pas. Réessayez.
         </p>
       )}
       {error === 'server' && (
-        <p
-          className="text-[13px] text-red-600 mt-3"
-          data-testid="driver-pin-setup-error-server"
-        >
+        <p role="alert" className="text-[13px] text-red-600 mt-3">
           Erreur technique. Veuillez réessayer dans un instant.
         </p>
       )}
