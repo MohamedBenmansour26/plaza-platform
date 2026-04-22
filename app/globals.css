@@ -5,17 +5,22 @@
 @layer base {
   :root {
     /* ─── shadcn/ui base tokens ─────────────────────────────────────── */
-    --background: 0 0% 100%;
+    /* Dashboard page canvas — off-white (#F8F9FA) per design-refresh brief §1.1.
+       Admin panel overrides to #F1F5F9 inside .admin-scope (separate PR). */
+    --background: 210 17% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
-    /* Primary: #2563EB — warm blue */
-    --primary: 221 83% 53%;
+    /* Primary: #1A6BFF — unified Plaza blue (design-refresh v1) */
+    --primary: 217 100% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary: #FF6B1A — brighter Plaza orange (design-refresh v1).
+       Used as brand accent on merchant + customer storefront surfaces.
+       Admin is no-orange — do not use inside .admin-scope. */
+    --secondary: 20 100% 55%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 214 32% 91%;
     --muted-foreground: 215 16% 47%;
 
@@ -29,8 +34,48 @@
     --input: 214 32% 91%;
 
     /* Ring: matches primary */
-    --ring: 221 83% 53%;
+    --ring: 217 100% 55%;
     --radius: 0.75rem;
+
+    /* Success: #10B981 — teal-green (design-refresh v1). */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Chart palette — Recharts surfaces (design-refresh §1.1). */
+    --chart-1: 217 100% 55%;   /* #1A6BFF primary blue */
+    --chart-2: 160 84% 39%;    /* #10B981 success teal */
+    --chart-3: 38 92% 50%;     /* #F59E0B warning amber */
+    --chart-4: 20 100% 55%;    /* #FF6B1A secondary orange */
+    --chart-5: 0 84% 60%;      /* #EF4444 destructive red */
+
+    /* Sidebar accent border (PR #2 will apply on merchant sidebar). */
+    --sidebar-active-border: 217 100% 55%;
+
+    /* ─── Tailwind v4 @theme CSS-variable form (hex) ─────────────────
+       These forms are consumed by existing code as `var(--color-*)`
+       (e.g. `var(--color-primary)` in BoutiqueForm save bar).
+       PLZ-088 fix: before this change, `--color-primary` was only set
+       via inline style on /driver and /store/[slug] layouts. On the
+       merchant dashboard it was never declared, so `md:hidden` fixed
+       save/publish bars rendered with an empty primary colour. Declare
+       here on `:root` so every surface inherits unless explicitly
+       overridden (storefront still overrides per-tenant primary_color
+       via inline style on the store layout; driver still hard-codes
+       #2563EB for its own consistency).                               */
+    --color-primary: #1A6BFF;
+    --color-primary-foreground: #FFFFFF;
+    --color-secondary: #FF6B1A;
+    --color-secondary-foreground: #FFFFFF;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-destructive: #EF4444;
+    --color-chart-1: #1A6BFF;
+    --color-chart-2: #10B981;
+    --color-chart-3: #F59E0B;
+    --color-chart-4: #FF6B1A;
+    --color-chart-5: #EF4444;
 
     /* ─── Plaza brand color tokens ──────────────────────────────────── */
 
