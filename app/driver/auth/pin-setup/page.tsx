@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Key, Delete, Loader2 } from 'lucide-react';
 import { PinBoxes } from '../../_components/PinBoxes';
@@ -19,12 +19,21 @@ function PinSetupContent() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Synchronous step mirror — `press()` reads this to route to pin vs confirm
+  // without waiting for React to flush the `step` state. Without it, rapid
+  // successive clicks (including programmatic `.click()`) that arrive during
+  // the 300 ms pin→confirm transition or within the same React batch silently
+  // drop, because the closure still sees step === 1 && pin.length === 4.
+  const stepRef = useRef<1 | 2>(1);
+
   useEffect(() => {
     if (pin.length === 4 && step === 1) {
       const t = setTimeout(() => setStep(2), 300);
       return () => clearTimeout(t);
     }
   }, [pin, step]);
+
+  useEffect(() => { stepRef.current = step; }, [step]);
 
   useEffect(() => {
     if (confirm.length === 4) {
@@ -51,12 +60,27 @@ function PinSetupContent() {
 
   function press(n: string) {
     if (loading) return;
-    if (step === 1 && pin.length < 4) setPin(p => p + n);
-    else if (step === 2 && confirm.length < 4) setConfirm(c => c + n);
+    // Route via stepRef so rapid clicks see the latest routing target.
+    // Functional updaters guarantee we always append to the latest buffer
+    // and never exceed 4 digits even if multiple clicks land in one React batch.
+    if (stepRef.current === 1) {
+      setPin(prev => {
+        if (prev.length >= 4) return prev;
+        const next = prev + n;
+        // Flip routing synchronously the moment pin fills, so the next
+        // click in the same event-loop tick routes to confirm, not a
+        // dropped-on-the-floor pin append.
+        if (next.length === 4) stepRef.current = 2;
+        return next;
+      });
+    } else {
+      setConfirm(prev => (prev.length < 4 ? prev + n : prev));
+    }
   }
 
   function del() {
-    if (step === 1) setPin(p => p.slice(0, -1));
+    if (loading) return;
+    if (stepRef.current === 1) setPin(p => p.slice(0, -1));
     else setConfirm(c => c.slice(0, -1));
   }
 
@@ -89,16 +113,19 @@ function PinSetupContent() {
       <div className="grid grid-cols-3 gap-3 mt-8 w-[280px]">
         {NUMPAD.map(n => (
           <button key={n} onClick={() => press(String(n))} disabled={loading}
+            data-testid={`driver-pin-setup-keypad-${n}-btn`}
             className="h-16 rounded-2xl bg-white border border-gray-200 text-xl font-medium text-[#1C1917] hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50">
             {n}
           </button>
         ))}
         <div />
         <button onClick={() => press('0')} disabled={loading}
+          data-testid="driver-pin-setup-keypad-0-btn"
           className="h-16 rounded-2xl bg-white border border-gray-200 text-xl font-medium text-[#1C1917] hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50">
           0
         </button>
         <button onClick={del} disabled={loading}
+          data-testid="driver-pin-setup-keypad-backspace-btn"
           className="h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50"
           aria-label="Effacer">
           <Delete className="w-5 h-5 text-[#1C1917]" />
