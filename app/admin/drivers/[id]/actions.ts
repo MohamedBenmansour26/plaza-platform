@@ -54,15 +54,6 @@ export async function approveDriverAction(
     return { success: false, error: 'driver_not_found' };
   }
 
-  if (
-    !driver.license_photo_url ||
-    !driver.insurance_url ||
-    !driver.id_front_url ||
-    !driver.id_back_url
-  ) {
-    return { success: false, error: 'missing_documents' };
-  }
-
   const { error } = await service
     .from('drivers')
     .update({
@@ -80,7 +71,7 @@ export async function approveDriverAction(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/drivers');
+  revalidatePath('/admin/drivers/pending');
   revalidatePath(`/admin/drivers/${driverId}`);
   return { success: true };
 }
@@ -142,7 +133,7 @@ export async function resubmitDocumentAction(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/drivers');
+  revalidatePath('/admin/drivers/pending');
   revalidatePath(`/admin/drivers/${driverId}`);
   return { success: true };
 }
@@ -175,7 +166,7 @@ export async function rejectDriverAction(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/drivers');
+  revalidatePath('/admin/drivers/pending');
   revalidatePath(`/admin/drivers/${driverId}`);
   return { success: true };
 }
