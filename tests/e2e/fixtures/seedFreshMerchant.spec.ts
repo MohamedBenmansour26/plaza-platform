@@ -1,5 +1,9 @@
+import { loadEnvConfig } from '@next/env';
+import { createClient } from '@supabase/supabase-js';
 import { test, expect, type Page } from '@playwright/test';
 import { seedFreshMerchant } from './seedFreshMerchant';
+
+loadEnvConfig(process.cwd());
 
 /**
  * PLZ-078 — Proof-of-life spec for seedFreshMerchant.
@@ -36,6 +40,23 @@ test.describe('seedFreshMerchant fixture', () => {
     expect(handle.storeSlug.length).toBeGreaterThan(0);
     expect(handle.phone).toMatch(/^\+2126\d{8}$/);
     expect(handle.pin).toBe('1234');
+
+    // PLZ-081 — fixture drives the boutique location pin-drop; assert the
+    // contract field is present AND the merchant row actually has coordinates.
+    expect(handle.hasLocation).toBe(true);
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } },
+    );
+    const { data: merchantRow } = await admin
+      .from('merchants')
+      .select('location_lat, location_lng')
+      .eq('id', handle.merchantId)
+      .maybeSingle();
+    const typed = merchantRow as { location_lat: number | null; location_lng: number | null } | null;
+    expect(typed?.location_lat).not.toBeNull();
+    expect(typed?.location_lng).not.toBeNull();
 
     const storefrontResponse = await page.goto(`/store/${handle.storeSlug}`);
     expect(storefrontResponse?.status()).toBe(200);

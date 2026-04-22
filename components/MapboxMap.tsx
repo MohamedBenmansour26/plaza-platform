@@ -150,6 +150,7 @@ export default function MapboxMap({ lat, lng, onLocationChange }: Props) {
         disabled={locating}
         className="absolute top-2 right-2 z-10 bg-white rounded-lg shadow-md p-2 hover:bg-stone-50 disabled:opacity-60"
         title="Ma position"
+        data-testid="merchant-boutique-locate-btn"
       >
         {locating ? (
           <div className="w-5 h-5 border-2 border-stone-400 border-t-transparent rounded-full animate-spin" />

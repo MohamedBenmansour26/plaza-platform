@@ -16,6 +16,9 @@ loadEnvConfig(process.cwd());
  *   3. /auth/pin-setup (enter PIN twice) → /dashboard → middleware to /onboarding
  *   4. /onboarding (store name) → /dashboard
  *   5. merchantId + storeSlug resolved via admin read (UI-created state only)
+ *   6. (PLZ-081) /dashboard/boutique — geolocation-driven pin-drop at
+ *      Casablanca, then Enregistrer. Lets tests reach "Publier ma boutique"
+ *      since the checklist's 4th step (Localisation) gates the publish.
  *
  * Note on the brief's "/auth/signup" wording:
  *   That route is the deprecated email/password flow (its banner redirects
@@ -37,7 +40,27 @@ export interface FreshMerchantHandle {
   storeSlug: string;
   phone: string; // E.164 Moroccan, e.g. "+212691234567"
   pin: string;
+  /**
+   * PLZ-081 — Present (and always `true`) when the fixture successfully drove
+   * the `/dashboard/boutique` location pin-drop flow and persisted
+   * `location_lat` + `location_lng` on the merchant row. When the Mapbox token
+   * is unavailable or the location step is skipped, the field is absent so
+   * pre-PLZ-081 callers keep their original contract.
+   */
+  hasLocation?: true;
 }
+
+/**
+ * PLZ-081 — default pin-drop coordinates.
+ *
+ * The boutique location picker (components/MapboxMap.tsx) doesn't hardcode a
+ * merchant location — it falls back to MOROCCO_DEFAULT_VIEW (centered on the
+ * country, zoom 5). We pick Casablanca (Twin Center) as a realistic default
+ * for fixture merchants so downstream tests that read `location_description`
+ * get a plausible address context.
+ */
+const CASABLANCA_LAT = 33.5731;
+const CASABLANCA_LNG = -7.5898;
 
 function randomDigits(count: number): string {
   let out = '';
@@ -107,6 +130,24 @@ async function listAuthEmails(): Promise<Set<string>> {
 async function isPhoneTaken(phone: string): Promise<boolean> {
   const emails = await listAuthEmails();
   return emails.has(syntheticEmailFromPhone(phone));
+}
+
+async function readMerchantLocation(
+  merchantId: string,
+): Promise<{ lat: number | null; lng: number | null }> {
+  const { data, error } = await adminClient()
+    .from('merchants')
+    .select('location_lat, location_lng')
+    .eq('id', merchantId)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`seedFreshMerchant: location readback failed — ${error.message}`);
+  }
+  const row = data as { location_lat: number | null; location_lng: number | null } | null;
+  return {
+    lat: row?.location_lat ?? null,
+    lng: row?.location_lng ?? null,
+  };
 }
 
 async function resolveMerchantByPhone(
@@ -281,6 +322,84 @@ export async function seedFreshMerchant(page: Page): Promise<FreshMerchantHandle
   }
   markStep('merchant-lookup', stepResolveStart);
 
+  // PLZ-081 — drive the /dashboard/boutique location pin-drop so downstream
+  // tests can reach the "Publier ma boutique" gate (which requires
+  // location_lat to be non-null). We use Playwright's geolocation override
+  // and click the map's "Ma position" control — this fires `handleLocate` in
+  // components/MapboxMap.tsx, which in turn calls the `onLocationChange`
+  // prop that BoutiqueForm uses to populate its local state. We then click
+  // the form's "Enregistrer" button and read back the merchant row.
+  //
+  // If the Mapbox token isn't configured the component renders lat/lng
+  // inputs instead — we fall back to filling those directly.
+  const stepLocationStart = Date.now();
+  let locationApplied = false;
+  try {
+    await page.context().grantPermissions(['geolocation']);
+    await page.context().setGeolocation({
+      latitude: CASABLANCA_LAT,
+      longitude: CASABLANCA_LNG,
+    });
+
+    await page.goto('/dashboard/boutique', { waitUntil: 'domcontentloaded' });
+    await page.waitForURL(/\/dashboard\/boutique/, { timeout: 20_000 });
+
+    // The map is client-side only (dynamic import, ssr:false) and first-run
+    // dev-server compilation + mapbox-gl bundle fetch pushes this well past
+    // the default 5s — give it up to 45s before falling back.
+    const locateBtn = page.getByTestId('merchant-boutique-locate-btn');
+    const locateAttached = await locateBtn
+      .waitFor({ state: 'attached', timeout: 45_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (locateAttached) {
+      await locateBtn.scrollIntoViewIfNeeded();
+      await locateBtn.click();
+      // onLocationChange updates BoutiqueForm's locationLat/locationLng state,
+      // which renders the "Position enregistrée" confirmation line. Waiting
+      // for that text is the strongest proxy for "state is populated".
+      await page.getByText(/Position enregistrée/).waitFor({ timeout: 10_000 });
+    } else {
+      // Token missing → fallback numeric inputs. These are rendered by
+      // MapboxMap.tsx when NEXT_PUBLIC_MAPBOX_TOKEN is absent. No testids
+      // there (intentional — Saad only exercises the happy map path), so
+      // key off label text via Playwright's role/text locators.
+      const latInput = page.getByLabel('Latitude');
+      const lngInput = page.getByLabel('Longitude');
+      await latInput.fill(String(CASABLANCA_LAT));
+      await lngInput.fill(String(CASABLANCA_LNG));
+    }
+
+    await page.getByTestId('merchant-boutique-save-btn').click();
+
+    // Poll the DB until the merchant row reflects the new coordinates —
+    // surviving both the server-action commit round-trip and Supabase's
+    // replica read lag.
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const loc = await readMerchantLocation(resolved.id);
+      if (loc.lat !== null && loc.lng !== null) {
+        locationApplied = true;
+        break;
+      }
+      // eslint-disable-next-line no-await-in-loop
+      await page.waitForTimeout(500);
+    }
+  } catch (err) {
+    fail(
+      'location pin-drop (boutique)',
+      'merchant-boutique-locate-btn / merchant-boutique-save-btn',
+      err,
+    );
+  }
+  if (!locationApplied) {
+    throw new Error(
+      `seedFreshMerchant: location pin-drop did not persist — merchants.location_lat still NULL for ${resolved.id}.`,
+    );
+  }
+  markStep('location-pin-drop', stepLocationStart);
+
   const total = Date.now() - t0;
   if (total > 60_000) {
     // eslint-disable-next-line no-console
@@ -292,5 +411,6 @@ export async function seedFreshMerchant(page: Page): Promise<FreshMerchantHandle
     storeSlug: resolved.storeSlug,
     phone,
     pin,
+    hasLocation: true,
   };
 }

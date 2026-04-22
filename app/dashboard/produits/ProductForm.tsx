@@ -505,8 +505,12 @@ export function ProductForm({ product }: Props) {
   // The single publish button below is positioned via its wrapper:
   //  - mobile: `fixed bottom-0` sticky footer across the viewport.
   //  - desktop: `static` inline top-right action bar.
+  // PLZ-082: on mobile (<lg) MobileNav is fixed bottom-0 h-16 at z-50. The
+  // publish bar sits at `bottom-16` so it stacks above MobileNav instead of
+  // being occluded by it. On md+ the wrapper flips to `static`, which nullifies
+  // any `bottom-*` class, so the inline desktop layout is unaffected.
   const publishRow = (
-    <div className="fixed md:static bottom-0 start-0 end-0 z-10 md:z-0 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:mb-6 flex justify-stretch md:justify-end">
+    <div className="fixed md:static bottom-16 md:bottom-0 start-0 end-0 z-10 md:z-0 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:mb-6 flex justify-stretch md:justify-end">
       <button
         type="button"
         onClick={handleSubmit}
@@ -556,7 +560,7 @@ export function ProductForm({ product }: Props) {
 
   return (
     <>
-      <div className="bg-[#FAFAF9] min-h-screen pb-24 md:pb-0">
+      <div className="bg-[#FAFAF9] min-h-screen pb-40 md:pb-0">
         {/* Mobile top bar (back link + title) — hidden on desktop. */}
         <div className="md:hidden bg-white h-14 px-4 flex items-center justify-center relative border-b border-[#E2E8F0]">
           <Link
