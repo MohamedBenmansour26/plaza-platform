@@ -83,7 +83,7 @@ export function DataTable<T extends { id: string }>({
     >
       <table className="w-full border-collapse">
         <thead>
-          <tr className="h-10 bg-[#FAFAF9] border-b border-[#E7E5E4]">
+          <tr className="h-10 border-b border-[#E7E5E4]" style={{ backgroundColor: 'var(--admin-color-row-hover)' }}>
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -136,8 +136,8 @@ export function DataTable<T extends { id: string }>({
                       onFocus={() => setSelectedIndex(index)}
                       className={cn(
                         'border-b border-[#F5F5F4] last:border-b-0 cursor-pointer transition-colors',
-                        'hover:bg-[#FAFAF9] focus:outline-none',
-                        selected && 'bg-[#F5F5F4] relative',
+                        'hover:bg-[var(--admin-color-row-hover)] focus:outline-none',
+                        selected && 'bg-[var(--admin-color-row-selected)] relative',
                       )}
                       style={{ height: rowHeight }}
                       data-testid={rowTestId}
@@ -152,7 +152,7 @@ export function DataTable<T extends { id: string }>({
                             col.align === 'center' && 'text-center',
                             colIndex === 0 &&
                               selected &&
-                              'border-l-2 border-[#2563EB]',
+                              'border-l-2 border-[var(--admin-color-primary)]',
                           )}
                         >
                           {col.render(row)}

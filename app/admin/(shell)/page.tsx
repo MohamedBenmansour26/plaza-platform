@@ -19,7 +19,7 @@ export default function AdminHomePage() {
           P0 — cette page est un placeholder. Accède à la{' '}
           <Link
             href="/admin/drivers/pending"
-            className="font-medium text-[#2563EB] hover:underline"
+            className="font-medium text-[var(--admin-color-primary)] hover:underline"
             data-testid="admin-home-drivers-pending-link"
           >
             file d&apos;attente des livreurs

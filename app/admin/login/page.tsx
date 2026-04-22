@@ -13,11 +13,14 @@ export default async function AdminLoginPage({
   const unauthorized = params?.error === 'unauthorized';
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#FAFAF9] px-4">
+    <main
+      className="flex min-h-screen items-center justify-center px-4"
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
+    >
       <div className="w-full max-w-[420px]">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="text-[24px] font-bold text-[#2563EB]">Plaza</div>
+          <div className="text-[24px] font-bold text-[var(--admin-color-primary)]">Plaza</div>
           <div className="mt-1 text-[12px] font-semibold uppercase tracking-wider text-[#78716C]">
             Console admin
           </div>

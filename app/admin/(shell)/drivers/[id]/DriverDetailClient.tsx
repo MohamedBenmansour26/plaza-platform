@@ -282,7 +282,7 @@ export function DriverDetailClient({ driver }: { driver: DriverDetail }) {
                   type="button"
                   onClick={handleApprovePrimary}
                   disabled={pending}
-                  className="h-11 w-full rounded-[6px] bg-[#2563EB] text-[14px] font-semibold text-white hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-11 w-full rounded-[6px] bg-[var(--admin-color-primary)] text-[14px] font-semibold text-white hover:bg-[var(--admin-color-primary-dark)] disabled:cursor-not-allowed disabled:opacity-60"
                   data-testid="admin-driver-dossier-approve-btn"
                 >
                   Approuver le dossier
@@ -557,7 +557,10 @@ function MobileDetail({
   );
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] pb-[120px]">
+    <div
+      className="min-h-screen pb-[120px]"
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
+    >
       <div className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-[#E7E5E4] bg-white px-2">
         <button
           type="button"
@@ -606,7 +609,7 @@ function MobileDetail({
       <div className="px-4 py-4">
         <div className="rounded-[12px] border border-[#E7E5E4] bg-white p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-[13px] font-semibold text-[#2563EB]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--admin-color-primary-tint)] text-[13px] font-semibold text-[var(--admin-color-primary)]">
               {driver.fullName
                 .split(/\s+/)
                 .slice(0, 2)
@@ -688,7 +691,7 @@ function MobileDetail({
         <button
           type="button"
           onClick={onApprovePrimary}
-          className="h-12 w-full rounded-[6px] bg-[#2563EB] text-[15px] font-semibold text-white hover:bg-[#1D4ED8]"
+          className="h-12 w-full rounded-[6px] bg-[var(--admin-color-primary)] text-[15px] font-semibold text-white hover:bg-[var(--admin-color-primary-dark)]"
           data-testid="admin-driver-dossier-approve-mobile-btn"
         >
           Approuver le dossier

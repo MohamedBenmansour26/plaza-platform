@@ -18,12 +18,13 @@ export function DesktopRequired() {
     <div
       data-admin-desktop-required
       role="alert"
-      className="hidden min-h-screen items-center justify-center bg-[#FAFAF9] px-6"
+      className="hidden min-h-screen items-center justify-center px-6"
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
     >
       <div className="w-full max-w-[320px] rounded-[12px] border border-[#E7E5E4] bg-white px-6 py-8">
         <div className="flex flex-col items-center text-center">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[20px] font-bold text-[#2563EB]">Plaza</span>
+            <span className="text-[20px] font-bold text-[var(--admin-color-primary)]">Plaza</span>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#78716C]">
               Admin
             </span>
@@ -43,7 +44,7 @@ export function DesktopRequired() {
             <button
               type="button"
               onClick={() => setFormOpen(true)}
-              className="mt-6 h-10 w-full rounded-[6px] bg-[#2563EB] text-[14px] font-semibold text-white hover:bg-[#1D4ED8]"
+              className="mt-6 h-10 w-full rounded-[6px] bg-[var(--admin-color-primary)] text-[14px] font-semibold text-white hover:bg-[var(--admin-color-primary-dark)]"
             >
               M&apos;envoyer le lien par email
             </button>
@@ -64,11 +65,11 @@ export function DesktopRequired() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="vous@plaza.ma"
-                className="h-9 flex-1 rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] placeholder:text-[#A8A29E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#EFF6FF]"
+                className="h-9 flex-1 rounded-[6px] border border-[#E7E5E4] px-3 text-[14px] placeholder:text-[#A8A29E] focus:border-[var(--admin-color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-color-primary-tint)]"
               />
               <button
                 type="submit"
-                className="h-9 rounded-[6px] bg-[#2563EB] px-4 text-[13px] font-semibold text-white hover:bg-[#1D4ED8]"
+                className="h-9 rounded-[6px] bg-[var(--admin-color-primary)] px-4 text-[13px] font-semibold text-white hover:bg-[var(--admin-color-primary-dark)]"
               >
                 Envoyer
               </button>
@@ -80,7 +81,7 @@ export function DesktopRequired() {
           )}
           <Link
             href="/admin/drivers/pending"
-            className="mt-3 text-[13px] font-medium text-[#2563EB] hover:underline"
+            className="mt-3 text-[13px] font-medium text-[var(--admin-color-primary)] hover:underline"
           >
             Aller à l&apos;approbation des livreurs →
           </Link>

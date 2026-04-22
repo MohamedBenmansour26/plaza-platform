@@ -53,7 +53,10 @@ export function DemoClient() {
   const [viewerOpen, setViewerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] px-8 py-10">
+    <div
+      className="min-h-screen px-8 py-10"
+      style={{ backgroundColor: 'var(--admin-color-bg)' }}
+    >
       <div className="mx-auto max-w-[1120px]">
         <h1 className="text-[28px] font-bold text-[#1C1917]">
           Admin components demo
@@ -206,7 +209,7 @@ export function DemoClient() {
           <button
             type="button"
             onClick={() => setViewerOpen(true)}
-            className="h-9 rounded-[6px] bg-[#2563EB] px-3 text-[13px] font-semibold text-white hover:bg-[#1D4ED8]"
+            className="h-9 rounded-[6px] bg-[var(--admin-color-primary)] px-3 text-[13px] font-semibold text-white hover:bg-[var(--admin-color-primary-dark)]"
           >
             Ouvrir le visionneur
           </button>

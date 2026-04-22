@@ -78,7 +78,7 @@ export function PendingQueueClient({
       label: 'Livreur',
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[11px] font-semibold text-[#2563EB]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--admin-color-primary-tint)] text-[11px] font-semibold text-[var(--admin-color-primary)]">
             {row.fullName
               .split(/\s+/)
               .slice(0, 2)
@@ -160,7 +160,7 @@ export function PendingQueueClient({
       width: '100px',
       align: 'right',
       render: () => (
-        <div className="flex items-center justify-end text-[13px] font-medium text-[#2563EB]">
+        <div className="flex items-center justify-end text-[13px] font-medium text-[var(--admin-color-primary)]">
           Examiner <ChevronRight className="ml-0.5 h-3.5 w-3.5" />
         </div>
       ),
@@ -252,6 +252,7 @@ export function PendingQueueClient({
             emptyState={emptyState}
             ariaLabel="File d'attente des livreurs"
             rowTestId="admin-drivers-pending-row"
+            rowHeight={44}
           />
           <p className="mt-3 text-right text-[12px] text-[#78716C]">
             ↑↓ naviguer · Entrée ouvrir
@@ -281,12 +282,12 @@ function MobilePendingQueue({
     <div className="min-h-screen pb-[env(safe-area-inset-bottom)]">
       <div className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-[#E7E5E4] bg-white px-4">
         <div className="flex items-baseline gap-2">
-          <span className="text-[18px] font-bold text-[#2563EB]">Plaza</span>
+          <span className="text-[18px] font-bold text-[var(--admin-color-primary)]">Plaza</span>
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[#78716C]">
             Admin
           </span>
         </div>
-        <div className="h-8 w-8 rounded-full bg-[#EFF6FF]" aria-hidden />
+        <div className="h-8 w-8 rounded-full bg-[var(--admin-color-primary-tint)]" aria-hidden />
       </div>
       <div className="px-4 py-4">
         <h1 className="text-[20px] font-semibold text-[#1C1917]">
@@ -322,12 +323,12 @@ function MobilePendingQueue({
                 key={driver.id}
                 type="button"
                 onClick={() => onRowClick(driver)}
-                className="flex w-full flex-col gap-3 rounded-[12px] border border-[#E7E5E4] bg-white p-4 text-left hover:bg-[#FAFAF9]"
+                className="flex w-full flex-col gap-3 rounded-[12px] border border-[#E7E5E4] bg-white p-4 text-left hover:bg-[var(--admin-color-row-hover)]"
                 data-testid="admin-drivers-pending-card"
                 data-id={driver.id}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-[13px] font-semibold text-[#2563EB]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--admin-color-primary-tint)] text-[13px] font-semibold text-[var(--admin-color-primary)]">
                     {driver.fullName
                       .split(/\s+/)
                       .slice(0, 2)
@@ -359,7 +360,7 @@ function MobilePendingQueue({
                         ? '1 jour'
                         : `${days} jours`}
                   </StatusChip>
-                  <span className="text-[13px] font-medium text-[#2563EB]">
+                  <span className="text-[13px] font-medium text-[var(--admin-color-primary)]">
                     Examiner →
                   </span>
                 </div>
