@@ -20,12 +20,12 @@ export function SidebarNavItem({
   disabled = false,
 }: Props) {
   const base = cn(
-    'relative flex h-9 items-center gap-3 rounded-[6px] px-3 text-[14px] transition-colors',
+    'relative flex h-10 items-center gap-3 rounded-[6px] px-3 text-[14px] transition-colors',
     active
-      ? 'bg-[#EFF6FF] font-medium text-[#2563EB]'
+      ? 'bg-[#1E3A5F] pl-[13px] font-medium text-white'
       : disabled
-        ? 'cursor-not-allowed text-[#A8A29E]'
-        : 'text-[#78716C] hover:bg-[#F5F5F4] hover:text-[#1C1917]',
+        ? 'cursor-not-allowed text-[#64748B]'
+        : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white',
   );
 
   const content = (
@@ -33,7 +33,7 @@ export function SidebarNavItem({
       {active ? (
         <span
           aria-hidden
-          className="absolute inset-y-0 left-0 w-[2px] rounded-r-full bg-[#2563EB]"
+          className="absolute inset-y-0 left-0 w-[3px] rounded-r-full bg-[#1A6BFF]"
         />
       ) : null}
       <Icon className="h-4 w-4 flex-shrink-0" strokeWidth={1.8} />
