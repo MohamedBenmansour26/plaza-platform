@@ -727,80 +727,34 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
     </div>
   );
 
-  // ─── Mobile layout ─────────────────────────────────────────────────────────
-
-  const mobileLayout = (
-    <div className="md:hidden bg-[#FAFAF9] min-h-screen pb-24">
-      <div className="bg-white h-14 px-4 flex items-center justify-between border-b border-[#E2E8F0]">
-        <h1 className="text-base font-semibold text-[#1C1917]">{t('pageTitle')}</h1>
-        <a
-          href={`/store/${storeSlug}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-sm"
-          style={{ color: 'var(--color-primary)' }}
-        >
-          {t('viewStore')}
-        </a>
-      </div>
-
-      {/* Link preview */}
-      <div className="bg-white mx-4 mt-4 rounded-xl shadow-sm p-4">
-        <p className="text-xs text-[#78716C] uppercase mb-1">{t('storeLink')}</p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm flex-1 truncate" style={{ color: 'var(--color-primary)' }}>
-            plaza.ma/store/{storeSlug}
-          </span>
-          <button type="button" onClick={copyLink} className="p-1.5">
-            {copied ? (
-              <Check className="w-4 h-4 text-[#16A34A]" />
-            ) : (
-              <Copy className="w-4 h-4 text-[#78716C]" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-3">
-        {identitySection}
-        {appearanceSection}
-        {deliverySection}
-        <DeliveryZones initialZones={deliveryZones} />
-        {statusSection}
-        {workingHoursSection}
-        {paymentModesSection}
-      </div>
-
-      <div className="fixed bottom-0 start-0 end-0 bg-white border-t border-[#E2E8F0] p-4 md:hidden">
-        {savedIndicator && (
-          <p className="text-center text-sm font-medium text-[#16A34A] mb-2">Enregistré ✓</p>
-        )}
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isPending || uploadingLogo || uploadingBanner}
-          className="w-full h-12 text-white text-base font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-          style={{ backgroundColor: 'var(--color-primary)' }}
-          data-testid="merchant-boutique-save-btn"
-        >
-          {isPending ? t('saving') : t('save')}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ─── Desktop layout ────────────────────────────────────────────────────────
-
-  const desktopLayout = (
-    <div className="hidden md:block bg-[#FAFAF9] min-h-screen">
-      <div className="max-w-[1280px] mx-auto p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-[#1C1917]">{t('pageTitle')}</h1>
+  // ─── Unified layout (mobile + desktop via responsive classes) ─────────────
+  // PLZ-079: removed the previous `md:hidden` / `hidden md:block` fork so each
+  // testid (save button, inputs, selects) resolves to exactly one DOM element
+  // at any breakpoint. The "Enregistré ✓" indicator now lives in the single
+  // save-button row, fixing SAAD-003 (indicator invisible on desktop).
+  return (
+    <>
+      <div className="bg-[#FAFAF9] min-h-screen pb-24 md:pb-0">
+        {/* Top bar — mobile: compact h-14 with text link.
+                      desktop: bordered ExternalLink button. */}
+        <div className="bg-white md:bg-transparent h-14 md:h-auto px-4 md:px-0 flex items-center justify-between border-b md:border-b-0 border-[#E2E8F0] md:pt-8 md:mb-6 md:max-w-[1280px] md:mx-auto md:w-full md:px-8">
+          <h1 className="text-base md:text-2xl font-semibold text-[#1C1917]">{t('pageTitle')}</h1>
+          {/* Mobile variant: plain text link. */}
           <a
             href={`/store/${storeSlug}`}
             target="_blank"
             rel="noreferrer"
-            className="h-10 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            className="text-sm md:hidden"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            {t('viewStore')}
+          </a>
+          {/* Desktop variant: bordered button with ExternalLink icon. */}
+          <a
+            href={`/store/${storeSlug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden md:flex h-10 px-4 rounded-lg text-sm font-medium transition-colors items-center gap-2"
             style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)', backgroundColor: 'transparent' }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 8%, white)')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -810,8 +764,26 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           </a>
         </div>
 
-        <div className="flex gap-6">
-          <div className="flex-1 max-w-[640px] space-y-3">
+        {/* Mobile-only link preview card (desktop has it inside the preview panel). */}
+        <div className="md:hidden bg-white mx-4 mt-4 rounded-xl shadow-sm p-4">
+          <p className="text-xs text-[#78716C] uppercase mb-1">{t('storeLink')}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm flex-1 truncate" style={{ color: 'var(--color-primary)' }}>
+              plaza.ma/store/{storeSlug}
+            </span>
+            <button type="button" onClick={copyLink} className="p-1.5">
+              {copied ? (
+                <Check className="w-4 h-4 text-[#16A34A]" />
+              ) : (
+                <Copy className="w-4 h-4 text-[#78716C]" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Main content: single-column on mobile, 2-column on desktop with preview aside. */}
+        <div className="max-w-[1280px] mx-auto md:px-8 md:flex md:gap-6">
+          <div className="flex-1 md:max-w-[640px] p-4 md:p-0 space-y-3">
             {identitySection}
             {appearanceSection}
             {deliverySection}
@@ -820,19 +792,24 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             {workingHoursSection}
             {paymentModesSection}
 
-            <div className="pt-2 flex items-center gap-4">
+            {/* Save row — single element, positioned fixed bottom on mobile,
+                static inline on desktop. `flex-col-reverse` on mobile puts the
+                indicator ABOVE the button (DOM order is button → indicator). */}
+            <div className="fixed md:static bottom-0 start-0 end-0 z-10 bg-white md:bg-transparent border-t md:border-t-0 border-[#E2E8F0] p-4 md:p-0 md:pt-2 flex flex-col-reverse md:flex-row md:items-center md:gap-4">
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={isPending || uploadingLogo || uploadingBanner}
-                className="w-[200px] h-12 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="w-full md:w-[200px] h-12 text-white text-base md:text-sm font-semibold md:font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                 style={{ backgroundColor: 'var(--color-primary)' }}
                 data-testid="merchant-boutique-save-btn"
               >
                 {isPending ? t('saving') : t('save')}
               </button>
               {savedIndicator && (
-                <span className="text-sm font-medium text-[#16A34A]">Enregistré ✓</span>
+                <span className="text-center md:text-start text-sm font-medium text-[#16A34A] mb-2 md:mb-0">
+                  Enregistré ✓
+                </span>
               )}
             </div>
           </div>
@@ -840,13 +817,6 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           {previewPanel}
         </div>
       </div>
-    </div>
-  );
-
-  return (
-    <>
-      {mobileLayout}
-      {desktopLayout}
 
       {/* ── Checklist gate modal ─────────────────────────────────────────────── */}
       {showIncompleteModal && (
