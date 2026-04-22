@@ -111,6 +111,7 @@ export function FinancesClient({ metrics, period }: Props) {
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
               }`}
+              data-testid={`merchant-finances-period-${p.id}-btn`}
             >
               {p.label}
             </button>
@@ -299,6 +300,8 @@ export function FinancesClient({ metrics, period }: Props) {
                             <Link
                               href={`/dashboard/produits/${p.product_id}`}
                               className="text-sm font-medium text-[#1C1917] truncate hover:text-[var(--color-primary)] block"
+                              data-testid="merchant-finances-top-product-link"
+                              data-id={p.product_id}
                             >
                               {p.name_fr}
                             </Link>

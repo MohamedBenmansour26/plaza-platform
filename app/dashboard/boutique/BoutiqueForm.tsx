@@ -230,7 +230,15 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
   const ex2Commission = ex2Price * 0.05;
   const ex2Revenue = ex2Price - ex2Commission - 30;
 
-  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
+  const Toggle = ({
+    checked,
+    onChange,
+    testId,
+  }: {
+    checked: boolean;
+    onChange: () => void;
+    testId?: string;
+  }) => (
     <button
       type="button"
       role="switch"
@@ -239,6 +247,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
       className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
         checked ? 'bg-[#16A34A]' : 'bg-[#E2E8F0]'
       }`}
+      data-testid={testId}
     >
       <span
         className={`absolute top-0.5 start-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -263,6 +272,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             value={storeName}
             onChange={(e) => setStoreName(e.target.value)}
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            data-testid="merchant-boutique-store-name-input"
           />
         </div>
         <div>
@@ -274,6 +284,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               setStoreSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))
             }
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            data-testid="merchant-boutique-store-slug-input"
           />
           <p className="text-xs text-[#78716C] mt-1.5">plaza.ma/store/{storeSlug}</p>
         </div>
@@ -284,6 +295,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] resize-none"
+            data-testid="merchant-boutique-description-textarea"
           />
         </div>
         <div>
@@ -292,6 +304,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+            data-testid="merchant-boutique-category-select"
           >
             <option value="" disabled>Choisir une catégorie…</option>
             {STORE_CATEGORIES.map((cat) => (
@@ -332,6 +345,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             onChange={(e) => setLocationDescription(e.target.value)}
             placeholder="Ex: 2ème étage, porte bleue, en face du café..."
             className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            data-testid="merchant-boutique-location-description-input"
           />
         </div>
       </div>
@@ -356,6 +370,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               const file = e.target.files?.[0];
               if (file) uploadFile(file, setUploadingLogo, setLogoUrl);
             }}
+            data-testid="merchant-boutique-logo-input"
           />
           <div
             onClick={() => !uploadingLogo && logoInputRef.current?.click()}
@@ -393,6 +408,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                       ? '2.5px solid #1C1917'
                       : '2px solid transparent',
                 }}
+                data-testid={`merchant-boutique-color-${opt.value.replace('#', '').toLowerCase()}-btn`}
               />
             ))}
           </div>
@@ -410,6 +426,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               const file = e.target.files?.[0];
               if (file) uploadFile(file, setUploadingBanner, setBannerUrl);
             }}
+            data-testid="merchant-boutique-banner-input"
           />
           <div
             onClick={() => !uploadingBanner && bannerInputRef.current?.click()}
@@ -458,7 +475,11 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             <div className="text-sm font-medium text-[#1C1917]">{t('freeDeliveryToggle')}</div>
             <div className="text-xs text-[#78716C] mt-0.5">{t('freeDeliverySubtitle')}</div>
           </div>
-          <Toggle checked={freeDeliveryEnabled} onChange={() => setFreeDeliveryEnabled((v) => !v)} />
+          <Toggle
+            checked={freeDeliveryEnabled}
+            onChange={() => setFreeDeliveryEnabled((v) => !v)}
+            testId="merchant-boutique-free-delivery-toggle-checkbox"
+          />
         </div>
 
         {freeDeliveryEnabled && (
@@ -472,6 +493,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                 value={freeDeliveryThreshold}
                 onChange={(e) => setFreeDeliveryThreshold(e.target.value)}
                 className="w-[120px] h-12 px-3 text-center text-xl font-semibold border-2 border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                data-testid="merchant-boutique-free-delivery-threshold-input"
               />
               <span className="text-base text-[#78716C]">MAD</span>
             </div>
@@ -583,7 +605,11 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
             {isOnline ? t('online') : t('offline')}
           </span>
         </div>
-        <Toggle checked={isOnline} onChange={handleToggleOnline} />
+        <Toggle
+          checked={isOnline}
+          onChange={handleToggleOnline}
+          testId="merchant-boutique-online-toggle-checkbox"
+        />
       </div>
       {!isOnline && (
         <p className="text-xs text-[#78716C] mt-2">{t('offlineNote')}</p>
@@ -614,6 +640,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               setTerminalEnabled(next);
               startTransition(() => updateTerminalEnabled(next));
             }}
+            testId="merchant-boutique-terminal-toggle-checkbox"
           />
         </div>
 
@@ -754,6 +781,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           disabled={isPending || uploadingLogo || uploadingBanner}
           className="w-full h-12 text-white text-base font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-primary)' }}
+          data-testid="merchant-boutique-save-btn"
         >
           {isPending ? t('saving') : t('save')}
         </button>
@@ -799,6 +827,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
                 disabled={isPending || uploadingLogo || uploadingBanner}
                 className="w-[200px] h-12 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                 style={{ backgroundColor: 'var(--color-primary)' }}
+                data-testid="merchant-boutique-save-btn"
               >
                 {isPending ? t('saving') : t('save')}
               </button>
@@ -826,6 +855,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="incomplete-modal-title"
+          data-testid="merchant-boutique-incomplete-dialog"
         >
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
             <h2
@@ -853,6 +883,7 @@ export function BoutiqueForm({ merchant, deliveryZones }: Props) {
               type="button"
               onClick={() => setShowIncompleteModal(false)}
               className="w-full h-10 rounded-xl border border-[#E2E8F0] text-sm font-medium text-[#1C1917] hover:bg-[#F8FAFC] transition-colors"
+              data-testid="merchant-boutique-incomplete-close-btn"
             >
               Fermer
             </button>

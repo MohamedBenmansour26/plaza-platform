@@ -58,6 +58,7 @@ export default function SignupPage() {
             <Link
               href="/auth/login"
               className="font-medium underline underline-offset-2 hover:text-amber-900"
+              data-testid="merchant-signup-deprecation-link"
             >
               {ts('deprecationLink')} {isRtl ? '←' : '→'}
             </Link>
@@ -80,6 +81,7 @@ export default function SignupPage() {
               required
               autoComplete="organization"
               disabled={loading}
+              data-testid="merchant-signup-store-name-input"
             />
           </div>
 
@@ -93,6 +95,7 @@ export default function SignupPage() {
               required
               autoComplete="email"
               disabled={loading}
+              data-testid="merchant-signup-email-input"
             />
           </div>
 
@@ -107,6 +110,7 @@ export default function SignupPage() {
               minLength={8}
               autoComplete="new-password"
               disabled={loading}
+              data-testid="merchant-signup-password-input"
             />
           </div>
 
@@ -116,14 +120,14 @@ export default function SignupPage() {
             </p>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading} data-testid="merchant-signup-submit-btn">
             {loading ? tc('loading') : t('signUp')}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
           {t('alreadyHaveAccount')}{' '}
-          <Link href="/auth/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          <Link href="/auth/login" className="font-medium text-primary underline-offset-4 hover:underline" data-testid="merchant-signup-signin-link">
             {t('signIn')}
           </Link>
         </p>

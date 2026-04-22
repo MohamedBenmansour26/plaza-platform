@@ -42,7 +42,10 @@ export function ReportIssueSheet({ order, onClose }: Props) {
       <div className="fixed inset-0 bg-black/30 z-[60]" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-[70] flex flex-col">
+      <div
+        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-[70] flex flex-col"
+        data-testid="merchant-order-report-issue-sheet"
+      >
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
@@ -90,6 +93,7 @@ export function ReportIssueSheet({ order, onClose }: Props) {
                   placeholder="Décrivez le problème rencontré avec cette commande…"
                   rows={6}
                   className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  data-testid="merchant-order-report-issue-description-textarea"
                 />
                 <div className="text-xs text-[#A8A29E] text-end mt-1">
                   {description.length}/{MAX_DESC}
@@ -107,6 +111,7 @@ export function ReportIssueSheet({ order, onClose }: Props) {
               onClick={handleSubmit}
               className="w-full h-11 text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
+              data-testid="merchant-order-report-issue-submit-btn"
             >
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Créer le ticket

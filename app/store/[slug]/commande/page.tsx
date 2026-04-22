@@ -281,6 +281,7 @@ export default function CheckoutPage() {
         <button
           onClick={() => router.back()}
           className="w-10 h-10 flex items-center justify-center -ml-2"
+          data-testid="customer-checkout-back-btn"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -317,6 +318,7 @@ export default function CheckoutPage() {
               placeholder="Entrez votre nom complet"
               className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
               required
+              data-testid="customer-checkout-name-input"
             />
           </div>
           <div>
@@ -335,6 +337,7 @@ export default function CheckoutPage() {
                   : 'border-[#E2E8F0]'
               }`}
               required
+              data-testid="customer-checkout-phone-input"
             />
             {phoneBlurred && phone.trim() && !isPhoneValid(phone) && (
               <p className="text-xs text-[#DC2626] mt-1">
@@ -416,6 +419,7 @@ export default function CheckoutPage() {
               value={addressNotes}
               onChange={(e) => setAddressNotes(e.target.value)}
               className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+              data-testid="customer-checkout-address-notes-textarea"
             />
           </div>
         </div>
@@ -450,6 +454,7 @@ export default function CheckoutPage() {
               onChange={() => setPaymentMethod('cash')}
               className="w-4 h-4"
               style={{ accentColor: 'var(--color-primary)' }}
+              data-testid="customer-checkout-payment-cash-input"
             />
             <Banknote className="w-5 h-5 text-[#78716C]" />
             <span className="font-medium text-[#1C1917]">Paiement à la livraison</span>
@@ -472,6 +477,7 @@ export default function CheckoutPage() {
                 onChange={() => setPaymentMethod('card-delivery')}
                 className="w-4 h-4"
                 style={{ accentColor: 'var(--color-primary)' }}
+                data-testid="customer-checkout-payment-card-delivery-input"
               />
               <CreditCard className="w-5 h-5 text-[#78716C]" />
               <span className="font-medium text-[#1C1917]">Carte à la livraison</span>
@@ -495,6 +501,7 @@ export default function CheckoutPage() {
                 onChange={() => setPaymentMethod('online')}
                 className="w-4 h-4"
                 style={{ accentColor: 'var(--color-primary)' }}
+                data-testid="customer-checkout-payment-online-input"
               />
               <Smartphone className="w-5 h-5 text-[#78716C]" />
               <span className="font-medium text-[#1C1917]">Paiement en ligne (via CMI)</span>
@@ -571,6 +578,7 @@ export default function CheckoutPage() {
             whileTap={{ scale: 0.98 }}
             className="w-full h-14 text-white rounded-lg font-medium text-[16px] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="customer-checkout-submit-btn"
           >
             {loading ? (
               <span className="flex items-center gap-2">

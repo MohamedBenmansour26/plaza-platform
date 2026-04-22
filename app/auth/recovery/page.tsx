@@ -35,6 +35,7 @@ export default function PhoneRecoveryPage() {
             onClick={() => router.back()}
             className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"
             aria-label="Retour"
+            data-testid="merchant-recovery-back-btn"
           >
             <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
           </button>
@@ -60,6 +61,7 @@ export default function PhoneRecoveryPage() {
               }}
               className="text-[13px] mt-6"
             style={{ color: 'var(--color-primary)' }}
+              data-testid="merchant-recovery-resend-btn"
             >
               {t('resend')}
             </button>
@@ -77,6 +79,7 @@ export default function PhoneRecoveryPage() {
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"
           aria-label="Retour"
+          data-testid="merchant-recovery-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
         </button>
@@ -108,6 +111,7 @@ export default function PhoneRecoveryPage() {
               className={`h-12 w-full border rounded-xl px-4 text-sm text-[#1C1917] outline-none transition-colors ${
                 error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)]'
               }`}
+              data-testid="merchant-recovery-email-input"
             />
             {error && (
               <div className="text-[13px] text-[#DC2626] mt-2">{t('emailError')}</div>
@@ -125,12 +129,13 @@ export default function PhoneRecoveryPage() {
                 : 'bg-[#E2E8F0] text-[#A8A29E] cursor-not-allowed'
             }`}
             style={email ? { backgroundColor: 'var(--color-primary)' } : undefined}
+            data-testid="merchant-recovery-submit-btn"
           >
             {t('submit')}
           </button>
           <div className="text-xs text-[#78716C] text-center mt-4">
             {t('noEmailNote')}{' '}
-            <button className="text-[#E8632A]">{t('contactSupport')}</button>
+            <button className="text-[#E8632A]" data-testid="merchant-recovery-contact-support-btn">{t('contactSupport')}</button>
           </div>
         </div>
       </div>

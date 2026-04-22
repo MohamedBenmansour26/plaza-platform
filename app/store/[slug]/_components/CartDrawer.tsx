@@ -54,6 +54,7 @@ function CartContent({
         <button
           onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+          data-testid="customer-cart-close-btn"
         >
           <X className="w-5 h-5 text-[#78716C]" />
         </button>
@@ -78,7 +79,7 @@ function CartContent({
             {items.map((item) => {
               const atMax = item.stock != null && item.quantity >= item.stock;
               return (
-                <div key={item.id} className="flex gap-3">
+                <div key={item.id} className="flex gap-3" data-testid="customer-cart-item-row" data-id={item.id}>
                   {item.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -98,6 +99,7 @@ function CartContent({
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1, item.stock ?? null)}
                           className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                          data-testid="customer-cart-item-qty-decrement-btn"
                         >
                           <Minus className="w-3.5 h-3.5 text-[#78716C]" />
                         </button>
@@ -108,6 +110,7 @@ function CartContent({
                           onClick={() => updateQuantity(item.id, item.quantity + 1, item.stock ?? null)}
                           disabled={atMax}
                           className="w-7 h-7 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                          data-testid="customer-cart-item-qty-increment-btn"
                         >
                           <Plus className="w-3.5 h-3.5 text-[#78716C]" />
                         </button>
@@ -124,6 +127,7 @@ function CartContent({
                   <button
                     onClick={() => removeItem(item.id)}
                     className="text-[#DC2626] hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
+                    data-testid="customer-cart-item-remove-btn"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -172,6 +176,7 @@ function CartContent({
             disabled={items.length === 0}
             className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="customer-cart-checkout-btn"
           >
             Passer la commande — {finalTotal.toFixed(0)} MAD
           </button>
@@ -180,6 +185,7 @@ function CartContent({
             onClick={onClose}
             className="w-full text-sm font-semibold py-1"
             style={{ color: 'var(--color-primary)' }}
+            data-testid="customer-cart-continue-btn"
           >
             Continuer mes achats
           </button>

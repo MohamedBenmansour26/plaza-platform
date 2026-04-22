@@ -170,11 +170,13 @@ function ChatPanel({
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
           className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           disabled={isSending}
+          data-testid="merchant-support-reply-input"
         />
         <button
           onClick={handleSend}
           disabled={!content.trim() || isSending}
           className="w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 transition-colors"
+          data-testid="merchant-support-send-btn"
         >
           {isSending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -268,6 +270,7 @@ export function SupportClient({ tickets }: Props) {
               <button
                 onClick={() => setShowNewTicket(true)}
                 className="h-9 px-3 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
+                data-testid="merchant-support-new-ticket-btn"
               >
                 {t('new_ticket')}
               </button>
@@ -289,6 +292,8 @@ export function SupportClient({ tickets }: Props) {
                         ? 'bg-[#F8FAFC]'
                         : 'hover:bg-[#F8FAFC]'
                     }`}
+                    data-testid="merchant-support-ticket-row"
+                    data-id={ticket.id}
                   >
                     <div className="flex items-start justify-between mb-1">
                       <span className="text-[13px] font-bold text-[#1C1917]">
@@ -353,6 +358,7 @@ export function SupportClient({ tickets }: Props) {
           <button
             onClick={() => setShowNewTicket(true)}
             className="h-9 px-3 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:opacity-90 transition-colors"
+            data-testid="merchant-support-new-ticket-btn"
           >
             <Plus className="w-4 h-4" />
             {t('new_ticket_mobile')}
@@ -376,6 +382,8 @@ export function SupportClient({ tickets }: Props) {
                 key={ticket.id}
                 href={`/dashboard/support/${ticket.id}`}
                 className="block bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+                data-testid="merchant-support-ticket-row"
+                data-id={ticket.id}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-[14px] font-semibold text-[#1C1917]">

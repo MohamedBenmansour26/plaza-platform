@@ -39,6 +39,7 @@ export default async function ProduitsPage() {
             href="/dashboard/produits/nouveau"
             className="h-10 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="merchant-products-new-product-btn"
           >
             <Plus className="w-5 h-5" />
             Ajouter un produit

@@ -70,7 +70,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
   }
 
   return (
-    <Link href={`/store/${slug}/produit/${product.id}`} className="flex flex-col h-full">
+    <Link href={`/store/${slug}/produit/${product.id}`} className="flex flex-col h-full" data-testid="customer-store-product-card" data-id={product.id}>
       <motion.div
         whileHover={!outOfStock ? { y: -4 } : {}}
         className={`w-full flex flex-col h-full bg-white rounded-xl overflow-hidden transition-all shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] ${
@@ -151,6 +151,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
                   ? { backgroundColor: 'var(--color-primary)' }
                   : {}
               }
+              data-testid="customer-product-card-add-to-cart-btn"
             >
               {outOfStock ? (
                 'Rupture de stock'
@@ -172,6 +173,7 @@ export function ProductCard({ product, slug }: ProductCardProps) {
                 outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
               }`}
               style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
+              data-testid="customer-product-card-buy-now-btn"
             >
               {buyingNow ? (
                 <span className="flex items-center justify-center gap-1.5">

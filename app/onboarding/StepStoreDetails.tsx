@@ -70,6 +70,7 @@ export function StepStoreDetails({
           placeholder={t('storeNamePlaceholder')}
           required
           autoFocus
+          data-testid="merchant-onboarding-store-name-input"
         />
       </div>
 
@@ -86,6 +87,7 @@ export function StepStoreDetails({
             placeholder={t('storeSlugPlaceholder')}
             className="ps-[7.5rem]"
             required
+            data-testid="merchant-onboarding-store-slug-input"
           />
         </div>
         <div className="min-h-[1.25rem]">{slugIndicator}</div>
@@ -99,6 +101,7 @@ export function StepStoreDetails({
           onChange={(e) => onDescription(e.target.value)}
           placeholder={t('descriptionPlaceholder')}
           rows={3}
+          data-testid="merchant-onboarding-description-textarea"
         />
       </div>
 
@@ -111,6 +114,7 @@ export function StepStoreDetails({
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onLogoFile(f); }}
           disabled={logoUploading}
           className="cursor-pointer file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1 file:text-sm file:font-medium file:text-primary-foreground"
+          data-testid="merchant-onboarding-logo-input"
         />
         {logoUploading && (
           <p className="text-xs text-muted-foreground">{t('uploading')}</p>
@@ -120,7 +124,7 @@ export function StepStoreDetails({
       {error && (
         <p className="text-sm text-destructive text-center">{error}</p>
       )}
-      <Button type="submit" className="w-full" disabled={!canContinue || submitting}>
+      <Button type="submit" className="w-full" disabled={!canContinue || submitting} data-testid="merchant-onboarding-finish-btn">
         {submitting ? '…' : t('finish')}
       </Button>
     </form>

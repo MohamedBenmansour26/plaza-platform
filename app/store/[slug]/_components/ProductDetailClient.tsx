@@ -136,6 +136,7 @@ export function ProductDetailClient({
         <button
           onClick={() => router.back()}
           className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100"
+          data-testid="customer-product-detail-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
         </button>
@@ -145,6 +146,7 @@ export function ProductDetailClient({
         <button
           onClick={() => setCartOpen(true)}
           className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 relative"
+          data-testid="customer-product-detail-cart-btn"
         >
           <ShoppingCart className="w-5 h-5 text-[#78716C]" />
           {cartCount > 0 && (
@@ -254,6 +256,7 @@ export function ProductDetailClient({
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="w-12 h-12 flex items-center justify-center hover:bg-gray-50"
+                  data-testid="customer-product-detail-qty-decrement-btn"
                 >
                   <Minus className="w-5 h-5 text-[#78716C]" />
                 </button>
@@ -267,6 +270,7 @@ export function ProductDetailClient({
                   }}
                   disabled={atStockLimit}
                   className="w-12 h-12 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  data-testid="customer-product-detail-qty-increment-btn"
                 >
                   <Plus className="w-5 h-5 text-[#78716C]" />
                 </button>
@@ -292,6 +296,7 @@ export function ProductDetailClient({
                   ? { borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }
                   : {}
               }
+              data-testid="customer-product-detail-add-to-cart-btn"
             >
               Ajouter au panier
             </button>
@@ -302,6 +307,7 @@ export function ProductDetailClient({
                 outOfStock ? 'bg-gray-300 cursor-not-allowed' : ''
               }`}
               style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
+              data-testid="customer-product-detail-buy-now-btn"
             >
               {buyingNow ? (
                 <span className="flex items-center justify-center gap-1.5">
@@ -449,6 +455,7 @@ export function ProductDetailClient({
                 ? { borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }
                 : {}
             }
+            data-testid="customer-product-detail-add-to-cart-btn"
           >
             Ajouter au panier
           </button>
@@ -459,6 +466,7 @@ export function ProductDetailClient({
               outOfStock ? 'bg-gray-300 cursor-not-allowed' : buyingNow ? '' : 'active:scale-[0.97]'
             }`}
             style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
+            data-testid="customer-product-detail-buy-now-btn"
           >
             {buyingNow ? (
               <span className="flex items-center justify-center gap-1.5">

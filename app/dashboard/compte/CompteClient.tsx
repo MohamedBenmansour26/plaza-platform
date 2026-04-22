@@ -110,6 +110,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                data-testid="merchant-account-full-name-input"
               />
             </div>
             <div>
@@ -119,6 +120,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
                 value={mail}
                 onChange={(e) => setMail(e.target.value)}
                 className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                data-testid="merchant-account-email-input"
               />
               <p className="text-xs text-[#78716C] mt-1">{t('emailNote')}</p>
             </div>
@@ -130,6 +132,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
                 value={tel}
                 onChange={(e) => setTel(e.target.value)}
                 className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                data-testid="merchant-account-phone-input"
               />
             </div>
 
@@ -139,6 +142,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
               onClick={() => setShowPasswordForm((v) => !v)}
               className="w-full h-12 flex items-center justify-between px-4 border border-[#E2E8F0] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
               style={{ color: 'var(--color-primary)' }}
+              data-testid="merchant-account-change-password-btn"
             >
               <span>{t('changePassword')}</span>
               {showPasswordForm ? (
@@ -159,6 +163,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={t('passwordPlaceholder')}
                       className="w-full h-10 px-3 pr-10 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                      data-testid="merchant-account-new-password-input"
                     />
                     <button
                       type="button"
@@ -177,6 +182,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
                   disabled={isPasswordPending}
                   className="h-9 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                   style={{ backgroundColor: 'var(--color-primary)' }}
+                  data-testid="merchant-account-save-password-btn"
                 >
                   {isPasswordPending ? t('saving') : t('savePassword')}
                 </button>
@@ -195,6 +201,7 @@ export function CompteClient({ fullName, email, phone, initials }: Props) {
           disabled={isPending}
           className="w-full h-11 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-primary)' }}
+          data-testid="merchant-account-save-btn"
         >
           {isPending ? t('saving') : t('save')}
         </button>

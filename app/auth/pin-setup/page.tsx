@@ -93,6 +93,7 @@ function PINSetupContent() {
               step === 1 ? 'invisible' : ''
             }`}
             aria-label="Retour"
+            data-testid="merchant-pin-setup-back-btn"
           >
             <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
           </button>
@@ -157,6 +158,7 @@ function PINSetupContent() {
               className={`w-12 h-12 text-center text-xl border-2 rounded-lg outline-none transition-all ${
                 error ? 'border-[#DC2626]' : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
               }`}
+              data-testid={`merchant-pin-setup-digit-${index + 1}-input`}
             />
           ))}
         </div>
@@ -173,6 +175,7 @@ function PINSetupContent() {
                 key={num}
                 onClick={() => handleNumberPress(num.toString())}
                 className="h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all"
+                data-testid={`merchant-pin-setup-numpad-${num}-btn`}
               >
                 {num}
               </button>
@@ -182,6 +185,7 @@ function PINSetupContent() {
             <button
               onClick={() => handleNumberPress('0')}
               className="h-16 rounded-2xl bg-white border border-[#E2E8F0] text-xl font-medium text-[#1C1917] hover:bg-[#F0F4FF] active:scale-95 transition-all"
+              data-testid="merchant-pin-setup-numpad-0-btn"
             >
               0
             </button>
@@ -190,6 +194,7 @@ function PINSetupContent() {
               onClick={handleBackspace}
               className="h-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center hover:bg-[#F0F4FF] active:scale-95 transition-all"
               aria-label="Effacer"
+              data-testid="merchant-pin-setup-backspace-btn"
             >
               <Delete className="w-5 h-5 text-[#1C1917]" />
             </button>

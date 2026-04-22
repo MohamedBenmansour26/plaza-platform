@@ -68,6 +68,7 @@ export function TicketDetailClient({ ticket }: Props) {
           <button
             onClick={() => router.back()}
             className="p-2 -ml-2"
+            data-testid="merchant-support-ticket-back-btn"
           >
             <ArrowLeft size={20} className="text-[#1C1917]" />
           </button>
@@ -183,11 +184,13 @@ export function TicketDetailClient({ ticket }: Props) {
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               disabled={isSending}
               className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-[14px] focus:outline-none focus:border-[var(--color-primary)]"
+              data-testid="merchant-support-reply-input"
             />
             <button
               onClick={handleSend}
               disabled={!content.trim() || isSending}
               className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+              data-testid="merchant-support-send-btn"
             >
               {isSending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

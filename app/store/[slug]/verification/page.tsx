@@ -312,6 +312,7 @@ export default function VerificationPage() {
         <button
           onClick={() => router.back()}
           className="w-10 h-10 flex items-center justify-center -ml-2"
+          data-testid="customer-verification-back-btn"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -371,6 +372,8 @@ export default function VerificationPage() {
                         : 'border-[#E2E8F0] bg-white'
                   }`}
                   style={!error && digit ? { borderColor: 'var(--color-primary)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)' } : {}}
+                  data-testid="customer-verification-otp-input"
+                  data-index={index}
                 />
               ))}
             </div>
@@ -402,6 +405,7 @@ export default function VerificationPage() {
             disabled={loading || otp.join('').length !== 6}
             className="w-full h-14 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="customer-verification-verify-btn"
           >
             {loading ? (
               <>
@@ -421,6 +425,7 @@ export default function VerificationPage() {
               onClick={handleResend}
               className="text-[14px] font-medium hover:underline"
               style={{ color: 'var(--color-primary)' }}
+              data-testid="customer-verification-resend-btn"
             >
               Renvoyer le code
             </button>

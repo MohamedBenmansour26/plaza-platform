@@ -201,6 +201,7 @@ export function ProductForm({ product }: Props) {
           className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${
             discountActive ? 'bg-[#E8632A]' : 'bg-[#E2E8F0]'
           }`}
+          data-testid="merchant-product-form-discount-toggle-checkbox"
         >
           <span className={`absolute top-0.5 start-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
             discountActive ? 'translate-x-5' : 'translate-x-0'
@@ -219,6 +220,7 @@ export function ProductForm({ product }: Props) {
               value={originalPrice}
               onChange={(e) => setOriginalPrice(e.target.value)}
               className="w-full h-14 px-4 pr-16 border border-[#E2E8F0] rounded-lg text-2xl font-semibold text-[#1C1917] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+              data-testid="merchant-product-form-original-price-input"
             />
             <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
           </div>
@@ -242,6 +244,7 @@ export function ProductForm({ product }: Props) {
                 ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20'
                 : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'
             }`}
+            data-testid="merchant-product-form-price-input"
           />
           <span className="absolute end-4 top-1/2 -translate-y-1/2 text-base text-[#78716C]">MAD</span>
         </div>
@@ -287,6 +290,7 @@ export function ProductForm({ product }: Props) {
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={handleImageChange}
+        data-testid="merchant-product-form-photo-input"
       />
       <div
         onClick={() => !uploading && fileInputRef.current?.click()}
@@ -331,6 +335,7 @@ export function ProductForm({ product }: Props) {
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
             isVisible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
           }`}
+          data-testid="merchant-product-form-visibility-toggle-checkbox"
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
@@ -352,6 +357,7 @@ export function ProductForm({ product }: Props) {
         type="button"
         onClick={() => setShowDeleteModal(true)}
         className="w-full h-10 bg-white border-[1.5px] border-[#DC2626] text-[#DC2626] rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
+        data-testid="merchant-product-form-delete-btn"
       >
         {t('formDelete')}
       </button>
@@ -368,6 +374,7 @@ export function ProductForm({ product }: Props) {
         <Link
           href="/dashboard/produits"
           className="absolute start-4 p-2 -ms-2 text-[#1C1917]"
+          data-testid="merchant-product-form-back-link"
         >
           <ArrowLeft size={20} />
         </Link>
@@ -399,6 +406,7 @@ export function ProductForm({ product }: Props) {
                   ? 'border-[#DC2626] focus:border-[#DC2626]'
                   : 'border-[#E2E8F0] focus:border-[var(--color-primary)]'
               }`}
+              data-testid="merchant-product-form-name-input"
             />
             {errors.nameFr && (
               <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
@@ -415,6 +423,7 @@ export function ProductForm({ product }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] resize-none"
+              data-testid="merchant-product-form-description-textarea"
             />
           </div>
 
@@ -427,6 +436,7 @@ export function ProductForm({ product }: Props) {
               value={catL1}
               onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
               className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+              data-testid="merchant-product-form-category-l1-select"
             >
               <option value="">Sélectionner une catégorie</option>
               {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
@@ -439,6 +449,7 @@ export function ProductForm({ product }: Props) {
                 value={catL2}
                 onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
                 className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+                data-testid="merchant-product-form-category-l2-select"
               >
                 <option value="">Sous-catégorie</option>
                 {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
@@ -452,6 +463,7 @@ export function ProductForm({ product }: Props) {
                 value={catL3}
                 onChange={(e) => setCatL3(e.target.value)}
                 className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+                data-testid="merchant-product-form-category-l3-select"
               >
                 <option value="">Type (optionnel)</option>
                 {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
@@ -471,6 +483,7 @@ export function ProductForm({ product }: Props) {
               value={stock}
               onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
               className="w-full h-11 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)]"
+              data-testid="merchant-product-form-stock-input"
             />
             <p className="text-xs text-[#78716C] mt-1">
               Stock = 0 signifie rupture de stock — le produit sera visible mais non commandable.
@@ -488,6 +501,7 @@ export function ProductForm({ product }: Props) {
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 isVisible ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
               }`}
+              data-testid="merchant-product-form-visibility-toggle-checkbox"
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
@@ -513,6 +527,7 @@ export function ProductForm({ product }: Props) {
           disabled={isPending || uploading}
           className="w-full h-12 text-white text-base font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-primary)' }}
+          data-testid="merchant-product-form-publish-btn"
         >
           {isPending
             ? isEdit ? t('formSaving') : t('formPublishing')
@@ -544,6 +559,7 @@ export function ProductForm({ product }: Props) {
             disabled={isPending || uploading}
             className="h-10 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="merchant-product-form-publish-btn"
           >
             {isPending
               ? isEdit ? t('formSaving') : t('formPublishing')
@@ -572,6 +588,7 @@ export function ProductForm({ product }: Props) {
                         ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]'
                         : 'border-[#E2E8F0] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]'
                     }`}
+                    data-testid="merchant-product-form-name-input"
                   />
                   {errors.nameFr && (
                     <p className="text-xs text-[#DC2626] mt-1">{errors.nameFr}</p>
@@ -586,6 +603,7 @@ export function ProductForm({ product }: Props) {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] resize-none"
+                    data-testid="merchant-product-form-description-textarea"
                   />
                 </div>
 
@@ -598,6 +616,7 @@ export function ProductForm({ product }: Props) {
                     value={catL1}
                     onChange={(e) => { setCatL1(e.target.value); setCatL2(''); setCatL3(''); }}
                     className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+                    data-testid="merchant-product-form-category-l1-select"
                   >
                     <option value="">Sélectionner une catégorie</option>
                     {Object.keys(PRODUCT_CATEGORIES).map((l1) => (
@@ -610,6 +629,7 @@ export function ProductForm({ product }: Props) {
                       value={catL2}
                       onChange={(e) => { setCatL2(e.target.value); setCatL3(''); }}
                       className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white mb-2"
+                      data-testid="merchant-product-form-category-l2-select"
                     >
                       <option value="">Sous-catégorie</option>
                       {Object.keys(PRODUCT_CATEGORIES[catL1]).map((l2) => (
@@ -623,6 +643,7 @@ export function ProductForm({ product }: Props) {
                       value={catL3}
                       onChange={(e) => setCatL3(e.target.value)}
                       className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+                      data-testid="merchant-product-form-category-l3-select"
                     >
                       <option value="">Type (optionnel)</option>
                       {(PRODUCT_CATEGORIES[catL1][catL2]).map((l3) => (
@@ -640,6 +661,7 @@ export function ProductForm({ product }: Props) {
                       type="button"
                       onClick={() => setStock((s) => Math.max(0, s - 1))}
                       className="w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+                      data-testid="merchant-product-form-stock-decrement-btn"
                     >
                       −
                     </button>
@@ -648,11 +670,13 @@ export function ProductForm({ product }: Props) {
                       value={stock}
                       onChange={(e) => setStock(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-24 h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm text-center focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                      data-testid="merchant-product-form-stock-input"
                     />
                     <button
                       type="button"
                       onClick={() => setStock((s) => s + 1)}
                       className="w-8 h-8 border border-[#E2E8F0] rounded text-[#78716C] hover:bg-[#F8FAFC] text-lg leading-none"
+                      data-testid="merchant-product-form-stock-increment-btn"
                     >
                       +
                     </button>
@@ -680,7 +704,10 @@ export function ProductForm({ product }: Props) {
   // ─── Delete modal ──────────────────────────────────────────────────────────
 
   const deleteModal = showDeleteModal ? (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      data-testid="merchant-product-form-delete-dialog"
+    >
       <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
         <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('formDeleteTitle')}</h3>
         <p className="text-sm text-[#78716C] mb-6">{t('formDeleteBody')}</p>
@@ -690,6 +717,7 @@ export function ProductForm({ product }: Props) {
             onClick={() => setShowDeleteModal(false)}
             disabled={isDeleting}
             className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+            data-testid="merchant-product-form-delete-cancel-btn"
           >
             {t('formDeleteCancel')}
           </button>
@@ -698,6 +726,7 @@ export function ProductForm({ product }: Props) {
             onClick={handleDelete}
             disabled={isDeleting}
             className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+            data-testid="merchant-product-form-delete-confirm-btn"
           >
             {isDeleting ? t('loading') : t('formDeleteConfirm')}
           </button>

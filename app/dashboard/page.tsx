@@ -114,7 +114,7 @@ export default async function DashboardPage() {
       {/* Mobile top bar */}
       <div className="md:hidden bg-white px-4 py-4 flex items-center justify-between border-b border-[#E2E8F0]">
         <div className="font-bold text-xl" style={{ color: 'var(--color-primary)' }}>Plaza</div>
-        <Link href="/dashboard/compte">
+        <Link href="/dashboard/compte" data-testid="merchant-dashboard-account-link">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
             {merchant.store_name.slice(0, 2).toUpperCase()}
           </div>
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <Link href="/dashboard/commandes?filter=pending" className="block">
+          <Link href="/dashboard/commandes?filter=pending" className="block" data-testid="merchant-dashboard-pending-orders-link">
             <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 h-full cursor-pointer hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-full bg-[#FFFBEB] flex items-center justify-center">
@@ -223,6 +223,8 @@ export default async function DashboardPage() {
                     key={order.id}
                     href={`/dashboard/commandes/${order.id}`}
                     className="block bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow"
+                    data-testid="merchant-dashboard-recent-order-row"
+                    data-id={order.id}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -266,6 +268,8 @@ export default async function DashboardPage() {
                     key={order.id}
                     href={`/dashboard/commandes/${order.id}`}
                     className="h-12 px-4 flex items-center border-b border-[#F3F4F6] hover:bg-[#F8FAFC] cursor-pointer transition-colors"
+                    data-testid="merchant-dashboard-recent-order-row"
+                    data-id={order.id}
                   >
                     <div className="w-[130px] text-sm font-medium text-[#1C1917]">
                       {order.order_number}
@@ -310,6 +314,7 @@ export default async function DashboardPage() {
                 rel="noopener noreferrer"
                 className="btn-primary-outline-hover w-full h-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 style={{ border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}
+                data-testid="merchant-dashboard-view-store-link"
               >
                 <ExternalLink className="w-4 h-4" />
                 Voir la boutique

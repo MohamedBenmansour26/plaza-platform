@@ -25,6 +25,7 @@ function ForgotPINContent() {
           onClick={() => router.back()}
           className="w-11 h-11 flex items-center justify-center hover:bg-[#F5F5F4] rounded-lg transition-colors mt-4 ms-4 md:mt-0 md:ms-0"
           aria-label="Retour"
+          data-testid="merchant-forgot-pin-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
         </button>
@@ -59,12 +60,14 @@ function ForgotPINContent() {
             onClick={handleSendOTP}
             className="h-14 w-full rounded-xl text-white text-base font-semibold hover:opacity-90 transition-opacity"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="merchant-forgot-pin-send-sms-btn"
           >
             {t('sendSms')}
           </button>
           <button
             onClick={() => router.push('/auth/recovery')}
             className="text-[13px] text-[#78716C] text-center mt-4 w-full"
+            data-testid="merchant-forgot-pin-wrong-number-btn"
           >
             {t('wrongNumber')}
           </button>

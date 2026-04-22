@@ -201,6 +201,7 @@ function ActionBar({
             onClick={() => run(confirmOrderAction)}
             className="w-full h-12 text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="merchant-order-confirm-btn"
           >
             Confirmer la commande
           </button>
@@ -210,6 +211,7 @@ function ActionBar({
           <button
             onClick={onReportOpen}
             className="w-full h-12 border border-[#E2E8F0] text-[#78716C] rounded-lg text-[14px] font-medium hover:bg-[#F5F5F4] transition-colors"
+            data-testid="merchant-order-report-issue-btn"
           >
             Signaler un problème
           </button>
@@ -238,7 +240,10 @@ export function OrderDetailSheet({ order, onClose }: Props) {
       />
 
       {/* Drawer panel */}
-      <div className="fixed end-0 top-0 h-screen w-full max-w-[560px] bg-white shadow-xl z-50 flex flex-col">
+      <div
+        className="fixed end-0 top-0 h-screen w-full max-w-[560px] bg-white shadow-xl z-50 flex flex-col"
+        data-testid="merchant-order-detail-sheet"
+      >
 
         {/* Header */}
         <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
