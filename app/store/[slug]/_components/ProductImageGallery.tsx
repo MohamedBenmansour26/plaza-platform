@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { resolveImageAlt, type ProductImage } from '@/lib/product-images';
+import { cn } from '@/lib/utils';
 
 interface ProductImageGalleryProps {
   images: ProductImage[];
@@ -32,11 +33,18 @@ export function ProductImageGallery({
   const total = images.length;
 
   // Scroll to a specific slide, anchored to the snap point.
+  // Honours `prefers-reduced-motion` — users who opt out of animation get
+  // an instant jump instead of the smooth scroll.
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const clamped = Math.max(0, Math.min(index, total - 1));
-    scroller.scrollTo({ left: scroller.clientWidth * clamped, behavior });
+    const prefersReducedMotion = typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scroller.scrollTo({
+      left: scroller.clientWidth * clamped,
+      behavior: prefersReducedMotion ? 'auto' : behavior,
+    });
     setActiveIndex(clamped);
   }, [total]);
 
@@ -114,7 +122,7 @@ export function ProductImageGallery({
         aria-label={`${productName} — galerie d'images`}
         tabIndex={0}
         onKeyDown={handleKeyDown}
-        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth focus:outline-none focus-visible:ring-2"
+        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory motion-safe:scroll-smooth focus:outline-none focus-visible:ring-2"
         style={{
           scrollSnapType: 'x mandatory',
           // Hide native scrollbar cross-browser without bleeding into global CSS.
@@ -122,7 +130,12 @@ export function ProductImageGallery({
         }}
       >
         {images.map((img, i) => {
-          const alt = resolveImageAlt(img, productName, i);
+          // Slide carries aria-label="{productName} image N of M". If the merchant
+          // didn't author a custom alt, `resolveImageAlt` falls back to the same
+          // string → screen readers would announce it twice. Mirror the predicate
+          // from `resolveImageAlt` and pass alt="" when the fallback would collide.
+          const hasCustomAlt = (img.alt ?? '').trim().length > 0;
+          const alt = hasCustomAlt ? resolveImageAlt(img, productName, i) : '';
           return (
             <div
               key={`${img.url}-${i}`}
@@ -159,15 +172,24 @@ export function ProductImageGallery({
               onClick={() => scrollToIndex(i)}
               aria-label={`Go to image ${i + 1} of ${total}`}
               aria-current={active ? 'true' : undefined}
-              className="rounded-full transition-all"
-              style={{
-                width: active ? 10 : 8,
-                height: active ? 10 : 8,
-                backgroundColor: active
-                  ? 'var(--color-primary, #1A6BFF)'
-                  : 'rgba(120, 113, 108, 0.45)',
-              }}
-            />
+              className={cn(
+                // 24×24 CSS-px hit area — WCAG 2.5.8 AA target size.
+                'grid place-items-center h-6 w-6 rounded-full',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--color-primary,#1A6BFF)]',
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'block rounded-full transition-all',
+                  // Inactive dot: stone-500 (#78716c) on bg-white/70 pill
+                  // clears WCAG 1.4.11 3:1 non-text contrast (~4.3:1).
+                  active
+                    ? 'h-2.5 w-2.5 bg-[var(--color-primary,#1A6BFF)]'
+                    : 'h-2 w-2 bg-stone-500',
+                )}
+              />
+            </button>
           );
         })}
       </div>
