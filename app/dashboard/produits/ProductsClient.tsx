@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Search, Edit2, Trash2, Plus } from 'lucide-react';
 import type { Product } from '@/types/supabase';
 import { toggleProductVisibility, deleteProduct } from './actions';
+import { getProductImages } from '@/lib/product-images';
 
 type FilterStatus = 'tous' | 'en-stock' | 'rupture' | 'masques';
 
@@ -107,13 +108,17 @@ export function ProductsClient({ products: initialProducts }: Props) {
         {filtered.length === 0 ? (
           <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
-          filtered.map((product) => (
+          filtered.map((product) => {
+            // PLZ-090c — cover image comes from images[0] (the reorderable
+            // slot 1), falling back to image_url for pre-090a rows.
+            const coverUrl = getProductImages(product)[0]?.url ?? null;
+            return (
             <Link key={product.id} href={`/dashboard/produits/${product.id}`} data-testid="merchant-products-row" data-id={product.id}>
               <div className="bg-card rounded-xl p-3 shadow-card flex gap-3 hover:shadow-card-hover transition-shadow">
-                {product.image_url ? (
+                {coverUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={product.image_url}
+                    src={coverUrl}
                     alt={product.name_fr}
                     className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
@@ -149,7 +154,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 </div>
               </div>
             </Link>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -167,7 +173,11 @@ export function ProductsClient({ products: initialProducts }: Props) {
         {filtered.length === 0 ? (
           <EmptyState hasProducts={initialProducts.length > 0} />
         ) : (
-          filtered.map((product) => (
+          filtered.map((product) => {
+            // PLZ-090c — cover image comes from images[0] (the reorderable
+            // slot 1), falling back to image_url for pre-090a rows.
+            const coverUrl = getProductImages(product)[0]?.url ?? null;
+            return (
             <div
               key={product.id}
               className="min-h-16 px-4 flex items-center border-b border-border hover:bg-muted/40 transition-colors last:border-b-0"
@@ -175,10 +185,10 @@ export function ProductsClient({ products: initialProducts }: Props) {
               data-id={product.id}
             >
               <div className="w-16">
-                {product.image_url ? (
+                {coverUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={product.image_url}
+                    src={coverUrl}
                     alt={product.name_fr}
                     className="w-12 h-12 rounded-lg object-cover"
                   />
@@ -256,7 +266,8 @@ export function ProductsClient({ products: initialProducts }: Props) {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 

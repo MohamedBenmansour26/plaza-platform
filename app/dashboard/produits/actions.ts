@@ -4,6 +4,37 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Merchant } from '@/types/supabase';
+import { MAX_PRODUCT_IMAGES, type ProductImage } from '@/lib/product-images';
+
+/**
+ * Parse + sanitise the `images` JSON blob coming from the product form.
+ * Defence-in-depth against the DB check constraint: we never send more than
+ * MAX_PRODUCT_IMAGES entries, never send malformed shapes, and always fall
+ * back to `[]` if the blob is missing / unparseable (draft-safe).
+ */
+function parseImages(raw: string | null): ProductImage[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .filter(
+      (x): x is { url: string; alt?: string } =>
+        typeof x === 'object' &&
+        x !== null &&
+        typeof (x as { url?: unknown }).url === 'string' &&
+        ((x as { url: string }).url).length > 0,
+    )
+    .slice(0, MAX_PRODUCT_IMAGES)
+    .map((x) => ({
+      url: x.url,
+      alt: typeof x.alt === 'string' ? x.alt : '',
+    }));
+}
 
 async function getMerchantId(): Promise<string> {
   const supabase = await createClient();
@@ -31,7 +62,10 @@ export async function createProduct(formData: FormData): Promise<void> {
   const description = (formData.get('description') as string | null)?.trim() || null;
   const priceMAD = parseFloat(formData.get('price') as string);
   const stock = Math.max(0, parseInt(formData.get('stock') as string) || 0);
-  const imageUrl = (formData.get('image_url') as string | null) || null;
+  // PLZ-090c — images[] is the new source of truth. image_url is kept in
+  // sync with images[0].url as a safety net (dropped in a follow-up migration).
+  const images = parseImages(formData.get('images') as string | null);
+  const imageUrl = images[0]?.url ?? null;
   const isVisible = formData.get('is_visible') === 'true';
   const discountActive = formData.get('discount_active') === 'true';
   const originalPriceRaw = formData.get('original_price');
@@ -48,6 +82,7 @@ export async function createProduct(formData: FormData): Promise<void> {
     price: Math.round(priceMAD * 100),
     stock,
     image_url: imageUrl,
+    images,
     is_visible: isVisible,
     discount_active: discountActive,
     original_price: originalPrice,
@@ -70,7 +105,8 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   const description = (formData.get('description') as string | null)?.trim() || null;
   const priceMAD = parseFloat(formData.get('price') as string);
   const stock = Math.max(0, parseInt(formData.get('stock') as string) || 0);
-  const imageUrl = (formData.get('image_url') as string | null) || null;
+  const images = parseImages(formData.get('images') as string | null);
+  const imageUrl = images[0]?.url ?? null;
   const isVisible = formData.get('is_visible') === 'true';
   const discountActive = formData.get('discount_active') === 'true';
   const originalPriceRaw = formData.get('original_price');
@@ -88,6 +124,7 @@ export async function updateProduct(productId: string, formData: FormData): Prom
       price: Math.round(priceMAD * 100),
       stock,
       image_url: imageUrl,
+      images,
       is_visible: isVisible,
       discount_active: discountActive,
       original_price: originalPrice,
