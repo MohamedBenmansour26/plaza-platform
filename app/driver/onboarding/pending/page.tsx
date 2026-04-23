@@ -79,7 +79,7 @@ export default async function PendingPage() {
           </p>
         )}
         <Link
-          href="#"
+          href="/driver/support"
           className="mt-6 inline-flex h-12 items-center justify-center rounded-[12px] bg-[#DC2626] px-6 text-[14px] font-semibold text-white hover:bg-[#B91C1C]"
           data-testid="driver-onboarding-pending-rejected-support-link"
         >
@@ -121,9 +121,10 @@ export default async function PendingPage() {
           {t('resubmit.cta')}
         </Link>
         <Link
-          href="#"
+          href="/driver/support"
           className="mt-4 text-[13px] underline"
           style={{ color: 'var(--color-primary)' }}
+          data-testid="driver-onboarding-pending-resubmit-support-link"
         >
           {t('contactSupport')}
         </Link>
@@ -195,9 +196,10 @@ export default async function PendingPage() {
         {t('pending.smsHint')}
       </p>
       <Link
-        href="#"
+        href="/driver/support"
         className="text-[14px] mt-4 underline"
         style={{ color: 'var(--color-primary)' }}
+        data-testid="driver-onboarding-pending-support-link"
       >
         {t('contactSupport')}
       </Link>
