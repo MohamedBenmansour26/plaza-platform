@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 
 import { getMerchantBySlug } from './actions';
 import { CartProvider } from './_components/CartProvider';
-import { BottomTabBar } from './_components/BottomTabBar';
 import { StoreFooter } from './_components/StoreFooter';
 
 type Props = {
@@ -21,15 +20,19 @@ export default async function StoreLayout({ children, params }: Props) {
 
   const primaryColor = merchant.primary_color?.trim() || '#1A6BFF';
 
+  // BottomTabBar is rendered by each client component (StoreHomeClient,
+  // ProductDetailClient, etc.) so the `onInfoClick` / `onCartClick` handlers
+  // are wired to that page's local sheet state. Linear checkout / verification
+  // / confirmation flows intentionally omit the tab bar (they use their own
+  // back buttons + CTAs).
   return (
     <CartProvider slug={slug}>
       <div
         style={{ '--color-primary': primaryColor } as React.CSSProperties}
-        className="storefront-scope pb-[calc(56px+env(safe-area-inset-bottom))] lg:pb-0"
+        className="storefront-scope"
       >
         {children}
         <StoreFooter />
-        <BottomTabBar slug={slug} />
       </div>
     </CartProvider>
   );

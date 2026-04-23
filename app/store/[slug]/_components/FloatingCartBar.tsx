@@ -30,7 +30,7 @@ export function FloatingCartBar({ onClick, onOpenCart }: FloatingCartBarProps) {
         >
           <button
             onClick={handleClick}
-            className="w-full bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 flex items-center justify-between shadow-lg"
+            className="w-full bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 flex items-center justify-between shadow-lg transition-all active:scale-[0.98] hover:shadow-xl"
             data-testid="customer-floating-cart-btn"
           >
             <div className="flex items-center gap-3 text-[#1C1917]">
@@ -44,7 +44,7 @@ export function FloatingCartBar({ onClick, onOpenCart }: FloatingCartBarProps) {
               </span>
             </div>
             <div
-              className="text-white px-4 py-2 rounded-lg flex items-center gap-1.5"
+              className="text-white px-4 py-2 rounded-lg flex items-center gap-1.5 transition-all hover:brightness-[0.92]"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
               <span className="font-semibold text-sm">Commander</span>
