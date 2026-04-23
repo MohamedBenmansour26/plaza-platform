@@ -73,8 +73,11 @@ export async function getMerchantBySlug(
 // PLZ-048: Columns consumed by storefront product listing and detail views.
 // Excluded: merchant_id (filter param only, never rendered), created_at (not displayed).
 // Cast to Product so callers need no changes.
+// PLZ-090a: `images` jsonb added for the forthcoming multi-image gallery
+// (consumed by PLZ-090b). `image_url` stays selected as a safety net until
+// the follow-up migration drops it.
 const PRODUCT_STOREFRONT_SELECT =
-  'id, name_fr, name_ar, description, price, stock, image_url, ' +
+  'id, name_fr, name_ar, description, price, stock, image_url, images, ' +
   'is_visible, category_l1, category_l2, category_l3, ' +
   'original_price, discount_active';
 

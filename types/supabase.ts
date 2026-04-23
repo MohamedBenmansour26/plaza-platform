@@ -155,6 +155,9 @@ export type Database = {
           price:           number
           stock:           number
           image_url:       string | null
+          // Multi-image gallery (migration 2026-04-23, PLZ-090a).
+          // Backfilled from image_url: [{ url, alt: '' }]. Soft cap 8 enforced by check constraint.
+          images:          { url: string; alt: string }[]
           is_visible:      boolean
           created_at:      string
           // 3-level product categories (migration 2026-04-10)
@@ -174,6 +177,7 @@ export type Database = {
           price:            number
           stock?:           number
           image_url?:       string | null
+          images?:          { url: string; alt: string }[]
           is_visible?:      boolean
           created_at?:      string
           category_l1?:     string | null
@@ -191,6 +195,7 @@ export type Database = {
           price?:           number
           stock?:           number
           image_url?:       string | null
+          images?:          { url: string; alt: string }[]
           is_visible?:      boolean
           created_at?:      string
           category_l1?:     string | null
