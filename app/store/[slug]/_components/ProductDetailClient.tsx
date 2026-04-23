@@ -227,7 +227,10 @@ export function ProductDetailClient({
                   {originalPriceMAD} MAD
                 </span>
                 {discountPct != null && (
-                  <span className="bg-[#E8632A] text-white px-2.5 py-1 rounded text-sm font-bold">
+                  <span
+                    className="text-white px-2.5 py-1 rounded text-sm font-bold"
+                    style={{ backgroundColor: 'var(--color-orange-accent, #FF6B1A)' }}
+                  >
                     -{discountPct}%
                   </span>
                 )}
@@ -286,10 +289,10 @@ export function ProductDetailClient({
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`flex-1 py-3.5 rounded-lg font-semibold transition-colors border-2 ${
+              className={`flex-1 py-3.5 rounded-lg font-semibold transition-all border-2 ${
                 outOfStock
                   ? 'bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-white hover:bg-blue-50'
+                  : 'bg-white hover:bg-blue-50 active:scale-[0.98]'
               }`}
               style={
                 !outOfStock
@@ -303,8 +306,12 @@ export function ProductDetailClient({
             <button
               onClick={handleBuyNow}
               disabled={outOfStock || buyingNow}
-              className={`flex-1 py-3.5 rounded-lg font-bold text-white transition-colors disabled:opacity-70 disabled:cursor-wait ${
-                outOfStock ? 'bg-gray-300 cursor-not-allowed' : ''
+              className={`flex-1 py-3.5 rounded-lg font-bold text-white transition-all disabled:opacity-70 disabled:cursor-wait ${
+                outOfStock
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : buyingNow
+                  ? ''
+                  : 'hover:brightness-[0.92] active:scale-[0.98]'
               }`}
               style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
               data-testid="customer-product-detail-buy-now-btn"
@@ -329,11 +336,30 @@ export function ProductDetailClient({
                 <p className="text-xs text-[#16A34A]/80">À votre convenance</p>
               </div>
             </div>
-            <div className="bg-white border border-[#E2E8F0] rounded-xl p-3 flex items-start gap-2">
-              <Shield className="w-5 h-5 text-[#16A34A] flex-shrink-0 mt-0.5" />
+            <div
+              className="border rounded-xl p-3 flex items-start gap-2"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)',
+                borderColor: 'color-mix(in srgb, var(--color-primary) 30%, transparent)',
+              }}
+            >
+              <Shield
+                className="w-5 h-5 flex-shrink-0 mt-0.5"
+                style={{ color: 'var(--color-primary)' }}
+              />
               <div>
-                <p className="font-semibold text-sm text-[#16A34A]">Paiement sécurisé</p>
-                <p className="text-xs text-[#16A34A]/80">100% protégé</p>
+                <p
+                  className="font-semibold text-sm"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  Paiement sécurisé
+                </p>
+                <p
+                  className="text-xs"
+                  style={{ color: 'var(--color-primary)', opacity: 0.8 }}
+                >
+                  100% protégé
+                </p>
               </div>
             </div>
           </div>
@@ -368,7 +394,10 @@ export function ProductDetailClient({
                 {originalPriceMAD} MAD
               </span>
               {discountPct != null && (
-                <span className="bg-[#E8632A] text-white px-2 py-1 rounded text-sm font-bold">
+                <span
+                  className="text-white px-2 py-1 rounded text-sm font-bold"
+                  style={{ backgroundColor: 'var(--color-orange-accent, #FF6B1A)' }}
+                >
                   -{discountPct}%
                 </span>
               )}
@@ -462,8 +491,12 @@ export function ProductDetailClient({
           <button
             onClick={handleBuyNow}
             disabled={outOfStock || buyingNow}
-            className={`flex-1 h-12 rounded-lg font-semibold text-white transition-colors disabled:opacity-70 disabled:cursor-wait ${
-              outOfStock ? 'bg-gray-300 cursor-not-allowed' : buyingNow ? '' : 'active:scale-[0.97]'
+            className={`flex-1 h-12 rounded-lg font-semibold text-white transition-all disabled:opacity-70 disabled:cursor-wait ${
+              outOfStock
+                ? 'bg-gray-300 cursor-not-allowed'
+                : buyingNow
+                ? ''
+                : 'hover:brightness-[0.92] active:scale-[0.97]'
             }`}
             style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
             data-testid="customer-product-detail-buy-now-btn"

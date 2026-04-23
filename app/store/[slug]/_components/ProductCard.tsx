@@ -93,7 +93,10 @@ export function ProductCard({ product, slug }: ProductCardProps) {
 
           {/* Discount badge top-left */}
           {discountPct != null && (
-            <div className="absolute top-2 left-2 bg-[#E8632A] text-white text-[10px] font-bold px-2 py-1 rounded-full">
+            <div
+              className="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full"
+              style={{ backgroundColor: 'var(--color-orange-accent, #FF6B1A)' }}
+            >
               -{discountPct}%
             </div>
           )}
@@ -139,12 +142,12 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             <button
               onClick={handleAddToCart}
               disabled={outOfStock || atMaxStock}
-              className={`flex-1 h-8 text-xs font-medium rounded-lg transition-colors ${
+              className={`flex-1 h-8 text-xs font-medium rounded-lg transition-all ${
                 outOfStock || atMaxStock
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : isAdded
-                  ? 'bg-[#16A34A] text-white'
-                  : 'text-white'
+                  ? 'bg-[#16A34A] text-white active:scale-[0.97]'
+                  : 'text-white hover:brightness-[0.92] active:scale-[0.97]'
               }`}
               style={
                 !outOfStock && !atMaxStock && !isAdded
@@ -169,8 +172,12 @@ export function ProductCard({ product, slug }: ProductCardProps) {
             <button
               onClick={handleBuyNow}
               disabled={outOfStock || buyingNow}
-              className={`flex-1 h-8 text-xs font-semibold rounded-lg transition-colors text-white disabled:opacity-70 disabled:cursor-wait ${
-                outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
+              className={`flex-1 h-8 text-xs font-semibold rounded-lg transition-all text-white disabled:opacity-70 disabled:cursor-wait ${
+                outOfStock
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : buyingNow
+                  ? ''
+                  : 'hover:brightness-[0.92] active:scale-[0.97]'
               }`}
               style={!outOfStock && !buyingNow ? { backgroundColor: 'var(--color-primary)' } : {}}
               data-testid="customer-product-card-buy-now-btn"

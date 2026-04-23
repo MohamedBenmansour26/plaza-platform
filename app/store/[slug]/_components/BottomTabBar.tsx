@@ -72,7 +72,7 @@ export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarPro
             <button
               key={tab.name}
               onClick={tab.onClick}
-              className="flex flex-col items-center justify-center gap-1 relative flex-1"
+              className="flex flex-col items-center justify-center gap-1 relative flex-1 transition-transform active:scale-[0.95]"
               data-testid={tab.testId}
             >
               {content}
@@ -85,7 +85,7 @@ export function BottomTabBar({ slug, onInfoClick, onCartClick }: BottomTabBarPro
           <Link
             key={tab.name}
             href={tab.href!}
-            className="flex flex-col items-center justify-center gap-1 relative flex-1"
+            className="flex flex-col items-center justify-center gap-1 relative flex-1 transition-transform active:scale-[0.95]"
             data-testid={tab.testId}
           >
             {content}
