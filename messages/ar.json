@@ -429,6 +429,7 @@
     "status": {
       "pending": "قيد الانتظار",
       "confirmed": "مؤكد",
+      "assigned": "",
       "dispatched": "تم الشحن",
       "delivered": "تم التسليم",
       "cancelled": "ملغى"
