@@ -36,6 +36,7 @@ export function ParametresClient() {
     });
   }
 
+  // Toggle — brief §2.2. Track `bg-primary` when on, `bg-border` when off.
   const Toggle = ({ checked, onChange, disabled = false, testId }: { checked: boolean; onChange: () => void; disabled?: boolean; testId?: string }) => (
     <button
       type="button"
@@ -44,12 +45,12 @@ export function ParametresClient() {
       onClick={onChange}
       disabled={disabled}
       data-testid={testId}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-        checked ? 'bg-[var(--color-primary)]' : 'bg-[#E2E8F0]'
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+        checked ? 'bg-primary' : 'bg-border'
       }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+        className={`inline-block h-4 w-4 transform rounded-full bg-card shadow transition-transform ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
@@ -57,31 +58,32 @@ export function ParametresClient() {
   );
 
   return (
-    <div className="bg-[#FAFAF9] min-h-screen">
+    // design-refresh §3.1 — off-white canvas (#F8F9FA) via `bg-background`.
+    <div className="bg-background min-h-screen">
       {/* Mobile top bar */}
-      <div className="md:hidden bg-white h-14 px-4 flex items-center justify-center border-b border-[#E2E8F0]">
-        <h1 className="text-base font-semibold text-[#1C1917]">{t('pageTitle')}</h1>
+      <div className="md:hidden bg-card h-14 px-4 flex items-center justify-center border-b border-border">
+        <h1 className="text-base font-semibold text-foreground">{t('pageTitle')}</h1>
       </div>
 
       <div className="max-w-[640px] mx-auto px-4 py-6 md:py-10 space-y-4">
         {/* Desktop header */}
         <div className="hidden md:block mb-6">
-          <p className="text-xs text-[#78716C] mb-2">{t('breadcrumb')}</p>
-          <h1 className="text-2xl font-semibold text-[#1C1917]">{t('pageTitle')}</h1>
+          <p className="text-xs text-muted-foreground mb-2">{t('breadcrumb')}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t('pageTitle')}</h1>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-base font-semibold text-[#1C1917] mb-4">{t('notificationsTitle')}</h2>
+        <div className="bg-card rounded-xl shadow-card p-6">
+          <h2 className="text-base font-semibold text-foreground mb-4">{t('notificationsTitle')}</h2>
           <div>
             {notifItems.map((item, idx) => (
               <div
                 key={item.id}
                 className={`h-12 flex items-center justify-between ${
-                  idx < notifItems.length - 1 ? 'border-b border-[#F3F4F6]' : ''
+                  idx < notifItems.length - 1 ? 'border-b border-border' : ''
                 }`}
               >
-                <span className="text-sm text-[#1C1917]">{item.label}</span>
+                <span className="text-sm text-foreground">{item.label}</span>
                 <Toggle
                   checked={notifications[item.id]}
                   onChange={() =>
@@ -92,24 +94,24 @@ export function ParametresClient() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-[#A8A29E] mt-3">{t('notifNote')}</p>
+          <p className="text-xs text-muted-foreground mt-3">{t('notifNote')}</p>
         </div>
 
         {/* Language */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-base font-semibold text-[#1C1917] mb-3">{t('languageTitle')}</h2>
+        <div className="bg-card rounded-xl shadow-card p-6">
+          <h2 className="text-base font-semibold text-foreground mb-3">{t('languageTitle')}</h2>
           <div>
             {/* French — active, always selected */}
-            <div className="h-12 w-full flex items-center justify-between px-1 border-b border-[#F3F4F6]">
-              <span className="text-sm text-[#1C1917]">{t('langFr')}</span>
-              <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary)' }}>
-                <Check className="w-3 h-3 text-white" />
+            <div className="h-12 w-full flex items-center justify-between px-1 border-b border-border">
+              <span className="text-sm text-foreground">{t('langFr')}</span>
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-primary">
+                <Check className="w-3 h-3 text-primary-foreground" />
               </div>
             </div>
             {/* Arabic — coming soon */}
             <div className="h-12 w-full flex items-center justify-between px-1 opacity-50 cursor-not-allowed">
-              <span className="text-sm text-[#78716C]">{t('langAr')}</span>
-              <span className="text-xs text-[#A8A29E] bg-[#F5F5F4] px-2 py-1 rounded-full">
+              <span className="text-sm text-muted-foreground">{t('langAr')}</span>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                 Bientôt disponible
               </span>
             </div>
@@ -117,20 +119,21 @@ export function ParametresClient() {
         </div>
 
         {/* Security */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-base font-semibold text-[#1C1917] mb-3">{t('securityTitle')}</h2>
+        <div className="bg-card rounded-xl shadow-card p-6">
+          <h2 className="text-base font-semibold text-foreground mb-3">{t('securityTitle')}</h2>
           <div>
             <a
               href="/dashboard/compte"
-              className="h-12 w-full flex items-center justify-between hover:bg-[#F8FAFC] transition-colors border-b border-[#F3F4F6] px-1"
+              className="h-12 w-full flex items-center justify-between hover:bg-muted transition-colors border-b border-border px-1"
             >
-              <span className="text-sm text-[#1C1917]">{t('changePassword')}</span>
-              <ChevronRight className="w-4 h-4 text-[#78716C]" />
+              <span className="text-sm text-foreground">{t('changePassword')}</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </a>
             <div className="h-12 flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-[#1C1917]">{t('twoFactor')}</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FFF7ED] text-[#E8632A]">
+                <span className="text-sm text-foreground">{t('twoFactor')}</span>
+                {/* "Bientôt" pill uses orange secondary per brief §3.1. */}
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-secondary/10 text-secondary">
                   {t('twoFactorSoon')}
                 </span>
               </div>
@@ -143,32 +146,32 @@ export function ParametresClient() {
           </div>
         </div>
 
-        {/* Danger zone */}
-        <div className="bg-white rounded-xl border border-[#FEE2E2] shadow-sm p-6">
+        {/* Danger zone — outlined destructive button per brief §2.1. */}
+        <div className="bg-card rounded-xl border border-destructive/30 shadow-card p-6">
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
-            className="w-full h-11 bg-white border-[1.5px] border-[#DC2626] text-[#DC2626] rounded-lg text-sm font-medium hover:bg-[#FEF2F2] transition-colors"
+            className="w-full h-11 bg-card border-[1.5px] border-destructive text-destructive rounded-lg text-sm font-medium hover:bg-destructive/10 transition-colors"
             data-testid="merchant-settings-delete-account-btn"
           >
             {t('deleteAccount')}
           </button>
-          <p className="text-xs text-[#78716C] mt-2">{t('deleteAccountNote')}</p>
+          <p className="text-xs text-muted-foreground mt-2">{t('deleteAccountNote')}</p>
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete confirmation modal — brief §2.6. */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="merchant-settings-delete-dialog">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('deleteAccountTitle')}</h3>
-            <p className="text-sm text-[#78716C] mb-6">{t('deleteAccountBody')}</p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" data-testid="merchant-settings-delete-dialog">
+          <div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('deleteAccountTitle')}</h3>
+            <p className="text-sm text-muted-foreground mb-6">{t('deleteAccountBody')}</p>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="flex-1 h-10 border border-[#E2E8F0] text-[#1C1917] text-sm font-medium rounded-lg hover:bg-[#F5F5F4] transition-colors disabled:opacity-50"
+                className="flex-1 h-10 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                 data-testid="merchant-settings-delete-cancel-btn"
               >
                 {t('deleteCancel')}
@@ -177,7 +180,7 @@ export function ParametresClient() {
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
-                className="flex-1 h-10 bg-[#DC2626] text-white text-sm font-medium rounded-lg hover:bg-[#b91c1c] transition-colors disabled:opacity-50"
+                className="flex-1 h-10 bg-destructive text-destructive-foreground text-sm font-medium rounded-lg hover:bg-destructive/90 transition-colors disabled:opacity-50"
                 data-testid="merchant-settings-delete-confirm-btn"
               >
                 {isDeleting ? '…' : t('deleteConfirm')}

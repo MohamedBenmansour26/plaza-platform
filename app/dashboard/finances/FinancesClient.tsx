@@ -34,6 +34,18 @@ function formatChartDate(iso: string, period: Period): string {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: MOROCCO_TZ });
 }
 
+// ─── Chart colour tokens ─────────────────────────────────────────────────────
+
+// Recharts `stroke`/`fill` props require raw colour strings — they do not
+// resolve CSS-variable expressions at render time. We hard-code the
+// design-refresh palette hex values here (not tenant-specific, these are
+// platform-level chart colours per brief §3.1 & §5 data-viz notes).
+const CHART_LINE_HEX = '#1A6BFF';     // design-refresh primary
+const CHART_GRID_HEX = '#E5E7EB';     // matches `--border`
+const CHART_AXIS_HEX = '#6B7280';     // matches `--muted-foreground`
+const CHART_TOOLTIP_BG_HEX = '#FFFFFF';
+const CHART_TOOLTIP_BORDER_HEX = '#E5E7EB';
+
 // ─── Payment colours ──────────────────────────────────────────────────────────
 
 // Note: PAYMENT_COLORS values are used as SVG/Recharts fill colors.
@@ -88,19 +100,20 @@ export function FinancesClient({ metrics, period }: Props) {
   const isEmpty = metrics.totalOrders === 0;
 
   const ChartPlaceholder = ({ h }: { h: string }) => (
-    <div className={`${h} bg-[#F8FAFC] rounded-lg flex items-center justify-center`}>
-      <span className="text-sm text-[#A8A29E]">{t('no_data')}</span>
+    <div className={`${h} bg-muted rounded-lg flex items-center justify-center`}>
+      <span className="text-sm text-muted-foreground">{t('no_data')}</span>
     </div>
   );
 
   return (
+    // design-refresh §3.1 — off-white canvas inherited from body (`bg-background`).
     <div className="p-4 md:p-8 max-w-[1040px] mx-auto">
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-[#1C1917]">{t('title')}</h1>
+        <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
 
-        {/* Period selector */}
+        {/* Period selector — brief §2.1 pill buttons. */}
         <div className="flex gap-2">
           {PERIODS.map((p) => (
             <button
@@ -108,8 +121,8 @@ export function FinancesClient({ metrics, period }: Props) {
               onClick={() => router.push(`?period=${p.id}`)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 period === p.id
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'bg-white text-[#78716C] border border-[#E2E8F0] hover:bg-[#F8FAFC]'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-muted-foreground border border-border hover:bg-muted'
               }`}
               data-testid={`merchant-finances-period-${p.id}-btn`}
             >
@@ -121,23 +134,23 @@ export function FinancesClient({ metrics, period }: Props) {
 
       {/* ── Stats row ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 col-span-2 md:col-span-1">
-          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_revenue')}</div>
-          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+        <div className="bg-card rounded-xl shadow-card p-4 md:p-5 col-span-2 md:col-span-1">
+          <div className="text-[13px] text-muted-foreground mb-2">{t('stat_revenue')}</div>
+          <div className="text-xl md:text-2xl font-semibold text-foreground">
             {isEmpty ? '—' : formatMAD(metrics.totalRevenue)}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
-          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_orders')}</div>
-          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+        <div className="bg-card rounded-xl shadow-card p-4 md:p-5">
+          <div className="text-[13px] text-muted-foreground mb-2">{t('stat_orders')}</div>
+          <div className="text-xl md:text-2xl font-semibold text-foreground">
             {isEmpty ? '—' : metrics.totalOrders}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-4 md:p-5">
-          <div className="text-[13px] text-[#78716C] mb-2">{t('stat_avg_basket')}</div>
-          <div className="text-xl md:text-2xl font-semibold text-[#1C1917]">
+        <div className="bg-card rounded-xl shadow-card p-4 md:p-5">
+          <div className="text-[13px] text-muted-foreground mb-2">{t('stat_avg_basket')}</div>
+          <div className="text-xl md:text-2xl font-semibold text-foreground">
             {isEmpty ? '—' : formatMAD(metrics.avgBasket)}
           </div>
         </div>
@@ -145,12 +158,12 @@ export function FinancesClient({ metrics, period }: Props) {
 
       {isEmpty ? (
         /* ── Empty state ─────────────────────────────────────────────────── */
-        <div className="bg-white rounded-xl shadow-sm py-20 text-center">
-          <BarChart3Icon className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
-          <h3 className="text-base font-semibold text-[#1C1917] mb-2">
+        <div className="bg-card rounded-xl shadow-card py-20 text-center">
+          <BarChart3Icon className="w-12 h-12 text-border mx-auto mb-4" />
+          <h3 className="text-base font-semibold text-foreground mb-2">
             {t('empty_title')}
           </h3>
-          <p className="text-sm text-[#78716C]">
+          <p className="text-sm text-muted-foreground">
             {t('empty_body')}
           </p>
         </div>
@@ -159,9 +172,9 @@ export function FinancesClient({ metrics, period }: Props) {
           {/* ── Desktop layout: chart + right column ─────────────────────── */}
           <div className="hidden md:flex gap-6">
 
-            {/* Revenue line chart */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-base font-semibold text-[#1C1917] mb-4">
+            {/* Revenue line chart — design-refresh primary blue per brief §5. */}
+            <div className="flex-1 bg-card rounded-xl shadow-card p-6">
+              <h2 className="text-base font-semibold text-foreground mb-4">
                 {t('chart_title')}
               </h2>
               <div className="h-[220px]">
@@ -170,20 +183,20 @@ export function FinancesClient({ metrics, period }: Props) {
                     <LineChart data={chartData}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%"  stopColor="#E8632A" stopOpacity={0.15} />
-                          <stop offset="95%" stopColor="#E8632A" stopOpacity={0} />
+                          <stop offset="5%"  stopColor={CHART_LINE_HEX} stopOpacity={0.15} />
+                          <stop offset="95%" stopColor={CHART_LINE_HEX} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_HEX} />
                       <XAxis
                         dataKey="label"
-                        stroke="#78716C"
+                        stroke={CHART_AXIS_HEX}
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        stroke="#78716C"
+                        stroke={CHART_AXIS_HEX}
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
@@ -191,8 +204,8 @@ export function FinancesClient({ metrics, period }: Props) {
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #E2E8F0',
+                          backgroundColor: CHART_TOOLTIP_BG_HEX,
+                          border: `1px solid ${CHART_TOOLTIP_BORDER_HEX}`,
                           borderRadius: '8px',
                           fontSize: '12px',
                         }}
@@ -201,9 +214,9 @@ export function FinancesClient({ metrics, period }: Props) {
                       <Line
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#E8632A"
+                        stroke={CHART_LINE_HEX}
                         strokeWidth={2}
-                        dot={{ fill: '#E8632A', r: 3 }}
+                        dot={{ fill: CHART_LINE_HEX, r: 3 }}
                         activeDot={{ r: 5 }}
                       />
                     </LineChart>
@@ -218,8 +231,8 @@ export function FinancesClient({ metrics, period }: Props) {
             <div className="w-[340px] space-y-4 flex-shrink-0">
 
               {/* Payment breakdown */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-base font-semibold text-[#1C1917] mb-4">
+              <div className="bg-card rounded-xl shadow-card p-6">
+                <h2 className="text-base font-semibold text-foreground mb-4">
                   {t('payment_title')}
                 </h2>
                 {mounted && pieData.length > 0 ? (
@@ -244,10 +257,10 @@ export function FinancesClient({ metrics, period }: Props) {
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <div className="text-xl font-bold text-[#1C1917]">
+                          <div className="text-xl font-bold text-foreground">
                             {metrics.totalOrders}
                           </div>
-                          <div className="text-xs text-[#78716C]">{t('orders_label')}</div>
+                          <div className="text-xs text-muted-foreground">{t('orders_label')}</div>
                         </div>
                       </div>
                     </div>
@@ -256,9 +269,9 @@ export function FinancesClient({ metrics, period }: Props) {
                         <div key={item.name} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-sm text-[#1C1917]">{item.name}</span>
+                            <span className="text-sm text-foreground">{item.name}</span>
                           </div>
-                          <span className="text-sm font-semibold text-[#1C1917]">
+                          <span className="text-sm font-semibold text-foreground">
                             {item.value}%
                           </span>
                         </div>
@@ -271,25 +284,25 @@ export function FinancesClient({ metrics, period }: Props) {
               </div>
 
               {/* Top products */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-base font-semibold text-[#1C1917] mb-3">
+              <div className="bg-card rounded-xl shadow-card p-6">
+                <h2 className="text-base font-semibold text-foreground mb-3">
                   {t('top_products_title')}
                 </h2>
                 {metrics.topProducts.length === 0 ? (
-                  <p className="text-sm text-[#78716C] text-center py-4">{t('no_products')}</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">{t('no_products')}</p>
                 ) : (
                   <div>
                     {metrics.topProducts.map((p, i) => (
                       <div
                         key={p.product_id ?? p.name_fr}
-                        className={`flex items-center gap-3 py-3 -mx-3 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors ${
-                          i < metrics.topProducts.length - 1 ? 'border-b border-[#F3F4F6]' : ''
+                        className={`flex items-center gap-3 py-3 -mx-3 px-3 rounded-lg hover:bg-muted transition-colors ${
+                          i < metrics.topProducts.length - 1 ? 'border-b border-border' : ''
                         } ${p.product_id ? 'cursor-pointer' : ''}`}
                       >
-                        <div className="w-6 text-center text-sm font-semibold text-[#A8A29E]">
+                        <div className="w-6 text-center text-sm font-semibold text-muted-foreground">
                           {i + 1}
                         </div>
-                        <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                        <div className="w-10 h-10 rounded-md bg-muted flex-shrink-0 overflow-hidden">
                           {p.image_url && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={p.image_url} alt={p.name_fr} className="w-full h-full object-cover" />
@@ -299,18 +312,18 @@ export function FinancesClient({ metrics, period }: Props) {
                           {p.product_id ? (
                             <Link
                               href={`/dashboard/produits/${p.product_id}`}
-                              className="text-sm font-medium text-[#1C1917] truncate hover:text-[var(--color-primary)] block"
+                              className="text-sm font-medium text-foreground truncate hover:text-[var(--color-primary)] block"
                               data-testid="merchant-finances-top-product-link"
                               data-id={p.product_id}
                             >
                               {p.name_fr}
                             </Link>
                           ) : (
-                            <div className="text-sm font-medium text-[#1C1917] truncate">{p.name_fr}</div>
+                            <div className="text-sm font-medium text-foreground truncate">{p.name_fr}</div>
                           )}
-                          <div className="text-xs text-[#78716C]">{t('sold_count', { count: p.sold })}</div>
+                          <div className="text-xs text-muted-foreground">{t('sold_count', { count: p.sold })}</div>
                         </div>
-                        <div className="text-sm font-semibold text-[#1C1917] flex-shrink-0">
+                        <div className="text-sm font-semibold text-foreground flex-shrink-0">
                           {formatMAD(p.revenue)}
                         </div>
                       </div>
@@ -326,23 +339,23 @@ export function FinancesClient({ metrics, period }: Props) {
           <div className="md:hidden space-y-3">
 
             {/* Revenue card + chart */}
-            <div className="bg-white rounded-xl shadow-sm p-5">
-              <div className="text-[12px] text-[#78716C] uppercase mb-1">{t('stat_revenue')}</div>
-              <div className="text-[28px] font-semibold text-[#1C1917] mb-4">
+            <div className="bg-card rounded-xl shadow-card p-5">
+              <div className="text-xs text-muted-foreground uppercase mb-1">{t('stat_revenue')}</div>
+              <div className="text-[28px] font-semibold text-foreground mb-4">
                 {formatMAD(metrics.totalRevenue)}
               </div>
-              <div className="bg-[#FAFAF9] rounded-lg p-2 h-[160px]">
+              <div className="bg-background rounded-lg p-2 h-[160px]">
                 {mounted ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                       <XAxis
                         dataKey="label"
-                        tick={{ fontSize: 11, fill: '#78716C' }}
+                        tick={{ fontSize: 11, fill: CHART_AXIS_HEX }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: '#78716C' }}
+                        tick={{ fontSize: 11, fill: CHART_AXIS_HEX }}
                         axisLine={false}
                         tickLine={false}
                         width={30}
@@ -350,7 +363,7 @@ export function FinancesClient({ metrics, period }: Props) {
                       <Line
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#E8632A"
+                        stroke={CHART_LINE_HEX}
                         strokeWidth={2}
                         dot={false}
                         isAnimationActive={false}
@@ -358,14 +371,14 @@ export function FinancesClient({ metrics, period }: Props) {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full bg-[#F0F0EF] rounded animate-pulse" />
+                  <div className="h-full bg-muted rounded animate-pulse" />
                 )}
               </div>
             </div>
 
             {/* Payment breakdown — mobile uses custom SVG donut */}
-            <div className="bg-white rounded-xl shadow-sm p-5">
-              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-4">
+            <div className="bg-card rounded-xl shadow-card p-5">
+              <h3 className="text-base font-semibold text-foreground mb-4">
                 {t('payment_title')}
               </h3>
               {pieData.length > 0 ? (
@@ -376,9 +389,9 @@ export function FinancesClient({ metrics, period }: Props) {
                       <div key={item.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-[14px] text-[#1C1917]">{item.name}</span>
+                          <span className="text-sm text-foreground">{item.name}</span>
                         </div>
-                        <span className="text-[14px] font-semibold text-[#1C1917]">
+                        <span className="text-sm font-semibold text-foreground">
                           {item.value}%
                         </span>
                       </div>
@@ -386,33 +399,33 @@ export function FinancesClient({ metrics, period }: Props) {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-center text-[#78716C] py-8">{t('no_data')}</p>
+                <p className="text-sm text-center text-muted-foreground py-8">{t('no_data')}</p>
               )}
             </div>
 
             {/* Top products */}
-            <div className="bg-white rounded-xl shadow-sm p-4">
-              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-3">{t('top_products_title')}</h3>
+            <div className="bg-card rounded-xl shadow-card p-4">
+              <h3 className="text-base font-semibold text-foreground mb-3">{t('top_products_title')}</h3>
               {metrics.topProducts.length === 0 ? (
-                <p className="text-sm text-center text-[#78716C] py-4">{t('no_products')}</p>
+                <p className="text-sm text-center text-muted-foreground py-4">{t('no_products')}</p>
               ) : (
                 <div className="space-y-3">
                   {metrics.topProducts.map((p, i) => (
                     <div key={p.product_id ?? p.name_fr} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-semibold flex-shrink-0" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, white)', color: 'var(--color-primary)' }}>
                         {i + 1}
                       </div>
-                      <div className="w-10 h-10 rounded-md bg-[#F5F5F4] flex-shrink-0 overflow-hidden">
+                      <div className="w-10 h-10 rounded-md bg-muted flex-shrink-0 overflow-hidden">
                         {p.image_url && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={p.image_url} alt={p.name_fr} className="w-full h-full object-cover" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[14px] font-medium text-[#1C1917] truncate">{p.name_fr}</div>
-                        <div className="text-[12px] text-[#78716C]">{t('sold_count', { count: p.sold })}</div>
+                        <div className="text-sm font-medium text-foreground truncate">{p.name_fr}</div>
+                        <div className="text-xs text-muted-foreground">{t('sold_count', { count: p.sold })}</div>
                       </div>
-                      <div className="text-[14px] font-semibold text-[#1C1917]">
+                      <div className="text-sm font-semibold text-foreground">
                         {formatMAD(p.revenue)}
                       </div>
                     </div>
@@ -470,8 +483,8 @@ function DonutChartSVG({ data, total, ordersLabel }: { data: DonutSegment[]; tot
           ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-xl font-bold text-[#1C1917]">{total}</div>
-          <div className="text-xs text-[#78716C]">{ordersLabel}</div>
+          <div className="text-xl font-bold text-foreground">{total}</div>
+          <div className="text-xs text-muted-foreground">{ordersLabel}</div>
         </div>
       </div>
     </div>

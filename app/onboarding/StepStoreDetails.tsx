@@ -41,7 +41,7 @@ export function StepStoreDetails({
 
   const slugIndicator =
     slugStatus === 'available'
-      ? <span className="text-xs text-green-600">{t('storeSlugAvailable')}</span>
+      ? <span className="text-xs text-success">{t('storeSlugAvailable')}</span>
       : slugStatus === 'taken'
       ? <span className="text-xs text-destructive">{t('storeSlugTaken')}</span>
       : slugStatus === 'checking'

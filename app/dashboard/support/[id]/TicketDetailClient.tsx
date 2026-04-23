@@ -19,11 +19,15 @@ type Props = {
 
 export function TicketDetailClient({ ticket }: Props) {
   const t = useTranslations('support');
+  // Status config — brief §2.8 semantic status pills.
+  // Token-based CSS expressions so the runtime styling matches the refreshed
+  // palette (muted for neutral states, primary-tinted for in-progress, success
+  // for resolved).
   const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string }> = {
-    open:        { label: t('ticket_status_open'),        bg: '#F3F4F6', text: '#6B7280' },
-    in_progress: { label: t('ticket_status_in_progress'), bg: 'color-mix(in srgb, var(--color-primary) 8%, white)', text: 'var(--color-primary)' },
-    resolved:    { label: t('ticket_status_resolved'),    bg: '#F0FDF4', text: '#16A34A' },
-    closed:      { label: t('ticket_status_closed'),      bg: '#F3F4F6', text: '#6B7280' },
+    open:        { label: t('ticket_status_open'),        bg: 'hsl(var(--muted))',                                                    text: 'hsl(var(--muted-foreground))' },
+    in_progress: { label: t('ticket_status_in_progress'), bg: 'color-mix(in srgb, var(--color-primary) 10%, white)',                  text: 'var(--color-primary)' },
+    resolved:    { label: t('ticket_status_resolved'),    bg: 'color-mix(in srgb, hsl(var(--success)) 10%, white)',                   text: 'hsl(var(--success))' },
+    closed:      { label: t('ticket_status_closed'),      bg: 'hsl(var(--muted))',                                                    text: 'hsl(var(--muted-foreground))' },
   };
   const router = useRouter();
   const [isSending, startSending] = useTransition();
@@ -60,23 +64,24 @@ export function TicketDetailClient({ ticket }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    // design-refresh §3.1 — off-white canvas via `bg-background`.
+    <div className="min-h-screen bg-background">
       <div className="max-w-[480px] mx-auto flex flex-col h-screen">
 
         {/* Top bar */}
-        <div className="bg-white h-14 px-4 flex items-center justify-between border-b border-[#E2E8F0] flex-shrink-0">
+        <div className="bg-card h-14 px-4 flex items-center justify-between border-b border-border flex-shrink-0">
           <button
             onClick={() => router.back()}
             className="p-2 -ml-2"
             data-testid="merchant-support-ticket-back-btn"
           >
-            <ArrowLeft size={20} className="text-[#1C1917]" />
+            <ArrowLeft size={20} className="text-foreground" />
           </button>
-          <h1 className="text-[16px] font-semibold text-[#1C1917] flex-1 text-center truncate px-2">
+          <h1 className="text-base font-semibold text-foreground flex-1 text-center truncate px-2">
             {ticket.subject}
           </h1>
           <span
-            className="text-[12px] px-2 py-1 rounded-full flex-shrink-0"
+            className="text-xs px-2 py-1 rounded-full flex-shrink-0"
             style={{ backgroundColor: cfg.bg, color: cfg.text }}
           >
             {cfg.label}
@@ -86,9 +91,9 @@ export function TicketDetailClient({ ticket }: Props) {
         {/* Context card */}
         {ticket.order_id && (
           <div className="p-4 pb-0">
-            <div className="bg-white rounded-xl shadow-sm p-3">
+            <div className="bg-card rounded-xl shadow-card p-3">
               <div className="text-[13px]">
-                <span className="text-[#78716C]">{t('linked_order')}: </span>
+                <span className="text-muted-foreground">{t('linked_order')}: </span>
                 <Link
                   href={`/dashboard/commandes/${ticket.order_id}`}
                   className="hover:underline"
@@ -97,7 +102,7 @@ export function TicketDetailClient({ ticket }: Props) {
                   {t('view_order')}
                 </Link>
               </div>
-              <div className="text-[13px] text-[#78716C] mt-1">
+              <div className="text-[13px] text-muted-foreground mt-1">
                 {t('opened_on')}{' '}
                 {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
@@ -114,7 +119,7 @@ export function TicketDetailClient({ ticket }: Props) {
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           {/* Date pill */}
           <div className="flex justify-center">
-            <span className="px-3 py-1 bg-[#F5F5F4] text-[#78716C] text-[12px] rounded-full">
+            <span className="px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full">
               {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
                 weekday: 'long',
                 day: 'numeric',
@@ -125,7 +130,7 @@ export function TicketDetailClient({ ticket }: Props) {
           </div>
 
           {messages.length === 0 && (
-            <div className="text-center text-sm text-[#A8A29E] py-8">
+            <div className="text-center text-sm text-muted-foreground py-8">
               {t('no_messages')}
             </div>
           )}
@@ -142,10 +147,12 @@ export function TicketDetailClient({ ticket }: Props) {
               return (
                 <div key={msg.id} className="flex justify-end">
                   <div className="flex flex-col items-end max-w-[85%]">
-                    <div className="bg-[var(--color-primary)] text-white rounded-xl rounded-tr-none p-3">
-                      <p className="text-[14px]">{msg.content}</p>
+                    {/* Merchant bubble — tenant `--color-primary` for the
+                        per-tenant brand tint (PLZ-088). */}
+                    <div className="bg-[var(--color-primary)] text-primary-foreground rounded-xl rounded-tr-none p-3">
+                      <p className="text-sm">{msg.content}</p>
                     </div>
-                    <div className="text-[11px] text-[#A8A29E] mt-1">{time}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{time}</div>
                   </div>
                 </div>
               );
@@ -153,15 +160,15 @@ export function TicketDetailClient({ ticket }: Props) {
 
             return (
               <div key={msg.id} className="flex gap-2">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[14px] font-semibold flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-primary-foreground flex items-center justify-center text-sm font-semibold flex-shrink-0">
                   P
                 </div>
                 <div className="flex-1">
-                  <div className="text-[12px] text-[#78716C] mb-1">{t('plaza_support')}</div>
-                  <div className="bg-[#F5F5F4] rounded-xl rounded-tl-none p-3 max-w-[85%]">
-                    <p className="text-[14px] text-[#1C1917]">{msg.content}</p>
+                  <div className="text-xs text-muted-foreground mb-1">{t('plaza_support')}</div>
+                  <div className="bg-muted rounded-xl rounded-tl-none p-3 max-w-[85%]">
+                    <p className="text-sm text-foreground">{msg.content}</p>
                   </div>
-                  <div className="text-[11px] text-[#A8A29E] mt-1">{time}</div>
+                  <div className="text-[11px] text-muted-foreground mt-1">{time}</div>
                 </div>
               </div>
             );
@@ -171,9 +178,9 @@ export function TicketDetailClient({ ticket }: Props) {
         </div>
 
         {/* Reply bar */}
-        <div className="bg-white border-t border-[#E2E8F0] p-3 flex-shrink-0">
+        <div className="bg-card border-t border-border p-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <button className="p-2 text-[#78716C]">
+            <button className="p-2 text-muted-foreground">
               <Paperclip size={20} />
             </button>
             <input
@@ -183,13 +190,13 @@ export function TicketDetailClient({ ticket }: Props) {
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               disabled={isSending}
-              className="flex-1 h-10 px-3 border border-[#E2E8F0] rounded-lg text-[14px] focus:outline-none focus:border-[var(--color-primary)]"
+              className="flex-1 h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
               data-testid="merchant-support-reply-input"
             />
             <button
               onClick={handleSend}
               disabled={!content.trim() || isSending}
-              className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
               data-testid="merchant-support-send-btn"
             >
               {isSending ? (
