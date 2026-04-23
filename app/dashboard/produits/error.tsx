@@ -13,12 +13,12 @@ export default function ProduitsError({ error, reset }: Props) {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
-        <h2 className="text-lg font-semibold text-[#1C1917] mb-2">
+        <h2 className="text-lg font-semibold text-foreground mb-2">
           Une erreur est survenue
         </h2>
-        <p className="text-sm text-[#78716C] mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Impossible de charger vos produits. Veuillez réessayer.
         </p>
         <button

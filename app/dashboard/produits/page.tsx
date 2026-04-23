@@ -30,11 +30,11 @@ export default async function ProduitsPage() {
     .returns<Product[]>();
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-background">
       <div className="max-w-[1040px] mx-auto px-4 py-6 md:p-8">
-        {/* Page header */}
+        {/* Page header — mobile primary keeps inline `var(--color-primary)` per PLZ-088 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-[#1C1917]">Mes produits</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Mes produits</h1>
           <Link
             href="/dashboard/produits/nouveau"
             className="h-10 px-4 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"

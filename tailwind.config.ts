@@ -41,6 +41,19 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
 
+        /* ─── Status semantics (design-refresh v1 PR #3) ──────────── */
+        /* `--success` + `--warning` already live in globals.css; this */
+        /* mapping exposes them to Tailwind so `bg-success/10`,        */
+        /* `text-warning` etc. work in JSX without hardcoded hex.     */
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+
         /* ─── Merchant sidebar tokens (design-refresh v1 PR #2) ───── */
         /* Dark-slate sidebar for merchant dashboard. Admin scope     */
         /* overrides these inside `.admin-scope` (separate PR).       */
