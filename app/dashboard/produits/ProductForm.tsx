@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Camera, Info, ArrowLeft } from 'lucide-react';
+import { Info, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { Product } from '@/types/supabase';
 import { createProduct, updateProduct, deleteProduct } from './actions';
+import { ProductImageUploader } from './_components/ProductImageUploader';
+import {
+  getProductImages,
+  validateImagesForPublish,
+  type ProductImage,
+} from '@/lib/product-images';
 
 const PRODUCT_CATEGORIES: Record<string, Record<string, string[]>> = {
   'Mode': {
@@ -89,8 +95,12 @@ export function ProductForm({ product }: Props) {
   // Edited products keep their existing stock value.
   const [stock, setStock] = useState(product?.stock ?? (isEdit ? 0 : 1));
   const [isVisible, setIsVisible] = useState(product?.is_visible ?? true);
-  const [imageUrl, setImageUrl] = useState(product?.image_url ?? '');
-  const [uploading, setUploading] = useState(false);
+  // Multi-image gallery state (PLZ-090c). Initialised via getProductImages
+  // so we gracefully fall back to [{ url: image_url, alt: '' }] for
+  // pre-090a products that never had the `images[]` column populated.
+  const [images, setImages] = useState<ProductImage[]>(() =>
+    product ? getProductImages(product) : [],
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -106,8 +116,6 @@ export function ProductForm({ product }: Props) {
     product?.original_price ? String(product.original_price / 100) : ''
   );
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Price calculator
   const priceNum = parseFloat(price) || 0;
   const commission = priceNum * 0.05;
@@ -115,27 +123,16 @@ export function ProductForm({ product }: Props) {
   const showCalc = priceNum >= 1;
   const priceError = price !== '' && priceNum > 0 && priceNum < 1;
 
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('bucket', 'product-images');
-      const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      const json = await res.json() as { url?: string; error?: string };
-      if (json.url) setImageUrl(json.url);
-    } finally {
-      setUploading(false);
-    }
-  }
-
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
     if (!nameFr.trim()) newErrors.nameFr = t('formNameRequired');
     if (!price || priceNum <= 0) newErrors.price = t('formPriceRequired');
     if (priceNum > 0 && priceNum < 1) newErrors.price = t('formPriceMin');
+    // Founder binding (PLZ-090c): at least 1 image required on publish.
+    // Product form has no draft path today — every save is a publish, so we
+    // enforce this on every submit. `validateImagesForPublish` owns the copy.
+    const imgCheck = validateImagesForPublish(images);
+    if (!imgCheck.ok) newErrors.images = imgCheck.reason;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -155,7 +152,12 @@ export function ProductForm({ product }: Props) {
     fd.set('description', description);
     fd.set('price', price);
     fd.set('stock', String(stock));
-    fd.set('image_url', imageUrl);
+    // PLZ-090c — write both shapes:
+    //  - images (new jsonb column, source of truth for storefront gallery)
+    //  - image_url (legacy column, kept in sync with images[0].url as a
+    //    safety net for one more release cycle per the 090a migration note)
+    fd.set('images', JSON.stringify(images));
+    fd.set('image_url', images[0]?.url ?? '');
     fd.set('is_visible', String(isVisible));
     fd.set('category_l1', catL1);
     fd.set('category_l2', catL2);
@@ -281,45 +283,26 @@ export function ProductForm({ product }: Props) {
     </div>
   );
 
+  // PLZ-090c — multi-image uploader replaces the single-image photo card.
+  // Legacy image_url column is still written on save (images[0].url) to keep
+  // the pre-090a safety-net column in sync for one more release cycle.
   const photoCard = (
-    <div className="bg-card rounded-xl shadow-card p-5">
-      <h3 className="text-sm font-semibold text-foreground mb-3">{t('formPhoto')}</h3>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={handleImageChange}
-        data-testid="merchant-product-form-photo-input"
+    <div className="space-y-1.5">
+      <ProductImageUploader
+        value={images}
+        onChange={setImages}
+        productName={nameFr}
+        disabled={isPending}
+        data-testid="merchant-product-form-image-uploader"
       />
-      <div
-        onClick={() => !uploading && fileInputRef.current?.click()}
-        className="w-full h-[200px] rounded-lg flex flex-col items-center justify-center gap-2 mb-2 cursor-pointer transition-colors overflow-hidden"
-        style={{ background: imageUrl ? 'transparent' : undefined }}
-      >
-        {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
-        ) : (
-          <div className="w-full h-full bg-muted/60 hover:bg-muted transition-colors flex flex-col items-center justify-center gap-2">
-            <Camera className="w-8 h-8 text-muted-foreground" />
-            <span className="text-[13px]" style={{ color: 'var(--color-primary)' }}>
-              {uploading ? t('uploading') : (imageUrl ? t('formPhotoChange') : t('formPhotoAdd'))}
-            </span>
-          </div>
-        )}
-      </div>
-      {imageUrl && (
-        <button
-          type="button"
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          className="text-[13px] hover:underline"
-          style={{ color: 'var(--color-primary)' }}
+      {errors.images && (
+        <p
+          className="text-xs text-destructive px-1"
+          data-testid="merchant-product-form-images-error"
         >
-          {uploading ? t('uploading') : t('formPhotoChange')}
-        </button>
+          {errors.images}
+        </p>
       )}
-      <p className="text-xs text-muted-foreground mt-1">{t('formPhotoFormats')}</p>
     </div>
   );
 
@@ -518,7 +501,7 @@ export function ProductForm({ product }: Props) {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={isPending || uploading}
+        disabled={isPending}
         className="w-full md:w-auto h-12 md:h-10 md:px-4 text-white text-base md:text-sm font-semibold md:font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
         style={{ backgroundColor: 'var(--color-primary)' }}
         data-testid="merchant-product-form-publish-btn"

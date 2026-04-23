@@ -67,3 +67,69 @@ export function resolveImageAlt(
   const trimmed = (image.alt ?? '').trim();
   return trimmed.length > 0 ? trimmed : getDefaultAlt(productName, index);
 }
+
+// ── PLZ-090c merchant-form mutation helpers ────────────────────────────────
+// Pure (no side effects) — safe for use in optimistic React state updates.
+// Always return a NEW array so React sees a reference change.
+
+/**
+ * Reorder helper for the drag-to-reorder gallery. Returns a new array with
+ * the image at `fromIndex` moved to `toIndex`. Out-of-bounds indexes are
+ * clamped to a no-op (returns a shallow copy) so the UI cannot corrupt the
+ * array via a stale drag event.
+ */
+export function reorderImages(
+  images: ProductImage[],
+  fromIndex: number,
+  toIndex: number,
+): ProductImage[] {
+  const next = images.slice();
+  if (
+    fromIndex < 0 || fromIndex >= next.length ||
+    toIndex < 0 || toIndex >= next.length ||
+    fromIndex === toIndex
+  ) {
+    return next;
+  }
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
+/**
+ * Delete helper. Returns a new array without the image at `index`.
+ * Out-of-bounds indexes return a shallow copy (no-op).
+ */
+export function removeImageAt(images: ProductImage[], index: number): ProductImage[] {
+  if (index < 0 || index >= images.length) {
+    return images.slice();
+  }
+  const next = images.slice();
+  next.splice(index, 1);
+  return next;
+}
+
+/**
+ * Guard used by the "+" tile to know whether another upload slot should be
+ * offered. The client-side soft cap enforces the same 8-image limit as the
+ * DB check constraint (see 20260423000001_plz090a_product_images_jsonb.sql).
+ */
+export function canAddImage(images: ProductImage[]): boolean {
+  return images.length < MAX_PRODUCT_IMAGES;
+}
+
+/**
+ * Publish-time guard. Founder requirement (PLZ-090c): merchants may save a
+ * draft with 0 images but must supply at least one image before publishing.
+ *
+ * Returns a discriminated result object so callers can surface the French
+ * error message without re-deriving the copy each time.
+ */
+export function validateImagesForPublish(
+  images: ProductImage[],
+): { ok: true } | { ok: false; reason: string } {
+  if (images.length < 1) {
+    return { ok: false, reason: 'Au moins une image est requise pour publier' };
+  }
+  return { ok: true };
+}
