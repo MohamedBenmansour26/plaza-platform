@@ -22,7 +22,7 @@ const VARIANT_STYLES: Record<StatusChipVariant, string> = {
   resubmit: 'bg-[#FEF3C7] text-[#92400E]',
   suspended: 'bg-[#FEF2F2] text-[#B91C1C]',
   neutral: 'bg-[#F5F5F4] text-[#44403C]',
-  info: 'bg-[#EFF6FF] text-[#1E40AF]',
+  info: 'bg-[var(--admin-color-primary-tint)] text-[#1E40AF]',
 };
 
 export function StatusChip({ variant, children, className }: Props) {
