@@ -35,7 +35,11 @@ async function main() {
   if (listErr) { console.error('listUsers error:', listErr.message); process.exit(1); }
 
   const user = users.find((u) => u.email === ADMIN_EMAIL);
-  if (!user) { console.error(`No auth.users row for ${ADMIN_EMAIL}. Run activate-admin.js first.`); process.exit(1); }
+  if (!user) {
+    console.error(`No auth.users row for ${ADMIN_EMAIL}.`);
+    console.error('Run `npm run seed:admin` (scripts/seed-admin-user.js) first — it provisions the full admin row end-to-end.');
+    process.exit(1);
+  }
 
   const { error: updateErr } = await supabase.auth.admin.updateUserById(user.id, { password: newPassword });
   if (updateErr) { console.error('updateUserById error:', updateErr.message); process.exit(1); }

@@ -9,7 +9,9 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test:unit": "jest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "seed:admin": "node scripts/seed-admin-user.js",
+    "seed:test-merchant-pin": "node scripts/reset-test-merchant-pin.js"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.8",
