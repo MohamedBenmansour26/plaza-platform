@@ -218,6 +218,38 @@
   font-family: var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Storefront scope ────────────────────────────────────────────────
+   Applied to any route under /store/[slug]/** and /track/** via the
+   `.storefront-scope` class on app/store/[slug]/layout.tsx and
+   app/track/layout.tsx. Storefront is warm-neutral canvas (global
+   tokens already cover warmth), with a tighter corner radius and a
+   dedicated orange accent token used by per-merchant brand-adjacent
+   surfaces (e.g. promo badges, accent chips).
+
+   Does NOT override --color-primary — per-merchant primary is still
+   injected via inline style on the store layout (merchant.primary_color).
+   Do NOT add orange accent to admin surfaces.                          */
+.storefront-scope {
+  --radius: 0.625rem;
+
+  /* Storefront-specific orange accent — design-refresh storefront PR #1.
+     Mirrors merchant secondary hue but scoped so the name expresses
+     intent at call-sites. Admin/merchant consumers should continue to
+     use --color-secondary.                                              */
+  --color-orange-accent: #FF6B1A;
+}
+
+/* ─── Storefront input focus utility (foundation for PR #3) ───────────
+   Apply `.storefront-input` on checkout / storefront form inputs so the
+   focus ring respects the per-merchant primary color. PR #1 defines the
+   utility; PR #3 will apply it to consumer-facing form surfaces.        */
+.storefront-input:focus,
+.storefront-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 /* Desktop-required fallback: below 1024px, hide the shell and show the
    DesktopRequired card, but ONLY on non-approval routes. The two
    approval routes add `.admin-approval-route` on their root wrapper,

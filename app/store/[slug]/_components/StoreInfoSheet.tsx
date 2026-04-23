@@ -46,10 +46,13 @@ export function StoreInfoSheet({
     .slice(0, 2)
     .toUpperCase();
 
-  // Mapbox static map URL
+  // Mapbox static map URL — pin color respects the merchant's primary_color
+  // (falls back to 1a6bff / the design-refresh default primary when unset).
+  // Mapbox expects the hex without the leading '#'.
+  const pinHex = (merchant.primary_color?.trim() || '#1A6BFF').replace(/^#/, '').toLowerCase();
   const mapUrl =
     merchant.location_lat != null && merchant.location_lng != null
-      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+2563eb(${merchant.location_lng},${merchant.location_lat})/${merchant.location_lng},${merchant.location_lat},13,0/400x200@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''}`
+      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+${pinHex}(${merchant.location_lng},${merchant.location_lat})/${merchant.location_lng},${merchant.location_lat},13,0/400x200@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''}`
       : null;
 
   return (
