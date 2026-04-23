@@ -47,7 +47,7 @@ function AccordionSection({ heading, links }: AccordionSectionProps) {
             <li key={link}>
               <a
                 href="#"
-                className="text-sm text-white hover:text-[#E8632A] transition-colors block"
+                className="text-sm text-white transition-colors block hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 {link}
               </a>
@@ -90,21 +90,21 @@ export function StoreFooter() {
               <a
                 href="#"
                 aria-label="Instagram"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="Facebook"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="TikTok"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <TikTokIcon className="w-5 h-5" />
               </a>
@@ -121,7 +121,7 @@ export function StoreFooter() {
                 <li key={link}>
                   <a
                     href="#"
-                    className="text-sm text-white hover:text-[#E8632A] transition-colors block mb-2"
+                    className="text-sm text-white transition-colors block mb-2 hover:text-[var(--color-orange-accent,#FF6B1A)]"
                   >
                     {link}
                   </a>
@@ -140,7 +140,7 @@ export function StoreFooter() {
                 <li key={link}>
                   <a
                     href="#"
-                    className="text-sm text-white hover:text-[#E8632A] transition-colors block mb-2"
+                    className="text-sm text-white transition-colors block mb-2 hover:text-[var(--color-orange-accent,#FF6B1A)]"
                   >
                     {link}
                   </a>
@@ -159,7 +159,7 @@ export function StoreFooter() {
                 <li key={link}>
                   <a
                     href="#"
-                    className="text-sm text-white hover:text-[#E8632A] transition-colors block mb-2"
+                    className="text-sm text-white transition-colors block mb-2 hover:text-[var(--color-orange-accent,#FF6B1A)]"
                   >
                     {link}
                   </a>
@@ -181,21 +181,21 @@ export function StoreFooter() {
               <a
                 href="#"
                 aria-label="Instagram"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="Facebook"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 aria-label="TikTok"
-                className="text-white hover:text-[#E8632A] transition-colors cursor-pointer"
+                className="text-white transition-colors cursor-pointer hover:text-[var(--color-orange-accent,#FF6B1A)]"
               >
                 <TikTokIcon className="w-5 h-5" />
               </a>

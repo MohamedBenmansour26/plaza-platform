@@ -2,10 +2,10 @@ export default function StorefrontLoading() {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Header skeleton */}
-      <header className="sticky top-0 z-40 border-b bg-white h-14 flex items-center px-4 justify-between">
+      <header className="sticky top-0 z-40 border-b border-[#E2E8F0] bg-white h-14 flex items-center px-4 justify-between">
         <div className="space-y-1.5">
-          <div className="h-4 w-36 animate-pulse rounded bg-stone-200" />
-          <div className="h-3 w-24 animate-pulse rounded bg-stone-100" />
+          <div className="h-4 w-36 animate-pulse rounded-lg bg-stone-200" />
+          <div className="h-3 w-24 animate-pulse rounded-lg bg-stone-100" />
         </div>
         <div className="h-9 w-9 animate-pulse rounded-full bg-stone-200" />
       </header>

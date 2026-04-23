@@ -146,7 +146,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
       >
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100"
+          className="w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-gray-100 active:scale-[0.95]"
           data-testid="customer-order-status-back-btn"
         >
           <ArrowLeft className="w-5 h-5 text-[#1C1917]" />
@@ -157,7 +157,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50"
+          className="w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-gray-100 active:scale-[0.95] disabled:opacity-50 disabled:active:scale-100"
           data-testid="customer-order-status-refresh-btn"
         >
           <RefreshCw className={`w-5 h-5 text-[#78716C] ${refreshing ? 'animate-spin' : ''}`} />
@@ -400,7 +400,7 @@ export function OrderStatusClient({ order, merchantPhone }: Props) {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3.5 border-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              className="w-full py-3.5 border-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
               style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
               data-testid="customer-order-status-whatsapp-link"
             >

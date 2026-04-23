@@ -275,7 +275,7 @@ export default function ConfirmationPage() {
             </span>
             <button
               onClick={handleCopy}
-              className="p-2 rounded-lg transition-colors hover:opacity-80"
+              className="p-2 rounded-lg transition-all hover:opacity-80 hover:bg-gray-50 active:scale-[0.95]"
               data-testid="customer-confirmation-copy-order-btn"
             >
               {copied ? (
@@ -460,7 +460,7 @@ export default function ConfirmationPage() {
           {order.orderId ? (
             <Link
               href={`/store/${slug}/commande/${order.orderId}`}
-              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
+              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-all hover:brightness-[0.92] active:scale-[0.98]"
               style={{ backgroundColor: 'var(--color-primary)' }}
               data-testid="customer-confirmation-track-link"
             >
@@ -469,7 +469,7 @@ export default function ConfirmationPage() {
           ) : (
             <Link
               href={`/track?order=${orderNumber}`}
-              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-colors"
+              className="w-full h-12 rounded-xl text-white font-semibold text-sm flex items-center justify-center transition-all hover:brightness-[0.92] active:scale-[0.98]"
               style={{ backgroundColor: 'var(--color-primary)' }}
               data-testid="customer-confirmation-track-link"
             >
@@ -478,7 +478,7 @@ export default function ConfirmationPage() {
           )}
           <Link
             href={`/store/${slug}`}
-            className="w-full h-12 rounded-xl border-2 border-[#E2E8F0] text-[#78716C] font-semibold text-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+            className="w-full h-12 rounded-xl border-2 border-[#E2E8F0] text-[#78716C] font-semibold text-sm flex items-center justify-center transition-all hover:bg-gray-50 hover:border-[#A8A29E] active:scale-[0.98]"
             data-testid="customer-confirmation-return-link"
           >
             Retour à la boutique

@@ -280,7 +280,7 @@ export default function CheckoutPage() {
       <div className="sticky top-0 z-50 bg-white border-b border-[#E2E8F0] h-14 flex items-center px-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 flex items-center justify-center -ml-2"
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full transition-all hover:bg-gray-100 active:scale-[0.95]"
           data-testid="customer-checkout-back-btn"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -316,7 +316,7 @@ export default function CheckoutPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Entrez votre nom complet"
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px]"
+              className="storefront-input w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px]"
               required
               data-testid="customer-checkout-name-input"
             />
@@ -331,7 +331,7 @@ export default function CheckoutPage() {
               onChange={(e) => { setPhone(e.target.value); }}
               onBlur={() => setPhoneBlurred(true)}
               placeholder="06XXXXXXXX"
-              className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[15px] ${
+              className={`storefront-input w-full px-3 py-2.5 border rounded-lg text-[15px] ${
                 phoneBlurred && phone.trim() && !isPhoneValid(phone)
                   ? 'border-[#DC2626]'
                   : 'border-[#E2E8F0]'
@@ -418,7 +418,7 @@ export default function CheckoutPage() {
               rows={3}
               value={addressNotes}
               onChange={(e) => setAddressNotes(e.target.value)}
-              className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+              className="storefront-input w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-[15px] placeholder:text-[#A8A29E] resize-none"
               data-testid="customer-checkout-address-notes-textarea"
             />
           </div>
@@ -576,7 +576,7 @@ export default function CheckoutPage() {
             onClick={handleSubmit}
             disabled={loading || !isFormValid() || !merchant}
             whileTap={{ scale: 0.98 }}
-            className="w-full h-14 text-white rounded-lg font-medium text-[16px] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-14 text-white rounded-lg font-medium text-[16px] transition-all hover:brightness-[0.92] disabled:opacity-50 disabled:hover:brightness-100 flex items-center justify-center gap-2"
             style={{ backgroundColor: 'var(--color-primary)' }}
             data-testid="customer-checkout-submit-btn"
           >
