@@ -19,13 +19,13 @@ export default async function StoreLayout({ children, params }: Props) {
     notFound();
   }
 
-  const primaryColor = merchant.primary_color?.trim() || '#E8632A';
+  const primaryColor = merchant.primary_color?.trim() || '#1A6BFF';
 
   return (
     <CartProvider slug={slug}>
       <div
         style={{ '--color-primary': primaryColor } as React.CSSProperties}
-        className="pb-[calc(56px+env(safe-area-inset-bottom))] lg:pb-0"
+        className="storefront-scope pb-[calc(56px+env(safe-area-inset-bottom))] lg:pb-0"
       >
         {children}
         <StoreFooter />

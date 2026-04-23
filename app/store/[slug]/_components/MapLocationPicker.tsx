@@ -23,6 +23,18 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
   // Keep ref up-to-date without triggering effect
   onLocationSelectRef.current = onLocationSelect;
 
+  // Resolve the marker colour at call-time from the current
+  // `.storefront-scope` (reads `--color-primary`, which is per-merchant
+  // on /store/[slug]). Falls back to the design-refresh primary when the
+  // CSS variable is not resolvable (SSR / pre-hydration).
+  const resolveMarkerColor = (): string => {
+    if (typeof window === 'undefined' || !mapContainer.current) return '#1A6BFF';
+    const resolved = getComputedStyle(mapContainer.current)
+      .getPropertyValue('--color-primary')
+      .trim();
+    return resolved || '#1A6BFF';
+  };
+
   const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -36,7 +48,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
           if (markerRef.current) {
             markerRef.current.setLngLat([lng, lat]);
           } else {
-            markerRef.current = new mapboxgl.Marker({ color: '#E8632A' })
+            markerRef.current = new mapboxgl.Marker({ color: resolveMarkerColor() })
               .setLngLat([lng, lat])
               .addTo(mapRef.current!);
           }
@@ -100,7 +112,7 @@ export function MapLocationPicker({ onLocationSelect }: Props) {
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
       } else {
-        markerRef.current = new mapboxgl.Marker({ color: '#E8632A' })
+        markerRef.current = new mapboxgl.Marker({ color: resolveMarkerColor() })
           .setLngLat([lng, lat])
           .addTo(map);
       }
