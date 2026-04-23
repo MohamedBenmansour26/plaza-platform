@@ -53,7 +53,7 @@ function CartContent({
         </div>
         <button
           onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+          className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-gray-100 active:scale-[0.95]"
           data-testid="customer-cart-close-btn"
         >
           <X className="w-5 h-5 text-[#78716C]" />
@@ -98,7 +98,7 @@ function CartContent({
                       <div className="flex items-center border border-[#E2E8F0] rounded-lg overflow-hidden">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1, item.stock ?? null)}
-                          className="w-7 h-7 flex items-center justify-center hover:bg-gray-50"
+                          className="w-7 h-7 flex items-center justify-center transition-colors hover:bg-gray-50 active:scale-[0.95]"
                           data-testid="customer-cart-item-qty-decrement-btn"
                         >
                           <Minus className="w-3.5 h-3.5 text-[#78716C]" />
@@ -109,7 +109,7 @@ function CartContent({
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1, item.stock ?? null)}
                           disabled={atMax}
-                          className="w-7 h-7 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="w-7 h-7 flex items-center justify-center transition-colors hover:bg-gray-50 active:scale-[0.95] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
                           data-testid="customer-cart-item-qty-increment-btn"
                         >
                           <Plus className="w-3.5 h-3.5 text-[#78716C]" />
@@ -126,7 +126,7 @@ function CartContent({
                   </div>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="text-[#DC2626] hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
+                    className="text-[#DC2626] p-1.5 rounded-lg flex-shrink-0 transition-colors hover:bg-red-50 active:scale-[0.95]"
                     data-testid="customer-cart-item-remove-btn"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -174,7 +174,7 @@ function CartContent({
           <button
             onClick={onCheckout}
             disabled={items.length === 0}
-            className="w-full text-white font-semibold py-3.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full text-white font-semibold py-3.5 rounded-lg transition-all hover:brightness-[0.92] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:brightness-100"
             style={{ backgroundColor: 'var(--color-primary)' }}
             data-testid="customer-cart-checkout-btn"
           >
@@ -183,7 +183,7 @@ function CartContent({
 
           <button
             onClick={onClose}
-            className="w-full text-sm font-semibold py-1"
+            className="w-full text-sm font-semibold py-1 transition-opacity hover:opacity-80"
             style={{ color: 'var(--color-primary)' }}
             data-testid="customer-cart-continue-btn"
           >

@@ -95,10 +95,10 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
                 key={date.toISOString()}
                 type="button"
                 onClick={() => onDateChange(date)}
-                className={`flex-shrink-0 px-3 py-2 rounded-lg text-[13px] font-medium border transition-colors whitespace-nowrap ${
+                className={`flex-shrink-0 px-3 py-2 rounded-lg text-[13px] font-medium border transition-all whitespace-nowrap active:scale-[0.97] ${
                   isSelected
-                    ? 'text-white'
-                    : 'bg-white text-[#1C1917] border-[#E2E8F0]'
+                    ? 'text-white hover:brightness-[0.92]'
+                    : 'bg-white text-[#1C1917] border-[#E2E8F0] hover:border-[var(--color-primary)]'
                 }`}
                 style={isSelected ? { backgroundColor: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'white' } : {}}
               >
@@ -122,7 +122,7 @@ export function DeliverySlotPicker({ selectedDate, selectedSlot, onDateChange, o
           <select
             value={selectedSlot}
             onChange={(e) => onSlotChange(e.target.value)}
-            className="w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-lg text-[15px] text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
+            className="storefront-input w-full h-11 px-4 bg-white border border-[#E2E8F0] rounded-lg text-[15px] text-[#1C1917]"
           >
             {availableSlots.map((slot) => (
               <option key={slot} value={slot}>

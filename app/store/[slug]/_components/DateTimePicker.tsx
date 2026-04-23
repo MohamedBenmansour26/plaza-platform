@@ -90,7 +90,7 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] flex items-center justify-between hover:border-[var(--color-primary)] transition-colors"
+        className="storefront-input w-full h-12 px-4 bg-[#FAFAF9] border border-[#E2E8F0] rounded-lg text-[15px] flex items-center justify-between transition-colors hover:border-[var(--color-primary)] active:scale-[0.99]"
         data-testid="customer-checkout-datetime-open-btn"
       >
         <div className="flex items-center gap-3">
@@ -158,12 +158,12 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
                         type="button"
                         onClick={() => handleTimeSelect(time)}
                         disabled={!selectedDate}
-                        className={`h-11 rounded-lg text-[14px] font-medium transition-all ${
+                        className={`h-11 rounded-lg text-[14px] font-medium transition-all active:scale-[0.97] ${
                           selectedTime === time
-                            ? 'text-white'
+                            ? 'text-white hover:brightness-[0.92]'
                             : selectedDate
                               ? 'bg-[#FAFAF9] hover:border-[var(--color-primary)] border border-[#E2E8F0]'
-                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed active:scale-100'
                         }`}
                         style={selectedTime === time ? { backgroundColor: 'var(--color-primary)' } : {}}
                         data-testid="customer-checkout-datetime-slot-btn"
@@ -189,7 +189,7 @@ export default function DateTimePicker({ value, onChange, workingHours }: DateTi
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 text-white rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity"
+                    className="px-4 py-2 text-white rounded-lg text-[14px] font-medium transition-all hover:brightness-[0.92] active:scale-[0.97]"
                     style={{ backgroundColor: 'var(--color-primary)' }}
                     data-testid="customer-checkout-datetime-confirm-btn"
                   >

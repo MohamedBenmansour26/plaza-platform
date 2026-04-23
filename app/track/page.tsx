@@ -91,10 +91,10 @@ export default function TrackOrderPage() {
                     setError(false);
                   }}
                   placeholder="PLZ-1042"
-                  className={`w-full h-14 pl-4 pr-12 text-[17px] font-medium tracking-wide border-2 rounded-lg focus:outline-none transition-colors ${
+                  className={`storefront-input w-full h-14 pl-4 pr-12 text-[17px] font-medium tracking-wide border-2 rounded-lg transition-colors ${
                     error
                       ? 'border-[#DC2626] bg-red-50'
-                      : 'border-[#E2E8F0] bg-white focus:border-[var(--color-primary)]'
+                      : 'border-[#E2E8F0] bg-white'
                   }`}
                   data-testid="customer-track-order-number-input"
                 />
@@ -114,7 +114,7 @@ export default function TrackOrderPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-14 text-white rounded-lg font-medium text-[16px] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full h-14 text-white rounded-lg font-medium text-[16px] transition-all hover:brightness-[0.92] active:scale-[0.98] disabled:opacity-50 disabled:hover:brightness-100 disabled:active:scale-100 flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
               data-testid="customer-track-submit-btn"
             >
@@ -140,7 +140,7 @@ export default function TrackOrderPage() {
           <div className="text-center">
             <button
               onClick={() => router.back()}
-              className="text-[14px] hover:underline"
+              className="text-[14px] transition-opacity hover:underline hover:opacity-80 active:scale-[0.97]"
               style={{ color: 'var(--color-primary)' }}
               data-testid="customer-track-back-btn"
             >
