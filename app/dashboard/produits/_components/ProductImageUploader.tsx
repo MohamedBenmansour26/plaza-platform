@@ -196,7 +196,7 @@ export function ProductImageUploader({
               over
                 ? `Image déplacée sur la position ${over.id}`
                 : `Image ${String(active.id)} en cours de déplacement.`,
-            onDragEnd: ({ active, over }) =>
+            onDragEnd: ({ over }) =>
               over
                 ? `Image déposée à la position ${over.id} sur ${value.length}.`
                 : `Déplacement annulé.`,
