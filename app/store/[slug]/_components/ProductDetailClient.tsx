@@ -13,9 +13,11 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
 import type { Merchant, Product } from '@/types/supabase';
+import { getProductImages } from '@/lib/product-images';
 import { useCart } from './CartProvider';
 import { CartDrawer } from './CartDrawer';
 import { BottomTabBar } from './BottomTabBar';
+import { ProductImageGallery } from './ProductImageGallery';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -97,7 +99,7 @@ export function ProductDetailClient({
         id: product.id,
         name: product.name_fr,
         price: priceMAD,
-        image: product.image_url ?? '',
+        image: primaryImageUrl,
         stock: product.stock,
       },
       quantity,
@@ -114,7 +116,7 @@ export function ProductDetailClient({
       name: product.name_fr,
       price: priceMAD,          // MAD (already divided by 100)
       quantity: quantity,
-      image: product.image_url ?? '',
+      image: primaryImageUrl,
     }];
     sessionStorage.setItem('cartItems', JSON.stringify(directCart));
     sessionStorage.setItem('cartSlug', slug);
@@ -123,7 +125,10 @@ export function ProductDetailClient({
     // Note: no setBuyingNow(false) needed — navigation unmounts the component
   }
 
-  const productImage = product.image_url ?? '';
+  const galleryImages = getProductImages(product);
+  // Kept for cart-item payload + buy-now sessionStorage (cart row still
+  // uses single image_url). First gallery entry is the best representative.
+  const primaryImageUrl = galleryImages[0]?.url ?? product.image_url ?? '';
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] pb-32 lg:pb-0">
@@ -160,19 +165,12 @@ export function ProductDetailClient({
         </button>
       </motion.header>
 
-      {/* Mobile: Full-width Image */}
+      {/* Mobile: Full-width Gallery */}
       <div className="relative w-full aspect-square overflow-hidden lg:hidden">
-        {productImage ? (
-          <img
-            src={productImage}
-            alt={product.name_fr}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-[#F5F5F4] flex items-center justify-center">
-            <span className="text-6xl text-[#D6D3D1]">🛍️</span>
-          </div>
-        )}
+        <ProductImageGallery
+          images={galleryImages}
+          productName={product.name_fr}
+        />
       </div>
 
       {/* Desktop: 2-col layout */}
@@ -185,17 +183,10 @@ export function ProductDetailClient({
           className="sticky top-20 h-fit"
         >
           <div className="relative aspect-square overflow-hidden rounded-2xl">
-            {productImage ? (
-              <img
-                src={productImage}
-                alt={product.name_fr}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-[#F5F5F4] flex items-center justify-center">
-                <span className="text-6xl text-[#D6D3D1]">🛍️</span>
-              </div>
-            )}
+            <ProductImageGallery
+              images={galleryImages}
+              productName={product.name_fr}
+            />
           </div>
         </motion.div>
 
