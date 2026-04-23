@@ -86,14 +86,15 @@ export function WorkingHoursSection({ initialHours }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-base font-semibold text-[#1C1917] pb-3 mb-4 border-b border-[#E2E8F0]">
+    <div className="bg-card rounded-xl shadow-card p-6">
+      <h2 className="text-base font-semibold text-foreground pb-3 mb-4 border-b border-border">
         Horaires d&apos;ouverture
       </h2>
 
-      {/* Schema error banner — shown only if save fails unexpectedly */}
+      {/* Schema error banner — shown only if save fails unexpectedly.
+          design-refresh §2.7 toast/banner warning pattern. */}
       {schemaPending && (
-        <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm text-amber-900 mb-4">
+        <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm text-warning mb-4">
           ℹ️ Les horaires ne peuvent pas être sauvegardés pour le moment. Veuillez réessayer.
         </div>
       )}
@@ -105,9 +106,9 @@ export function WorkingHoursSection({ initialHours }: Props) {
           id="sameForAll"
           checked={sameForAll}
           onChange={(e) => handleSameForAll(e.target.checked)}
-          className="w-4 h-4 rounded border-[#E2E8F0] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+          className="w-4 h-4 rounded border-border text-primary focus:ring-ring"
         />
-        <label htmlFor="sameForAll" className="text-sm text-[#1C1917] cursor-pointer select-none">
+        <label htmlFor="sameForAll" className="text-sm text-foreground cursor-pointer select-none">
           Mêmes horaires tous les jours
         </label>
       </div>
@@ -118,48 +119,48 @@ export function WorkingHoursSection({ initialHours }: Props) {
           const day = hours[key] ?? DEFAULT_HOURS[key] ?? { open: false, from: '', to: '' };
           return (
             <div key={key} className="flex items-center gap-3 flex-wrap">
-              {/* Toggle */}
+              {/* Toggle — brief §2.2 switch, success-on when open. */}
               <button
                 type="button"
                 role="switch"
                 aria-checked={day.open}
                 onClick={() => updateDay(key, { open: !day.open })}
-                className={`relative w-10 h-5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 flex-shrink-0 ${
-                  day.open ? 'bg-[#16A34A]' : 'bg-[#E2E8F0]'
+                className={`relative w-10 h-5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-shrink-0 ${
+                  day.open ? 'bg-success' : 'bg-border'
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 start-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  className={`absolute top-0.5 start-0.5 w-4 h-4 bg-card rounded-full shadow transition-transform ${
                     day.open ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
 
               {/* Day label */}
-              <span className="w-[80px] text-sm font-medium text-[#1C1917] flex-shrink-0">
+              <span className="w-[80px] text-sm font-medium text-foreground flex-shrink-0">
                 {label}
               </span>
 
-              {/* Time inputs */}
+              {/* Time inputs — brief §2.2 form inputs. */}
               {day.open ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#78716C]">De :</span>
+                  <span className="text-xs text-muted-foreground">De :</span>
                   <input
                     type="time"
                     value={day.from}
                     onChange={(e) => updateDay(key, { from: e.target.value })}
-                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-8 px-2 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
                   />
-                  <span className="text-xs text-[#78716C]">À :</span>
+                  <span className="text-xs text-muted-foreground">À :</span>
                   <input
                     type="time"
                     value={day.to}
                     onChange={(e) => updateDay(key, { to: e.target.value })}
-                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-8 px-2 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </div>
               ) : (
-                <span className="text-xs text-[#A8A29E] italic">Fermé</span>
+                <span className="text-xs text-muted-foreground italic">Fermé</span>
               )}
             </div>
           );
@@ -167,7 +168,7 @@ export function WorkingHoursSection({ initialHours }: Props) {
       </div>
 
       {isPending && (
-        <p className="text-xs text-[#78716C] mt-3">Sauvegarde…</p>
+        <p className="text-xs text-muted-foreground mt-3">Sauvegarde…</p>
       )}
     </div>
   );

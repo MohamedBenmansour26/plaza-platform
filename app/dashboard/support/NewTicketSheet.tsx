@@ -49,21 +49,21 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
+      {/* Backdrop — brief §2.6 modal overlay. */}
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
 
       {/* Sheet */}
       <div
-        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-white shadow-xl z-50 flex flex-col"
+        className="fixed end-0 top-0 h-screen w-full max-w-[480px] bg-card shadow-xl z-50 flex flex-col"
         data-testid="merchant-support-new-ticket-sheet"
       >
 
         {/* Header */}
-        <div className="h-16 border-b border-[#E2E8F0] px-6 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-base font-semibold text-[#1C1917]">{t('sheet_title')}</h2>
+        <div className="h-16 border-b border-border px-6 flex items-center justify-between flex-shrink-0">
+          <h2 className="text-base font-semibold text-foreground">{t('sheet_title')}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#F8FAFC] rounded-lg transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -74,23 +74,23 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
 
           {submitted ? (
             <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-[#F0FDF4] flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
                 <span className="text-3xl">✅</span>
               </div>
-              <h3 className="text-lg font-semibold text-[#1C1917] mb-2">{t('sheet_success_title')}</h3>
-              <p className="text-sm text-[#78716C]">{t('sheet_success_body')}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{t('sheet_success_title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('sheet_success_body')}</p>
             </div>
           ) : (
             <>
-              {/* Category */}
+              {/* Category — brief §2.2 select. */}
               <div>
-                <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   {t('sheet_category')}
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as TicketCategory)}
-                  className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-white"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring bg-card"
                   data-testid="merchant-support-new-ticket-category-select"
                 >
                   {CATEGORIES.map((c) => (
@@ -101,7 +101,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
 
               {/* Subject */}
               <div>
-                <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   {t('sheet_subject')}
                 </label>
                 <input
@@ -109,7 +109,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder={t('sheet_subject_placeholder')}
-                  className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                   data-testid="merchant-support-new-ticket-subject-input"
                 />
               </div>
@@ -117,15 +117,15 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
               {/* Order number (conditional) */}
               {category === 'order_issue' && (
                 <div>
-                  <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                    {t('sheet_order_number')} <span className="text-[#A8A29E] font-normal">({t('sheet_optional')})</span>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    {t('sheet_order_number')} <span className="text-muted-foreground font-normal">({t('sheet_optional')})</span>
                   </label>
                   <input
                     type="text"
                     value={orderId}
                     onChange={(e) => setOrderId(e.target.value)}
                     placeholder="PLZ-042"
-                    className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                    className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                     data-testid="merchant-support-new-ticket-order-id-input"
                   />
                 </div>
@@ -133,7 +133,7 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   {t('sheet_description')}
                 </label>
                 <textarea
@@ -141,39 +141,40 @@ export function NewTicketSheet({ onClose, onCreated }: Props) {
                   onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC))}
                   placeholder={t('sheet_description_placeholder')}
                   rows={5}
-                  className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                   data-testid="merchant-support-new-ticket-description-textarea"
                 />
-                <div className="text-xs text-[#A8A29E] text-end mt-1">
+                <div className="text-xs text-muted-foreground text-end mt-1">
                   {description.length}/{MAX_DESC}
                 </div>
               </div>
 
               {/* File upload zone (UI only — storage not yet configured) */}
               <div>
-                <label className="block text-sm font-medium text-[#1C1917] mb-1.5">
-                  {t('sheet_attachment')} <span className="text-[#A8A29E] font-normal">({t('sheet_optional')})</span>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  {t('sheet_attachment')} <span className="text-muted-foreground font-normal">({t('sheet_optional')})</span>
                 </label>
-                <div className="border-2 border-dashed border-[#E2E8F0] rounded-lg p-5 flex flex-col items-center gap-2 text-center">
-                  <Paperclip className="w-6 h-6 text-[#A8A29E]" />
-                  <p className="text-sm text-[#78716C]">
+                <div className="border-2 border-dashed border-border rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+                  <Paperclip className="w-6 h-6 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     {t('sheet_attachment_hint')}{' '}
-                    <span className="cursor-pointer hover:underline" style={{ color: 'var(--color-primary)' }}>{t('sheet_attachment_browse')}</span>
+                    <span className="cursor-pointer hover:underline text-primary">{t('sheet_attachment_browse')}</span>
                   </p>
-                  <p className="text-xs text-[#A8A29E]">{t('sheet_attachment_types')}</p>
+                  <p className="text-xs text-muted-foreground">{t('sheet_attachment_types')}</p>
                 </div>
               </div>
             </>
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer — tenant `--color-primary` var kept for consistency with the
+            rest of the support surface (merchant bubble, send button). */}
         {!submitted && (
-          <div className="border-t border-[#E2E8F0] px-6 py-4 flex-shrink-0">
+          <div className="border-t border-border px-6 py-4 flex-shrink-0">
             <button
               disabled={isPending || !subject.trim()}
               onClick={handleSubmit}
-              className="w-full h-11 text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
+              className="w-full h-11 text-primary-foreground text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
               style={{ backgroundColor: 'var(--color-primary)' }}
               data-testid="merchant-support-new-ticket-submit-btn"
             >
