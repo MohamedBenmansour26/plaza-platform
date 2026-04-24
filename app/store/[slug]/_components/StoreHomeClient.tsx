@@ -161,6 +161,7 @@ export function StoreHomeClient({
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         slug={slug}
+        freeThreshold={merchant.delivery_free_threshold ?? undefined}
       />
 
       <StoreInfoSheet
