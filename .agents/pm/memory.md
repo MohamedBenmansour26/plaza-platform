@@ -275,3 +275,83 @@ All 3 platform layers are on main and regression-clean:
 4. SAAD-037 — WhatsApp URL is correctly formed (`wa.me/212XXXXXXXXX` not double-prefixed)
 5. SAAD-038 — Timestamps show Morocco time, not browser local time
 6. SAAD-039 — "Signaler un problème" opens dialog, ticket is created, appears in support hub
+
+---
+
+## Session — 2026-04-23 (post-PLZ-090 sprint)
+
+### Shipped earlier today
+- **PLZ-090 multi-image product gallery** — full 3-PR vertical slice merged (PR #89 schema, #90 storefront, #91 merchant). Saad end-to-end regression GREEN across all 4 legs. `lib/product-images.ts` is the shared source of truth; legacy `image_url` kept one release cycle.
+
+### Founder sprint plan received 2026-04-23 (consolidated post-launch findings)
+4 sections (A storefront bugs / B driver bugs / C sequencing / D admin panel build-out).
+
+### Sprint 1 (money + trust — THIS WEEK) — DISPATCHED 2026-04-23
+- **A1** Hamza — `orders.status.*` i18n sweep (PLZ-1007 showed raw `orders.status.assigned` key; PLZ-058 renamed assigned → accepted). Agent `ae67b3deee3b97322`. Task #63.
+- **A2** Pre-fix audit DONE by PM directly via Management API — **one affected order platform-wide: PLZ-1008, Boutique test, 995 MAD subtotal > 500 MAD threshold, charged 30 MAD, status=confirmed**. No broader customer damage. Refund decision surfaced to founder (internal test order). A2 fix (Hamza checkout logic) queued as task #65 pending founder refund sign-off.
+- **B2** Mehdi — Driver Settings + Support CTAs wire-up + no-dead-buttons sweep across every driver screen. Agent `a48196cc1ed3ab6d5`. Task #66.
+
+### Parallel — Antonio dispatched 2026-04-23
+- Deliverable 1: `docs/ux/back-button-flow.md` (A3 map) — founder reviews before Hamza implements.
+- Deliverable 2: `docs/design/admin-panel-inspiration-brief.md` (Section D Phase 1 kickoff) — data-dense ops tooling direction; founder reviews before Phase 2 plan.
+- Both ship as one docs PR. Agent `a5f2e5192866c49f3`. Task #67.
+
+### Sprint 2 (driver lifecycle integrity, queued after Sprint 1 merges)
+- **B3 + B4** single Hamza PR — pickup confirmation screen (merchant_pickup_code + pickup_photo_url + support CTAs + "Signaler un échec") + delivery failure reporting mirror. Schema confirmed: `deliveries.merchant_pickup_code` exists (text); ALSO `orders.merchant_pickup_code` (integer) — data model inconsistency, validate against `deliveries` per PLZ-058. Task #68.
+- **B5** Hamza — delivery success page reads real `distance_km`, `estimated_duration_min` / computed accepted_at→delivered_at duration, `driver_earnings_mad`. All fields confirmed in deliveries schema. Task #69.
+
+### Sprint 3 (UX polish, parallel as capacity allows)
+- A3 impl (Hamza) — blocked on Antonio map + founder review. Task #70.
+- A4 product page wrap in StorefrontLayout (Mehdi + Antonio). Task #71.
+- B1 working hours polish (Mehdi + Antonio Switch review). Task #72.
+
+### Post Sprint 1 + 2 merge
+- Saad adversarial retest focused on: (a) checkout threshold logic, (b) full driver lifecycle end-to-end including failure scenarios. "R1/R2/R3/R4 rules" cited by founder — lookup required in QA docs before Saad dispatch.
+
+### Section D — admin panel build-out
+- Phase 1 discovery starts concurrent with Sprint 1 (Antonio brief above + task #73 PM admin ops inventory).
+- Phases 2/3/4/5/6 gated: no Phase 4 dev dispatch until founder approves Phase 2 plan.
+
+### Schema findings from today's A2 audit (worth persisting)
+- All monetary integers on orders/merchants are **centimes** (not MAD). Confirmed: orders.subtotal=99500 = 995 MAD, delivery_free_threshold=50000 = 500 MAD.
+- `orders.delivery_fee`, `orders.subtotal`, `orders.total`, `orders.plaza_commission` — all centimes.
+- `merchants.delivery_free_threshold` — centimes.
+- `merchants` has `store_name` (not `name`).
+- Live order status values in use — enumerated by Hamza as part of A1 sweep.
+
+### Process learnings this session
+- **Anas local gates ≠ CI**: Anas's PR #91 QA passed locally while GitHub Actions `Type check & Lint` was red on an unused-var lint error. Local worktree lint has a `@next/next` plugin conflict that masks real lint errors in worktrees. Always verify GitHub check-runs on tip SHA before declaring mergeable. PM fixed the lint error directly in commit `ffcd0ab` (one-line unused destructure) to keep the sprint moving.
+- **Money-bug pre-fix audit speed**: Running the read-only audit query directly via Management API (PM role, no agent spawn) gave founder the overcharge list in ~3 minutes vs ~10 minutes for a Youssef dispatch. For urgent read-only audits, PM should run directly and flag the decision to founder faster. Attribution still goes to the fix owner.
+
+---
+
+## Session — 2026-04-24 (Sprint 1 close + A2 dispatch)
+
+### Founder decisions on 4 open gates (all clean)
+1. **PLZ-1008 refund** — NO refund. Founder's own test account. Just ship the fix.
+2. **PR #92 docs** — Approve in principle, merge now. Founder will read `back-button-flow.md` directly and may issue overrides before Hamza is dispatched on A3. Admin UI brief moves forward without further founder input (Antonio's judgment trusted).
+3. **PR #93 E2E red** — Pre-existing flake, override authorized. Filed separate tech-debt ticket.
+4. **Arabic empty string** — Accept as-is. Spec said AR deferred; empty prevents IntlError. Full AR pass done in one sweep later, never piecemeal.
+
+### Sprint 1 close
+- **PR #92 (Antonio docs)** — merged, sha `35cbed0`. PM comment posted on thread flagging A3 gate to Antonio.
+- **PR #93 (A1 i18n)** — merged with documented E2E flake override, sha `cd65f57`.
+- **PR #94 (B2 driver CTAs)** — merged with same flake-override pattern (no storefront code touched, override scoped to driver routes), sha `8369f80`. Mehdi followups #76/#77/#78 logged for Sprint 3.
+- **Issue #95 PLZ-E2E-FLAKE** — filed at https://github.com/MohamedBenmansour26/plaza-platform/issues/95. P1 tech-debt. Anas/Youssef to investigate suite stability (not per-PR fixes).
+
+### CI-gate rule added to QA CLAUDE.md
+Permanent protocol update: Phase 1 now mandates checking GitHub Actions CI on the PR's tip SHA. Local `tsc`+`lint` does NOT substitute. Red CI requires:
+  (a) block merge if caused by this PR,
+  (b) file separate flake ticket if unrelated and proceed only with documented PM/founder override,
+  (c) escalate to PM if unclear.
+Merging against red CI without documented override = process failure. Closes the gap that bit PR #91 during PLZ-090 sprint.
+
+### A2 dispatched
+- Hamza A2 (free-delivery threshold checkout fix) running as agent `a2d695d8c1652de22`. Brief includes centimes-unit constraints from A2 audit, requires unit tests on threshold edge cases, branch `fix/plz-a2-free-delivery-threshold`.
+- Saad's "R1/R2/R3/R4 rules" still pending lookup in QA docs before post-Sprint-2 retest dispatch.
+
+### Sprint 2 gating
+After A2 merges (final Sprint 1 PR), dispatch Sprint 2: B3 pickup confirmation + B4 delivery failure reporting + B5 success page real data. All queued in tasks #5/#68/#69.
+
+### Process learning — github MCP vs curl
+Enterprise policy blocks grepping `.env.local` in this session's permission set. All PR/CI operations in this session ran through `mcp__github__*` tools successfully (get_pull_request_status, merge_pull_request, create_issue, add_issue_comment). `gh` CLI still not installed. One limitation: github MCP has no check-runs endpoint — combined status API returns Vercel statuses but not GitHub Actions. When Actions check-run detail is needed, must escalate to founder for alternate access path. Updated user-level feedback memory accordingly.
