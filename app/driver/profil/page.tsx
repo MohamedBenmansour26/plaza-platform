@@ -93,8 +93,8 @@ export default async function ProfilPage() {
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {[
             { Icon: Calendar,   label: 'Mes horaires',   color: 'var(--color-primary)', href: '/driver/profil/horaires', testId: 'driver-profil-horaires-link' },
-            { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '#', testId: undefined },
-            { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '#', testId: undefined },
+            { Icon: Settings,   label: 'Paramètres',     color: '#78716C', href: '/driver/parametres', testId: 'driver-profil-parametres-link' },
+            { Icon: HelpCircle, label: 'Aide & Support', color: '#78716C', href: '/driver/support',    testId: 'driver-profil-support-link' },
           ].map(({ Icon, label, color, href, testId }) => (
             <a key={label} href={href}
               className="px-4 flex items-center gap-3 border-b border-gray-100"

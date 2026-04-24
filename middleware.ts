@@ -13,7 +13,7 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'as-needed',
 });
 
-const PROTECTED_PREFIXES = ['/dashboard', '/onboarding', '/driver/livraisons', '/driver/historique', '/driver/profil', '/driver/onboarding'];
+const PROTECTED_PREFIXES = ['/dashboard', '/onboarding', '/driver/livraisons', '/driver/historique', '/driver/profil', '/driver/onboarding', '/driver/parametres', '/driver/support'];
 // Internal pages that are exempt from auth (no merchant data exposed).
 const PUBLIC_OVERRIDES = ['/dashboard/agents'];
 
