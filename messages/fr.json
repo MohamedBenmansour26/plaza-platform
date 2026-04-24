@@ -441,6 +441,7 @@
     "status": {
       "pending": "En attente",
       "confirmed": "Confirmée",
+      "assigned": "Assignée",
       "dispatched": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée"
