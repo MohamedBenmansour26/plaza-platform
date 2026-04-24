@@ -89,6 +89,24 @@ No console.log in production code
 No hardcoded strings that should be i18n
 Redirects outside try/catch blocks
 
+**MANDATORY — GitHub Actions CI on the PR's tip SHA must also be checked.**
+Local `tsc` + `lint` results do NOT substitute for CI. Worktree lint has a
+known `@next/next` plugin conflict that masks real errors locally (see
+session 2026-04-23: PR #91 QA passed locally while CI was red on unused-var).
+
+Protocol when CI is red:
+  (a) If failure is caused by this PR → block merge, send back to dev.
+  (b) If failure is unrelated flakiness on main → file a separate flake
+      ticket in Notion/GitHub, notify PM, proceed with merge only after
+      explicit founder/PM override with documented reason on the PR.
+  (c) If in doubt → escalate to PM. Do NOT merge against red CI silently.
+
+Check command (subagent session via github MCP):
+  mcp__github__get_pull_request_status(owner, repo, pull_number)
+Or via gh CLI:
+  gh pr checks <PR>
+  gh run view <run-id> --log-failed
+
 ### Phase 2 — Route Health
 Check middleware.ts SKIP_INTL contains all routes:
 ['/', '/auth', '/onboarding', '/dashboard',
