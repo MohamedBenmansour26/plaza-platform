@@ -179,6 +179,37 @@ export async function getDeliveryById(
   return data ? normaliseDelivery(data) : null;
 }
 
+// ─── Fetch delivery summary for success page ──────────────────────────────
+
+export type DeliverySummary = {
+  id: string;
+  distance_km: number | null;
+  estimated_duration_min: number | null;
+  driver_earnings_mad: number | null;
+  accepted_at: string | null;
+  delivered_at: string | null;
+};
+
+/**
+ * Fetch the minimal set of fields needed to render the delivery success
+ * summary. Returns null if the delivery does not exist or does not belong
+ * to the given driver — callers should render notFound() in that case.
+ */
+export async function getDeliverySummary(
+  deliveryId: string,
+  driverId: string,
+): Promise<DeliverySummary | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('deliveries')
+    .select('id, distance_km, estimated_duration_min, driver_earnings_mad, accepted_at, delivered_at')
+    .eq('id', deliveryId)
+    .eq('driver_id', driverId)
+    .maybeSingle<DeliverySummary>();
+  if (error) throw new Error(`getDeliverySummary: ${error.message}`);
+  return data ?? null;
+}
+
 // ─── Fetch completed deliveries for history ───────────────────────────────
 
 export type HistoryDelivery = {
