@@ -522,6 +522,23 @@
       "errorMismatch": "Les codes ne correspondent pas. Réessayez.",
       "errorServer": "Erreur technique. Veuillez réessayer dans un instant."
     },
+    "collect": {
+      "back": "Retour",
+      "title": "Confirmation de collecte",
+      "step1Title": "Étape 1 — Code marchand",
+      "step1Subtitle": "Demandez le code au commerçant",
+      "codeLabel": "Code de collecte",
+      "codeHint": "Saisissez le code à 6 chiffres",
+      "codeValid": "✓ Code validé",
+      "codeError": "Code incorrect — réessayez ({attempts} tentative{plural} restante{plural})",
+      "codeErrorSupport": "Code incorrect — contactez le support",
+      "codeSourceHint": "Le commerçant trouve ce code dans son tableau de bord",
+      "step2Title": "Étape 2 — Photo du colis",
+      "step2Subtitle": "Photographiez le colis avant de partir",
+      "contactSupport": "Contacter le support",
+      "reportFailure": "Signaler un échec",
+      "confirm": "Confirmer la collecte"
+    },
     "onboarding": {
       "pending": {
         "pending": {

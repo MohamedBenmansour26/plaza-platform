@@ -22,7 +22,10 @@ export async function confirmCollectionAction(
   const delivery = await getDeliveryById(deliveryId, driver.id);
   if (!delivery) return { error: 'delivery_not_found' };
 
-  const storedCode = delivery.order.merchant_pickup_code;
+  // PLZ-058 / B3: validate against the frozen text code on the deliveries row,
+  // NOT orders.merchant_pickup_code (integer). The two columns are a documented
+  // schema inconsistency to be resolved by Youssef post-Sprint-2.
+  const storedCode = delivery.merchant_pickup_code;
   if (!storedCode) return { error: 'no_pickup_code' };
 
   const storedStr = String(storedCode).padStart(6, '0');

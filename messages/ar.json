@@ -510,6 +510,23 @@
       "errorMismatch": "الرموز غير متطابقة. حاول مرة أخرى.",
       "errorServer": "خطأ تقني. يرجى المحاولة مرة أخرى بعد قليل."
     },
+    "collect": {
+      "back": "",
+      "title": "",
+      "step1Title": "",
+      "step1Subtitle": "",
+      "codeLabel": "",
+      "codeHint": "",
+      "codeValid": "",
+      "codeError": "",
+      "codeErrorSupport": "",
+      "codeSourceHint": "",
+      "step2Title": "",
+      "step2Subtitle": "",
+      "contactSupport": "",
+      "reportFailure": "",
+      "confirm": ""
+    },
     "onboarding": {
       "pending": {
         "pending": {

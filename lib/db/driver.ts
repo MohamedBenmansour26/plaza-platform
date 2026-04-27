@@ -49,6 +49,13 @@ export type DriverDelivery = {
   cod_confirmed: boolean;
   pickup_time: string | null;
   delivered_at: string | null;
+  /**
+   * Frozen merchant pickup code on the deliveries row (text).
+   * Copied from orders.merchant_pickup_code (integer) at dispatch time
+   * via createDispatchDelivery. Drivers validate against THIS column on
+   * collection — see PLZ-058 / B3 — not the orders.* integer field.
+   */
+  merchant_pickup_code: string | null;
   order: {
     id: string;
     order_number: string;
@@ -72,6 +79,7 @@ type RawDeliveryRow = {
   cod_confirmed: boolean;
   pickup_time: string | null;
   delivered_at: string | null;
+  merchant_pickup_code: string | null;
   orders: {
     id: string;
     order_number: string;
@@ -88,6 +96,7 @@ type RawDeliveryRow = {
 
 const DELIVERY_SELECT = `
   id, status, pickup_photo_url, delivery_photo_url, driver_earnings_mad, cod_confirmed, pickup_time, delivered_at,
+  merchant_pickup_code,
   orders (
     id, order_number, total, payment_method,
     merchant_pickup_code, customer_pin, delivery_date, delivery_slot,
@@ -106,6 +115,7 @@ function normaliseDelivery(row: RawDeliveryRow): DriverDelivery {
     cod_confirmed: row.cod_confirmed,
     pickup_time: row.pickup_time,
     delivered_at: row.delivered_at,
+    merchant_pickup_code: row.merchant_pickup_code,
     order: {
       id: row.orders.id,
       order_number: row.orders.order_number,
