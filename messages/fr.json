@@ -572,6 +572,41 @@
         },
         "contactSupport": "Contacter le support"
       }
+    },
+    "issue": {
+      "title": "Signaler un problème",
+      "back": "Retour",
+      "prompt": "Quel est le problème ?",
+      "submit": "Envoyer le rapport",
+      "reasons": {
+        "client_absent":   { "label": "Client absent",        "sub": "Personne à l'adresse" },
+        "client_refuse":   { "label": "Client refuse",        "sub": "Refuse le colis" },
+        "wrong_address":   { "label": "Adresse incorrecte",   "sub": "Impossible à trouver" },
+        "damaged":         { "label": "Colis endommagé",      "sub": "Pendant le transport" },
+        "payment_issue":   { "label": "Problème de paiement", "sub": "Montant ou refus" },
+        "other":           { "label": "Autre problème",       "sub": "Décrire ci-dessous" }
+      },
+      "notes": {
+        "label": "Note",
+        "optional": "facultatif",
+        "placeholder": "Ajouter un détail (facultatif)...",
+        "placeholderRequired": "Décrivez le problème...",
+        "requiredError": "Une description est requise pour « Autre »."
+      },
+      "photo": {
+        "label": "Ajouter une photo",
+        "optional": "facultatif"
+      },
+      "error": {
+        "generic": "Impossible d'envoyer le rapport. Réessayez."
+      },
+      "success": {
+        "title": "Problème signalé",
+        "body": "Notre équipe va examiner votre signalement et vous contactera si nécessaire.",
+        "reference": "Référence : Commande #{id}",
+        "responseTime": "Réponse sous 2h en heure ouvrée",
+        "cta": "Retour aux livraisons"
+      }
     }
   }
 }
