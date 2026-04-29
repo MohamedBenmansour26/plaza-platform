@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { getMerchantBySlug } from './actions';
 import { CartProvider } from './_components/CartProvider';
-import { StoreFooter } from './_components/StoreFooter';
+import { ConditionalStoreFooter } from './_components/ConditionalStoreFooter';
 
 type Props = {
   children: ReactNode;
@@ -24,7 +24,9 @@ export default async function StoreLayout({ children, params }: Props) {
   // ProductDetailClient, etc.) so the `onInfoClick` / `onCartClick` handlers
   // are wired to that page's local sheet state. Linear checkout / verification
   // / confirmation flows intentionally omit the tab bar (they use their own
-  // back buttons + CTAs).
+  // back buttons + CTAs). The global StoreFooter is hidden on those same
+  // linear flow pages by ConditionalStoreFooter so the fixed-bottom CTA can
+  // pin to the viewport without stacking against the footer.
   return (
     <CartProvider slug={slug}>
       <div
@@ -32,7 +34,7 @@ export default async function StoreLayout({ children, params }: Props) {
         className="storefront-scope"
       >
         {children}
-        <StoreFooter />
+        <ConditionalStoreFooter />
       </div>
     </CartProvider>
   );
