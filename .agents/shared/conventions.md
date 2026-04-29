@@ -209,6 +209,26 @@ refactor(dashboard): extract revenue chart into separate component
 
 ---
 
+## Schema naming — never rename live columns to match brief wording
+
+When a brief specifies one column name and the existing DB schema uses a different one, **follow the existing schema, not the brief**.
+
+### Rule
+- Existing live columns are the source of truth
+- Briefs reflect a writer's word choice, not a schema requirement
+- Renames are migration cost (alter table, RLS policies, type regen, every consuming query) with zero user-facing benefit
+- Only the PM agent can authorize a rename — and the rename needs a real reason beyond word choice (e.g. ambiguity, conflict with reserved word, factually wrong domain term)
+
+### How to apply
+- If you spot a brief/schema mismatch: implement against the schema, flag the mismatch in the PR body for PM review
+- Do not stop the dispatch to ask — keep moving, surface the gap in the handoff
+- Do not invent shadow columns to satisfy the brief if the schema already covers it (e.g. `failed_at` when `status='failed' + created_at` is sufficient)
+
+### Origin
+PR #103 (B4 delivery failure form): brief used `failure_reason / failure_note / failure_photo_url / failed_at`, but PLZ-057 had already shipped `issue_type / issue_notes / issue_photo_url` + `status='failed'`. Hamza correctly preserved the live convention. Founder ratified — locked here so future agents default correctly without burning cycles asking.
+
+---
+
 ## What to do when conventions conflict with speed
 
 At MVP stage, if following a convention would block shipping for more than a day, flag it to the PM agent. The PM agent escalates to the founder for a judgment call. Never silently skip a convention — always flag it explicitly.

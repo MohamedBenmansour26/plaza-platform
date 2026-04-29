@@ -355,3 +355,108 @@ After A2 merges (final Sprint 1 PR), dispatch Sprint 2: B3 pickup confirmation +
 
 ### Process learning — github MCP vs curl
 Enterprise policy blocks grepping `.env.local` in this session's permission set. All PR/CI operations in this session ran through `mcp__github__*` tools successfully (get_pull_request_status, merge_pull_request, create_issue, add_issue_comment). `gh` CLI still not installed. One limitation: github MCP has no check-runs endpoint — combined status API returns Vercel statuses but not GitHub Actions. When Actions check-run detail is needed, must escalate to founder for alternate access path. Updated user-level feedback memory accordingly.
+
+---
+
+## Session close — 2026-04-24 (evening) — TAG: infra-unstable session
+
+> **Session tag for next-day PM:** This session is marked **infra-unstable**. 4 subagent stalls across 4 dispatches in ~8h (Hamza A2 sandbox-blocked → PM-direct; Hamza B3+B4 stream idle timeout; Hamza B5 600s watchdog; Youssef ConnectionRefused proxy retry loop). Default to **sequential dispatch + narrow scope + PM-direct fallback** per `feedback_cluster_stall_sequential_dispatch.md` until a session restart confirms infra has stabilized. Do not resume parallel dispatch on the next session without a quick stability probe (single small dispatch first, observe outcome).
+
+### Sprint 1 fully closed
+- PR #92 (Antonio docs): MERGED — `35cbed0`
+- PR #93 (A1 i18n) MERGED with E2E flake override — `cd65f57`
+- PR #94 (B2 driver CTAs) MERGED with same flake override — `8369f80`
+- **PR #96 (A2 money-bug fix) MERGED with founder override** — `f531550`. Override comment posted: 11 unit tests cover PLZ-1008 repro + edges, Phase 5 deferred to founder manual spot-check (within 24h) due to known Mapbox/Playwright watchdog issue. Static gates + CI green on tip SHA `0286eb8`.
+- PR #97 (QA CI-gate rule + PM session log): MERGED — `b4484f6`. CI-gate now permanent on `.agents/qa/CLAUDE.md` Phase 1.
+- PR #98 (Saad CLAUDE.md with R1–R4 rules): MERGED — `58a54ba`. Saad persona codified.
+
+### Issue #99 filed — Anas watchdog infrastructure fix
+P1 tech-debt, labelled `infrastructure`/`qa`/`tech-debt`. Tracks the recurring 600s watchdog stalls on Mapbox/Playwright flows. Owner: Youssef-adjacent. Acceptance: Anas subagent runs full Phase 5 on checkout-with-map and driver-app flows without watchdog trip. Until fixed, the watchdog escalation rule (in `feedback_watchdog_escalation_in_briefs.md` user memory) is embedded in every dispatch brief.
+
+### Sprint 2 — partial close (B5 landed PM-direct, B3 dispatched, B4 queued)
+First parallel dispatch attempt failed entirely (3-of-3 stalls):
+- **Hamza B3+B4** (`worktree-agent-abebfae7`) — Stream idle timeout / partial response after 50 tool calls. Worktree had only `lib/db/driver.ts` modified, no commits. **Re-dispatched as B3 alone** with narrow-scope rules (40-call hard cap, 30-call early-stop trigger, no retries).
+- **Hamza B5** (`worktree-agent-a6fbb70d`) — 600s watchdog stall on `tsc --noEmit`. Worktree empty. **Landed via PM-direct as PR #100** (merged `1695cc4`) with founder override; manual spot-check within 24h.
+- **Youssef schema consult** (`adf9a6b1...`) — ConnectionRefused + retry loop. **Parked** until B3 + B4 land (founder directive). Fallback options if next attempt also stalls: PM runs schema analysis directly via Supabase Management API, or backlog ticket parked until post-admin-panel sprint.
+
+After B5 landed, switched to **narrow-scope sequential dispatch**: Hamza B3 alone (`feat/driver-pickup-confirmation-b3`) running with 40-call cap, single-feature scope (pickup screen + code verify + photo upload + support CTAs + failure-CTA stub only). B4 queued — do not dispatch until B3 lands.
+
+### Resilience rules added today (now permanent protocol)
+1. **Stream watchdog** (Mapbox/Playwright compile, silent `browser_wait_for`) → falls under issue #99; agent briefs include the option-(a) escalation rule; founder accepts deferred Phase 5 trade-off.
+2. **ConnectionRefused + retry loop** (proxy / API connectivity from agent sandbox) → DO NOT auto-retry. Parking the task is safer than burning 10 retries that all fail the same way.
+3. **Cluster-stall sequential rule** (>1 agent failure in <2h) → switch to sequential + narrow scope + PM-direct fallback. Resume parallel only after session restart confirms stability. See `feedback_cluster_stall_sequential_dispatch.md`.
+4. **PM-direct landing** is acceptable attribution when an agent is sandbox-blocked or stalls on last-mile mechanics. Same precedent as A2 fix `f531550` and B5 fix `1695cc4`.
+
+### What's next (founder-owned + PM-owned items)
+- Founder manual spot-check PR #96 + PR #100 on localhost (24h, founder-owned).
+- B3 PR landing (Hamza dispatched, awaiting completion or stall).
+- B4 dispatch (queued after B3 lands).
+- Youssef schema consult re-dispatch (after B3 + B4 land, per founder).
+- Item 3 (`back-button-flow.md` review → A3 gate) is founder-owned, separate.
+
+### Today's process learnings logged to user memory
+- `feedback_bundle_docs_with_code.md` — bundle session-learning docs with the related code PR, not separate chore PRs.
+- `feedback_watchdog_escalation_in_briefs.md` — embed the stop-and-switch-to-option-a rule in every Mapbox/driver dispatch brief.
+- `feedback_cluster_stall_sequential_dispatch.md` — on cluster-stall days, sequential + narrow + PM-direct.
+- `feedback_anas_merge.md` — rewritten: GitHub MCP tools for all PR/CI ops; no `.env.local` grep; `gh` CLI not installed; check-runs gap documented.
+
+---
+
+## Sprint 2 closure — 2026-04-27/28 — TAG: infra-unstable session (still applies)
+
+> **Session tag for next-day PM:** Infra-unstable session continues to apply. 5 subagent stalls across 5 dispatches in ~10h wall-clock (Hamza A2 sandbox-blocked; Hamza B3+B4 stream idle; Hamza B5 600s watchdog; Hamza B3-narrow commit-blocked; Hamza B4-narrow commit-blocked; Youssef ConnectionRefused). PM-direct landed 4 of 5 PRs from this session's code work. Default tomorrow's first dispatch to a small stability probe (e.g. Saad post-Sprint-2 retest at narrow scope) before resuming any parallel work.
+
+### Sprint 2 — fully closed, driver lifecycle end-to-end shippable
+- **PR #100 (B5 — success page real data)** MERGED with founder override — `1695cc4`. PM-direct land after Hamza B5 watchdog stall. `lib/db/driver.ts` `getDeliverySummary` + driver-ownership enforcement; computed duration prefers `delivered_at - accepted_at` with `estimated_duration_min` fallback; `'—'` placeholder for missing values.
+- **PR #101 (B3 — pickup confirmation + collection page)** MERGED with founder override — `add37876`. Hamza dispatched narrow-scope (40-call cap, 30-call early-stop), code complete, commit blocked at sandbox layer → PM-direct commit + push + PR. `confirmCollectionAction` validates against `delivery.merchant_pickup_code` (text on deliveries row, authoritative per PLZ-058) — no longer reads `delivery.order.merchant_pickup_code` (integer). 16 new i18n keys under `driver.collect.*`. Support CTA + failure-CTA stub wired to `/driver/livraisons/[id]/issue`.
+- **PR #103 (B4 — delivery failure form i18n + validation)** MERGED with founder override — `9c8fcc4`. Same Hamza narrow-scope-then-commit-blocker pattern as B3. `/driver/livraisons/[id]/issue` route already existed from PLZ-057 — Hamza filled the gaps: `driver.issue.*` namespace (35 keys × 2 locales), 6-value enum whitelist (`client_absent | client_refuse | wrong_address | damaged | payment_issue | other`), 500-char cap, "other requires notes" guard, ARIA `radiogroup` wiring.
+
+### Founder-ratified naming + enum precedents (now in conventions.md)
+- **`issue_*` columns kept** (not renamed to `failure_*` per brief). Rule locked: "When an existing schema convention exists, agents follow it; only PM can authorize a rename, and renames need a real reason beyond word choice." Added to `.agents/shared/conventions.md` as new "Schema naming — never rename live columns to match brief wording" section. Origin event referenced: PR #103.
+- **6-value `issue_type` enum kept** (includes `payment_issue`, brief had only 5). The brief was incomplete, not the schema; preserving the live enum constraint was correct.
+
+### Legacy data finding — backfill applied + Sprint 3 ticket filed
+- Audit found 5 `deliveries.merchant_pickup_code IS NULL` rows: 1 in-flight (`accepted`, test fixture `TEST-DRIVER-001` / `d1342df2-3365-4e53-80d4-1d8b60dcc6da`) + 2 `delivered` + 2 `failed`.
+- In-flight row backfilled in-place to `'123456'` via Management API UPDATE before dispatching B4. Verified post-update: zero in-flight NULLs.
+- 4 terminal NULL rows tracked in **issue #102** (P3 / data-hygiene / tech-debt). Plan: bundle backfill migration with Youssef's deferred schema consult (`orders.merchant_pickup_code` int vs `deliveries.merchant_pickup_code` text — the deeper inconsistency).
+- This stuck row also seeded an admin-panel ops gap: `TEST-DRIVER-001` sat in `accepted` for 12 days with no operator alert. Logged to `docs/admin/ops-inventory-seed.md` as the first entry — "Stuck deliveries — non-terminal states with no recent state transition" — with proposed view, per-state stuck thresholds, and Slack alert plan. Antonio + PM build on this during Phase 1 admin-panel ops inventory.
+
+### Issue #99 still open (Anas watchdog infrastructure)
+P1 tech-debt remains the gating reason for accepting deferred Phase 5 on every Mapbox/driver-flow PR this session. Until #99 is resolved, the watchdog escalation rule in `feedback_watchdog_escalation_in_briefs.md` continues to be embedded in every dispatch brief.
+
+### What's parked for tomorrow's clean session (founder directive — DO NOT dispatch tonight)
+- **Saad post-Sprint-2 retest** — first dispatch tomorrow as the stability probe. If clean → re-enable parallel dispatch.
+- **Youssef schema consult** — second dispatch tomorrow. Schema unification is research-only and benefits from a stable agent run; today's infra hostility makes it likely to ConnectionRefused again.
+- **A3 implementation (back-button flow)** — gated on founder reading `back-button-flow.md` and replying with the gate decision.
+- **Admin panel Phase 1 ops inventory in earnest** — PM + Antonio. Seeded today (`docs/admin/ops-inventory-seed.md`); promotion to Phase 1 sprint tickets happens during planning.
+- **Sprint 3 polish** as capacity allows.
+
+### Founder-owned items tonight (post-merge spot-checks)
+- PR #96 (A2 money-bug fix) on localhost
+- PR #100 (B5) + #101 (B3) + #103 (B4) end-to-end as one driver lifecycle pass on localhost
+- Read `back-button-flow.md` → A3 gate decision
+
+### Resilience protocol now permanent in user memory
+1. **Stream watchdog** (Mapbox/Playwright compile, silent `browser_wait_for`) → option-(a) escalation embedded in every dispatch brief; founder accepts deferred Phase 5 trade-off.
+2. **ConnectionRefused + retry loop** → DO NOT auto-retry; park the task.
+3. **Cluster-stall sequential rule** (>1 agent failure in <2h) → sequential + narrow + PM-direct fallback. Resume parallel only after a stability probe on the next session.
+4. **PM-direct landing** is acceptable attribution when an agent is sandbox-blocked or stalls on last-mile mechanics. Precedent: A2 `f531550`, B5 `1695cc4`, B3 `add37876`, B4 `9c8fcc4`.
+
+### Stopping point
+Sprint 2 fully closed. Awaiting founder spot-checks + A3 gate decision. Tomorrow's session opens with Saad retest as the stability probe.
+
+---
+
+## Session — 2026-04-28 (start) — TAG REMOVED: infra recovered
+
+### Stability probe — CLEAN
+Saad-persona probe (`a750abc17d75e0211`) ran in ~30s with 4/10 tool calls. No stalls, no retries triggered, watchdog did not trip, ToolSearch loaded Playwright schemas cleanly. Persona file loaded fine. Local dev server was not running so the navigate returned `ERR_CONNECTION_REFUSED` and landed on Chrome's error page — that is a valid probe outcome since the probe tested *infrastructure*, not app uptime.
+
+### Operating defaults today
+- **Infra-unstable tag REMOVED** — yesterday's session-close tag no longer applies.
+- **Parallel dispatch re-enabled** as default.
+- **Fail-fast hand-back rule** kept regardless (good hygiene). 30-call early-stop / 40-call hard cap continues to be embedded in dispatch briefs.
+- **No retries on stream watchdog or ConnectionRefused** still applies (issue #99 not yet resolved; the resilience rules in user memory remain permanent).
+
+### Network blip during PM working time
+Founder noted network was briefly down during this session's start; came back online before any subagent work was in flight. No impact on the probe (already returned). Logged as a single point-in-time observation, not a pattern.
